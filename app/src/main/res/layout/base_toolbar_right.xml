@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/toolbar"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    app:contentInsetEnd="0dp"
+    app:contentInsetStart="0dp"
+    app:popupTheme="@style/AppTheme.PopupOverlay">
+
+    <RelativeLayout
+        android:id="@+id/toolbar_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize">
+
+            <ImageView
+                android:id="@+id/iv_toolbar_back"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_alignParentRight="true"
+                android:padding="10dp"
+                android:src="@drawable/ic_left"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tv_toolbar_title"
+                style="@style/TitleBarTitleText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="@string/app_name" />
+
+            <LinearLayout
+                android:id="@+id/ll_toolbar_menu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:orientation="horizontal">
+
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/toolbar_bottom_line"
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:layout_alignParentBottom="true"
+                android:background="@color/transparent" />
+
+
+
+
+        </RelativeLayout>
+    </RelativeLayout>
+</android.support.v7.widget.Toolbar>

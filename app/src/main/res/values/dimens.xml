@@ -1,0 +1,15 @@
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="grid_expected_size">120dp</dimen>
+    <!--双倍边距-->
+    <dimen name="space_line2">12dp</dimen>
+    <!--边距-->
+    <dimen name="space_line">6dp</dimen>
+    <!--1.125=18/16-->
+    <dimen name="sp_big1">18sp</dimen>
+    <!--1  标准-->
+    <dimen name="sp_stander">16sp</dimen>
+</resources>
