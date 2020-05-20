@@ -13,6 +13,7 @@ public class MainActivity extends AppCompatActivity {
     private String account;
     private String password;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -22,11 +23,14 @@ public class MainActivity extends AppCompatActivity {
 
         account = getIntent().getStringExtra("account");
         password = getIntent().getStringExtra("password");
+
+
+
            // finish();
             //首先申请权限
-            LinPermission.requestPermission(MainActivity.this, 7);
+            LinPermission.requestMultiplePermission(MainActivity.this,new int[]{7,8});
 
-        if (LinPermission.checkPermission(MainActivity.this, 7)) {
+        if (LinPermission.checkPermission(MainActivity.this, new int[]{7,8})) {
 
 
             Intent intent = new Intent(MainActivity.this,GamesActivity.class);

@@ -1,6 +1,7 @@
 package com.unis.gameplatfrom.ui;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.UserManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,6 +13,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.blankj.utilcode.util.EmptyUtils;
 import com.blankj.utilcode.util.EncryptUtils;
@@ -29,6 +31,7 @@ import com.unis.gameplatfrom.base.BaseActivity;
 import com.unis.gameplatfrom.cache.UserCenter;
 import com.unis.gameplatfrom.model.GamesEntity;
 import com.unis.gameplatfrom.model.LoginResult;
+import com.unis.gameplatfrom.utils.PackageUtil;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -193,6 +196,13 @@ public class LoginActivity extends BaseActivity {
 
                             }
 
+                            //判断用户切换时需要隐藏或者显示的应用
+                            isHindORShowApp();
+
+
+                            UserCenter.getInstance().setGameAccount(mobile);
+
+
                             Intent intent = new Intent(LoginActivity.this,MainActivity.class);
                             intent.putExtra("account",mobile);
                             intent.putExtra("password",password);
@@ -205,6 +215,37 @@ public class LoginActivity extends BaseActivity {
                     }
                 });
     }
+
+
+
+    private void isHindORShowApp() {
+
+        String mobile = mAccount.getText().toString().trim();
+        String password = mPassword.getText().toString().trim();
+
+        RetrofitWrapper.getInstance().create(PublicApiInterface.class)
+                .passwordLogin(mobile,password,EncryptUtils.encryptMD5ToString(mobile+password+"UNIS").toLowerCase())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .compose(this.bindUntilEvent(ActivityEvent.DESTROY))
+                .subscribe(new HUDLoadDataSubscriber<LoginResult<GamesEntity>>(mContext) {
+                    @Override
+                    public void onNext(LoginResult<GamesEntity> result) {
+
+
+
+
+                    }
+
+                });
+
+    }
+
+
+
+
+
+
 
 
 

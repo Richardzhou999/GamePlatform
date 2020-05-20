@@ -14,6 +14,7 @@ import android.os.Environment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -59,6 +60,7 @@ import com.unis.gameplatfrom.utils.udateapk.LinPermission;
 
 
 import butterknife.BindView;
+import butterknife.OnClick;
 import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -84,6 +86,9 @@ public class GamesActivity extends BaseActivity {
 
     @BindView(R.id.toolbar_right)
     TextView toolbarRight;
+
+    @BindView(R.id.user_account)
+    TextView userAccount;
 
     @BindView(R.id.rv_games)
     RecyclerView gamesRv;
@@ -120,6 +125,8 @@ public class GamesActivity extends BaseActivity {
     private String account;
     private String password;
 
+    private String game_account;
+
 
 
     @Override
@@ -129,6 +136,10 @@ public class GamesActivity extends BaseActivity {
 
     @Override
     protected void initData() {
+
+
+        //当前用户
+        userAccount.setText("当前用户:"+account);
 
         //左边
         games = new ArrayList<>();
@@ -154,7 +165,7 @@ public class GamesActivity extends BaseActivity {
 
                 if (entity.getV() != 0) {
 
-                        if (LinPermission.checkPermission(GamesActivity.this, 7)) {
+                        if (LinPermission.checkPermission(GamesActivity.this, new int[]{7,8})) {
 
 //                            if (mDownloadBinder != null) {
 //                                long downloadId = mDownloadBinder.startDownload(APK_URL);
@@ -167,7 +178,7 @@ public class GamesActivity extends BaseActivity {
                              * 情况2：记录不在，游戏不在
                              * 情况3：两者都在
                              */
-                            GamesEntity entity1 = LitePal.where("g="+entity.getG()).findFirst(GamesEntity.class);
+                            GamesEntity entity1 = LitePal.where("id="+entity.getId()+" and account="+"'"+game_account+"'").findFirst(GamesEntity.class);
                             if(entity1 != null){
 
                                 //若游戏被删除，需清除游戏记录防止数据出错
@@ -218,7 +229,7 @@ public class GamesActivity extends BaseActivity {
                                 }else {
 
                                     entity1.setV(entity.getV());
-                                    entity1.setG(entity.getG());
+                                    entity1.setId(entity.getId());
                                     entity1.setName(entity.getName());
                                     entity1.setP(entity.getP());
                                     entity1.setPackname(entity.getPackname());
@@ -253,6 +264,7 @@ public class GamesActivity extends BaseActivity {
 
                                 if(isAppByPackageID(entity.getPackname())){
 
+                                    entity.setAccount(game_account);
                                     entity.save();
                                     startAppByPackageID(entity.getPackname());
 
@@ -260,6 +272,7 @@ public class GamesActivity extends BaseActivity {
 
                                     //第一次下载
 
+                                    entity.setAccount(game_account);
                                     entity.save();
                                     downApk(entity.getP(),entity.getIcon());
 
@@ -324,6 +337,15 @@ public class GamesActivity extends BaseActivity {
 
     private boolean refresh;
 
+    @OnClick({R.id.login_out})
+    public void onClick(View view){
+
+        startActivity(new Intent(GamesActivity.this,LoginActivity.class));
+        finish();
+
+
+    }
+
 
     @Override
     protected void initView(Bundle savedInstanceState) {
@@ -342,6 +364,7 @@ public class GamesActivity extends BaseActivity {
         account = getIntent().getStringExtra("account");
         password = getIntent().getStringExtra("password");
 
+        game_account= UserCenter.getInstance().getGame_account();
 
 
 
@@ -433,16 +456,18 @@ public class GamesActivity extends BaseActivity {
                     @Override
                     public void onNext(LoginResult<GamesEntity> result) {
 
-                        if (LinPermission.checkPermission(GamesActivity.this, 7)) {
+                        if (LinPermission.checkPermission(GamesActivity.this, new int[]{7,8})) {
 
                             for(GamesEntity entity : result.getGame()){
 
 
-                                GamesEntity entity1 = LitePal.where("g="+entity.getG()).findFirst(GamesEntity.class);
+                                GamesEntity entity1 = LitePal.where("id="+entity.getId()+" and account="+"'"+game_account+"'").findFirst(GamesEntity.class);
                                 if( entity1 != null ){
                                    // entity.setV(entity.getV()+1);
 
                                     if(isAppByPackageID(entity.getPackname())){
+
+
 
                                         if(entity.getV() > entity1.getV()){
 
@@ -525,7 +550,7 @@ public class GamesActivity extends BaseActivity {
             // 应用包名
             packageInfo = packageManager.getPackageInfo( packageId, 0);
         } catch (PackageManager.NameNotFoundException e) {
-            Toast.makeText(GamesActivity.this, "没有找到 应用", Toast.LENGTH_SHORT).show();
+            Toast.makeText(GamesActivity.this, "没有找到应用", Toast.LENGTH_SHORT).show();
             return false;
         }
         Intent resolveIntent = new Intent(Intent.ACTION_MAIN, null);
@@ -562,11 +587,6 @@ public class GamesActivity extends BaseActivity {
     }
 
 
-    /**
-     *
-     * @param filepath
-     * @param iconUrl
-     */
 
 
 

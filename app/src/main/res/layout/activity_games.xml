@@ -23,6 +23,14 @@
             android:background="@color/white">
 
 
+
+            <TextView
+                android:id="@+id/user_account"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+
+
             <TextView
                 android:id="@+id/toolbar_left"
                 android:layout_width="wrap_content"
@@ -31,6 +39,16 @@
                 style="@style/TitleBarTitleText"
                 android:layout_gravity="center"
                 />
+
+
+            <TextView
+                android:id="@+id/login_out"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="退出"
+                android:layout_marginRight="@dimen/dp_10"
+                android:layout_gravity="right"/>
+
 
 
 

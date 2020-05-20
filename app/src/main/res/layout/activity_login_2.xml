@@ -23,7 +23,7 @@
             android:text="账号："/>
 
         <EditText
-            android:id="@+id/txt_account"
+            android:id="@+id/text_account"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@null"
@@ -48,7 +48,7 @@
             android:text="密码："/>
 
         <EditText
-            android:id="@+id/txt_password"
+            android:id="@+id/text_password"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@null"
@@ -60,7 +60,7 @@
 
 
     <Button
-        android:id="@+id/btn_login"
+        android:id="@+id/bttn_login"
         android:layout_width="match_parent"
         android:layout_height="45dp"
         android:layout_alignParentBottom="true"

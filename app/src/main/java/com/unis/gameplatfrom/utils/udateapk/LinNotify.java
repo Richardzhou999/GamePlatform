@@ -53,6 +53,7 @@ public class LinNotify {
     public static final String CHECK_OP_NO_THROW = "checkOpNoThrow";
     public static final String OP_POST_NOTIFICATION = "OP_POST_NOTIFICATION";
     public static int notifyId = 0;
+    public static final int TYPE_PROGRESS= 1;
     public static String NOTIFYTAG = "games";
 
 
@@ -160,6 +161,17 @@ public class LinNotify {
      */
     public static void show(Context context, String contentTitle, String contentText, String channelId, PendingIntent pendingIntent) {
         show(context, contentTitle, contentText,null, 0, channelId, pendingIntent);
+    }
+
+    /**
+     * 发送通知（刷新前面的通知，指定通知渠道）
+     *
+     * @param contentTitle 标题
+     * @param contentText  内容
+     * @param channelId    渠道id
+     */
+    public static void show(Context context, String contentTitle, String contentText,int notifyId, String channelId, PendingIntent pendingIntent) {
+        show(context, contentTitle, contentText,null, notifyId, channelId, pendingIntent);
     }
 
     /**
@@ -380,7 +392,6 @@ public class LinNotify {
                 .setSubText(TextUtils.isEmpty(subText) ? null : subText) // APP名称的副标题
                 .setPriority(priority) //设置优先级 PRIORITY_DEFAULT
                 .setTicker(TextUtils.isEmpty(ticker) ? Ticker : ticker) // 设置通知首次弹出时，状态栏上显示的文本
-                .setContent(view)
                 .setWhen(System.currentTimeMillis()) // 设置通知发送的时间戳
                 .setShowWhen(true)//设置是否显示时间戳
                 .setDefaults(Notification.PRIORITY_HIGH)// 设置默认的提示音、振动方式、灯光等 使用的默认通知选项
@@ -403,12 +414,90 @@ public class LinNotify {
 
 
 
+        manager.notify(notifyId, builder.build()); // build()方法需要的最低API为16 ,
+    }
+
+
+
+    /**
+     * 发送进度条通知
+     *
+     * @param largeIconURL    大图标
+     * @param smallIcon    小图标
+     * @param contentTitle 标题
+     * @param subText      小标题/副标题
+     * @param contentText  内容
+     * @param priority     优先级
+     * @param ticker       通知首次弹出时，状态栏上显示的文本
+     * @param notifyId     定义是否显示多条通知栏
+     */
+    public static void showProgress(Context context, String largeIconURL,
+                            int smallIcon, String contentTitle,
+                            String subText, String contentText,
+                            int priority, String ticker,
+                            int notifyId, String channelId, int progress) {
+        //flags
+        // FLAG_ONE_SHOT:表示此PendingIntent只能使用一次的标志
+        // FLAG_IMMUTABLE:指示创建的PendingIntent应该是不可变的标志
+        // FLAG_NO_CREATE : 指示如果描述的PendingIntent尚不存在，则只返回null而不是创建它。
+        // FLAG_CANCEL_CURRENT :指示如果所描述的PendingIntent已存在，则应在生成新的PendingIntent,取消之前PendingIntent
+        // FLAG_UPDATE_CURRENT : 指示如果所描述的PendingIntent已存在，则保留它，但将其额外数据替换为此新Intent中的内容
+//
+        //获取通知服务管理器
+        NotificationManager manager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
+        //判断应用通知是否打开
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            if (!openNotificationChannel(context, manager, channelId)) return;
+        }
+
+        Bitmap largeIcon = null;
+
+//        if(!TextUtils.isEmpty(largeIconURL)){
+//
+//            largeIcon = returnBitMap(largeIconURL);
+//        }
+
+
+
+        //创建 NEW_MESSAGE 渠道通知栏  在API级别26.1.0中推荐使用此构造函数 Builder(context, 渠道名)
+        NotificationCompat.Builder builder = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) ? new NotificationCompat.Builder(context, channelId) : new NotificationCompat.Builder(context);
+        builder.setLargeIcon(largeIcon == null ? BitmapFactory.decodeResource(context.getResources(),R.drawable.logo) : largeIcon) //设置自动收报机和通知中显示的大图标。
+
+                .setSmallIcon(smallIcon == 0 ? R.drawable.logo : smallIcon) // 小图标
+                .setContentText(TextUtils.isEmpty(contentText)? null : contentText) // 内容
+                .setContentTitle(TextUtils.isEmpty(contentTitle)? null : contentTitle) // 标题
+                .setSubText(TextUtils.isEmpty(subText) ? null : subText) // APP名称的副标题
+                .setPriority(priority) //设置优先级 PRIORITY_DEFAULT
+                .setTicker(TextUtils.isEmpty(ticker) ? Ticker : ticker) // 设置通知首次弹出时，状态栏上显示的文本
+                .setWhen(System.currentTimeMillis()) // 设置通知发送的时间戳
+                .setShowWhen(true)//设置是否显示时间戳
+                .setDefaults(Notification.PRIORITY_HIGH)// 设置默认的提示音、振动方式、灯光等 使用的默认通知选项
+                .setAutoCancel(false)// 禁止点击通知后通知在通知栏上消失
+                .setOngoing(true) //禁止滑动删除
+                .setProgress(100,progress,false)
+                //锁屏状态下显示通知图标及标题 1、VISIBILITY_PUBLIC 在所有锁定屏幕上完整显示此通知/2、VISIBILITY_PRIVATE 隐藏安全锁屏上的敏感或私人信息/3、VISIBILITY_SECRET 不显示任何部分
+                .setVisibility(Notification.VISIBILITY_PUBLIC)//部分手机没效果
+                //.setFullScreenIntent(pendingIntent,true)//悬挂式通知8.0需手动打开
+//                .setColorized(true)
+//                .setGroupSummary(true)//将此通知设置为一组通知的组摘要
+//                .setGroup(NEW_GROUP)//使用组密钥
+//                .setDeleteIntent(pendingIntent)//当用户直接从通知面板清除通知时 发送意图
+//                .setFullScreenIntent(pendingIntent,true)
+//                .setContentInfo("大文本")//在通知的右侧设置大文本。
+//                .setContent(RemoteViews RemoteView)//设置自定义通知栏
+//                .setColor(Color.parseColor("#ff0000"))
+//                .setLights()//希望设备上的LED闪烁的argb值以及速率
+                //.setTimeoutAfter(3000)//指定取消此通知的时间（如果尚未取消）。
+        ;
+
+
+
         //修改通知标志
-        NOTIFYTAG =  notifyId + NOTIFYTAG;
+        //NOTIFYTAG =  notifyId + NOTIFYTAG;
 
         // 通知栏id
-        manager.notify(NOTIFYTAG,notifyId, builder.build()); // build()方法需要的最低API为16 ,
-        //manager.notify(notifyId, builder.build()); // build()方法需要的最低API为16 ,
+        //manager.notify(NOTIFYTAG,notifyId, builder.build()); // build()方法需要的最低API为16 ,
+        manager.notify(notifyId, builder.build()); // build()方法需要的最低API为16 ,
     }
 
 

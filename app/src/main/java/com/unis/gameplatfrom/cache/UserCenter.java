@@ -32,7 +32,11 @@ public class UserCenter {
 
     private String account;
 
+    private String game_account;
+
     private String password;
+
+
 
 
     private String host;//环境域名
@@ -91,6 +95,17 @@ public class UserCenter {
         this.account = account;
         SPUtils.getInstance(SP_NAME).put(SP_ACCOUNT, account);
     }
+
+    public String getGame_account(){
+        return game_account;
+    }
+
+    public void setGameAccount(String account){
+        this.game_account = account;
+        SPUtils.getInstance(SP_NAME).put(SP_ACCOUNT, account);
+    }
+
+
 
     public String getPassword() {
         return password;

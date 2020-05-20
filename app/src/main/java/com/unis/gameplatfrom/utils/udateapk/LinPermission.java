@@ -39,8 +39,9 @@ public class LinPermission {
             Manifest.permission.CAMERA,
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.BODY_SENSORS,
-//            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
+//            Manifest.permission.WRITE_CONTACTS,
             Manifest.permission.SEND_SMS,
     };
 

@@ -4,9 +4,9 @@ android {
 
     signingConfigs {
         config {
-            keyAlias 'game'
+            keyAlias 'hc07sign'
             keyPassword '123456'
-            storeFile file('../../keystore/gameplatform.jks')
+            storeFile file('../../keystore/hc07sign.jks')
             storePassword '123456'
         }
     }

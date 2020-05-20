@@ -4,23 +4,23 @@ import org.litepal.crud.LitePalSupport;
 
 public class GamesEntity extends LitePalSupport {
 
-     private int g;
+     private int id;
      private int v;
      private String p;
      private String icon;
      private String packname;
      private String name;
+     private String account;//判断用户的游戏
      private boolean isGame;//测试游戏是否存在
      private boolean isNewGame;//测试是否有新版本
 
 
-
-    public int getG() {
-        return g;
+    public int getId() {
+        return id;
     }
 
-    public void setG(int g) {
-        this.g = g;
+    public void setId(int id) {
+        this.id = id;
     }
 
     public int getV() {
@@ -63,6 +63,13 @@ public class GamesEntity extends LitePalSupport {
         this.name = name;
     }
 
+    public String getAccount() {
+        return account;
+    }
+
+    public void setAccount(String account) {
+        this.account = account;
+    }
 
     public boolean isGame() {
         return isGame;

@@ -55,9 +55,9 @@ public abstract class BaseActivity extends RxAppCompatActivity {
         registEventBus();
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
-//        if (getLayout() > 0) {
-//            setContentView(getLayout());
-//        }
+        if (getLayout() > 0) {
+            setContentView(getLayout());
+        }
         this.mUnbinder = ButterKnife.bind(this);
         Router.inject(this);
         initView(savedInstanceState);
