@@ -46,7 +46,7 @@ public abstract class BaseActivity extends RxAppCompatActivity {
             } else {
                 StatusBarUtil.setStatusBarColor(this, getStatusBarColor());
             }
-            StatusBarUtil.StatusBarLightMode(this);
+            StatusBarUtil.StatusBarLightMode(this,3);
         }
 
         mContext = this;
@@ -125,7 +125,7 @@ public abstract class BaseActivity extends RxAppCompatActivity {
      * @return
      */
     protected boolean hasTransparencyStatusBar() {
-        return false;
+        return true;
     }
 
     protected void registEventBus() {

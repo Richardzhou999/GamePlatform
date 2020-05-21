@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".ui.LoginActivity"
     android:orientation="vertical"
+    android:background="@drawable/air_bg"
     >
 
 
@@ -27,12 +28,15 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="账号："/>
+            android:text="账号："
+            android:textColor="@color/white"/>
 
         <EditText
             android:id="@+id/txt_account"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:theme="@style/MyEditText"
             />
 
 
@@ -51,13 +55,15 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textColor="@color/white"
             android:text="密码："/>
 
         <EditText
             android:id="@+id/txt_password"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-
+            android:textColor="@color/white"
+            android:theme="@style/MyEditText"
             />
 
 
@@ -76,11 +82,15 @@
         <CheckBox
             android:id="@+id/save_account"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:buttonTint="@color/white"
+
+            />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textColor="@color/white"
             android:text="记住账号"/>
 
     </LinearLayout>

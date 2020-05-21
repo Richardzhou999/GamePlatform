@@ -9,10 +9,11 @@
     </style>
 
     <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="android:windowBackground">@color/window_background</item>
+        <item name="android:windowBackground">@color/transparent</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
+
 
 
     <style name="MyDialogStyle">
@@ -41,5 +42,18 @@
         <item name="android:maxWidth">200dp</item>
         <item name="android:textColor">@color/tv1</item>
     </style>
+
+
+    <style name="MyEditText" parent="Theme.AppCompat.Light">
+        <item name="colorControlNormal">@color/white</item>
+        <item name="colorControlActivated">@color/text_blue</item>
+    </style>
+
+
+
+
+
+
+
 
 </resources>

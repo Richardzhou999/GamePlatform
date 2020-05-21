@@ -86,6 +86,7 @@ public class LoginActivity extends BaseActivity {
         if(!TextUtils.isEmpty(account)){
 
             mAccount.setText(account);
+            mAccount.setSelection(account.length());
             mSaveBtn.setChecked(true);
 
         }
@@ -113,16 +114,12 @@ public class LoginActivity extends BaseActivity {
 
                         }
 
-
                     }else {
 
                         mLoginBtn.setEnabled(false);
                         mLoginBtn.setBackgroundResource(R.drawable.button_round_bule_down);
 
-
                     }
-
-
             }
 
             @Override
