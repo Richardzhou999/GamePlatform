@@ -6,123 +6,29 @@
     android:layout_height="match_parent"
     tools:context=".ui.LoginActivity"
     android:orientation="vertical"
-    android:background="@drawable/air_bg"
-    >
+    android:background="@drawable/air_bg">
 
 
-    <View
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1"/>
+        android:layout_height="match_parent">
 
-
-
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="200dp"
-        android:layout_marginRight="200dp">
-
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="账号："
-            android:textColor="@color/white"/>
-
-        <EditText
-            android:id="@+id/txt_account"
+        <fragment
+            android:id="@+id/fragment_password_login"
+            android:name="com.unis.gameplatfrom.ui.PassWordFragment"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textColor="@color/white"
-            android:theme="@style/MyEditText"
-            />
+            android:layout_height="match_parent"
+            tools:layout="@layout/fragment_pass_word" />
 
-
-    </LinearLayout>
-
-
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="200dp"
-        android:layout_marginTop="@dimen/dp_10"
-        android:layout_marginRight="200dp">
-
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/white"
-            android:text="密码："/>
-
-        <EditText
-            android:id="@+id/txt_password"
+        <fragment
+            android:id="@+id/fragment_sms_login"
+            android:name="com.unis.gameplatfrom.ui.UserIDFragment"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textColor="@color/white"
-            android:theme="@style/MyEditText"
-            />
+            android:layout_height="match_parent"
+            tools:layout="@layout/fragment_user_id" />
 
 
-    </LinearLayout>
-
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="200dp"
-        android:layout_marginTop="@dimen/dp_10"
-        android:layout_marginRight="200dp"
-        android:gravity="right">
-
-
-        <CheckBox
-            android:id="@+id/save_account"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:buttonTint="@color/white"
-
-            />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/white"
-            android:text="记住账号"/>
-
-    </LinearLayout>
-
-
-
-    <Button
-        android:id="@+id/btn_login"
-        android:layout_width="match_parent"
-        android:layout_height="45dp"
-        android:layout_alignParentBottom="true"
-        android:text="登录"
-        android:layout_marginTop="20dp"
-        android:textSize="16sp"
-        android:layout_marginLeft="200dp"
-        android:layout_marginRight="200dp"
-        android:layout_gravity="center_horizontal"
-        android:textColor="@color/white"
-        android:enabled="false"
-        android:background="@drawable/button_round_bule_down"
-        />
-
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1"/>
-
-
-
-
-
+    </FrameLayout>
 
 
 

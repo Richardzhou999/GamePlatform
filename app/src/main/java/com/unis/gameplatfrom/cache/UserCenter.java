@@ -20,6 +20,7 @@ public class UserCenter {
 
 
     public static final String SP_ACCOUNT = "sp_account";
+    public static final String SP_USERID = "sp_userid";
     public static final String SP_PASSWORD = "sp_password";
 
     private static UserCenter instance;
@@ -31,6 +32,8 @@ public class UserCenter {
     private String webUrl;
 
     private String account;
+
+    private String userid;
 
     private String game_account;
 
@@ -51,7 +54,8 @@ public class UserCenter {
             this.token = SPUtils.getInstance(SP_NAME).getString(SP_TOKEN);
             this.host = SPUtils.getInstance(SP_NAME).getString(SP_HOST);
             this.account = SPUtils.getInstance(SP_NAME).getString(SP_ACCOUNT);
-            this.password  = SPUtils.getInstance(SP_NAME).getString(SP_PASSWORD);
+            this.userid = SPUtils.getInstance(SP_NAME).getString(SP_USERID);
+
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -68,7 +72,7 @@ public class UserCenter {
     public String getHost() {
         if (host == null || host.equals("") || host.isEmpty()){
 //            return "https://api.mollyfantasy.universal-space.cn";
-            return "http://s.health.shiyugame.com:9010";//测试
+            return "http://mmtk.shiyugame.com";//测试
         }
         return host;
     }
@@ -96,6 +100,15 @@ public class UserCenter {
         SPUtils.getInstance(SP_NAME).put(SP_ACCOUNT, account);
     }
 
+    public String getUserid() {
+        return userid;
+    }
+
+    public void setUserid(String userid) {
+        this.userid = userid;
+        SPUtils.getInstance(SP_NAME).put(SP_USERID, userid);
+    }
+
     public String getGame_account(){
         return game_account;
     }
@@ -104,6 +117,7 @@ public class UserCenter {
         this.game_account = account;
         SPUtils.getInstance(SP_NAME).put(SP_ACCOUNT, account);
     }
+
 
 
 

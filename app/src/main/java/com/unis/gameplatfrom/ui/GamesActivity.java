@@ -16,6 +16,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -84,11 +85,6 @@ public class GamesActivity extends BaseActivity {
     @BindView(R.id.toolbar_left)
     TextView toolbarLeft;
 
-    @BindView(R.id.toolbar_right)
-    TextView toolbarRight;
-
-    @BindView(R.id.user_account)
-    TextView userAccount;
 
     @BindView(R.id.rv_games)
     RecyclerView gamesRv;
@@ -96,11 +92,17 @@ public class GamesActivity extends BaseActivity {
     @BindView(R.id.refresh_layout)
     SmartRefreshLayout mRefreshLayout;
 
-    @BindView(R.id.rv_games_right)
-    RecyclerView gamesRvRight;
 
-    @BindView(R.id.refresh_layout_right)
-    SmartRefreshLayout mRefreshLayoutRight;
+    @BindView(R.id.txt_now_page)
+    TextView nowPageText;
+    @BindView(R.id.txt_count_page)
+    TextView countpageText;
+
+    @BindView(R.id.back_page)
+    ImageView backPage;
+
+    @BindView(R.id.to_page)
+    ImageView toPage;
 
 
     private GamesAdapter adapter;
@@ -111,7 +113,7 @@ public class GamesActivity extends BaseActivity {
     private List<GamesEntity> getGames = new ArrayList<>();
 
 
-    private List<GamesEntity> gamesRight;
+    private List<GamesEntity> gamesPage = new ArrayList<>();
 
     private static final String APK_URL = "http://101.28.249.94/apk.r1.market.hiapk.com/data/upload/apkres/2017/4_11/15/com.baidu.searchbox_034250.apk";
 
@@ -127,6 +129,7 @@ public class GamesActivity extends BaseActivity {
 
     private String game_account;
 
+    private int page = 1;
 
 
     @Override
@@ -138,24 +141,13 @@ public class GamesActivity extends BaseActivity {
     protected void initData() {
 
 
-        //当前用户
-        userAccount.setText("当前用户:"+account);
+
 
         //左边
         games = new ArrayList<>();
         adapter = new GamesAdapter(mContext,games);
         gamesRv.setLayoutManager(new LinearLayoutManager(this));
         gamesRv.setAdapter(adapter);
-
-        //右边
-        gamesRight = new ArrayList<>();
-        rightAdapter = new GamesRightAdapter(mContext, gamesRight);
-        gamesRvRight.setLayoutManager(new LinearLayoutManager(this));
-        gamesRvRight.setAdapter(rightAdapter);
-
-
-
-
 
         adapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
             @Override
@@ -295,9 +287,6 @@ public class GamesActivity extends BaseActivity {
 //                                            dialogInterface.dismiss();
 //                                        }
 //                                    });
-
-
-
                             }
 
 
@@ -327,7 +316,7 @@ public class GamesActivity extends BaseActivity {
         mRefreshLayout.setOnRefreshListener(new OnRefreshListener() {
             @Override
             public void onRefresh(RefreshLayout refreshlayout) {
-                gamesRvRight.setVisibility(View.GONE);
+
                  loadData();
                 refresh =true;
             }
@@ -337,11 +326,92 @@ public class GamesActivity extends BaseActivity {
 
     private boolean refresh;
 
-    @OnClick({R.id.login_out})
+    @OnClick({R.id.login_out,R.id.back_page,R.id.to_page})
     public void onClick(View view){
 
-        startActivity(new Intent(GamesActivity.this,LoginActivity.class));
-        finish();
+        switch (view.getId()){
+
+            case R.id.login_out:
+                startActivity(new Intent(GamesActivity.this,LoginActivity.class));
+                finish();
+
+                break;
+            case R.id.back_page:
+
+                if(gamesPage.size() != 0){
+                    gamesPage.clear();
+                }
+
+
+                if(getGames.size() > 10 ){
+
+
+
+                    nowPageText.setText("当前："+ page-- +" 页");
+                    countpageText.setText(" 共 2 页");
+
+                    for(int i=0 ; i<10; i++){
+
+                        gamesPage.add(getGames.get(i));
+
+                    }
+
+                    adapter.setNewData(gamesPage);
+
+
+                }
+                break;
+            case R.id.to_page:
+
+                if(gamesPage.size() != 0){
+                    gamesPage.clear();
+                }
+
+
+
+
+                if(getGames.size() > 10 && getGames.size() < 20){
+
+
+                    nowPageText.setText("当前："+ page++ +" 页");
+                    countpageText.setText(" 共 2 页");
+
+
+                    for(int i=10 ; i<getGames.size(); i++){
+
+                        gamesPage.add(getGames.get(i));
+
+                    }
+
+                    adapter.setNewData(gamesPage);
+
+
+                }else {
+
+                    nowPageText.setText("当前："+ page++ +" 页");
+                    countpageText.setText(" 共 3 页");
+
+
+                    for(int i=10 ; i<getGames.size(); i++){
+
+                        gamesPage.add(getGames.get(i));
+
+                    }
+
+                    adapter.setNewData(gamesPage);
+
+
+
+                }
+
+                break;
+
+
+
+
+
+
+        }
 
 
     }
@@ -407,6 +477,9 @@ public class GamesActivity extends BaseActivity {
 //    };
 
 
+
+
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -445,95 +518,110 @@ public class GamesActivity extends BaseActivity {
 
         String key = EncryptUtils.encryptMD5ToString(account+password+"UNIS").toLowerCase();
 
-        gamesRvRight.setVisibility(View.VISIBLE);
-
         RetrofitWrapper.getInstance().create(PublicApiInterface.class)
-                .passwordLogin(account,password,key)
+                .getGameList(UserCenter.getInstance().getToken())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .compose(this.bindUntilEvent(ActivityEvent.DESTROY))
-                .subscribe(new HUDLoadDataSubscriber<LoginResult<GamesEntity>>(mContext) {
+                .subscribe(new HUDLoadDataSubscriber<BaseCustomListResult<GamesEntity>>(mContext) {
                     @Override
-                    public void onNext(LoginResult<GamesEntity> result) {
-
-                        if (LinPermission.checkPermission(GamesActivity.this, new int[]{7,8})) {
-
-                            for(GamesEntity entity : result.getGame()){
+                    public void onNext(BaseCustomListResult<GamesEntity> result) {
 
 
-                                GamesEntity entity1 = LitePal.where("id="+entity.getId()+" and account="+"'"+game_account+"'").findFirst(GamesEntity.class);
-                                if( entity1 != null ){
-                                   // entity.setV(entity.getV()+1);
+                        if(result.getErr() == 0){
 
-                                    if(isAppByPackageID(entity.getPackname())){
+                            if (LinPermission.checkPermission(GamesActivity.this, new int[]{7,8})) {
+
+                                if(result.getData().size() > 10){
+
+                                    backPage.setVisibility(View.VISIBLE);
+                                    toPage.setVisibility(View.VISIBLE);
+
+                                }else {
+
+                                    backPage.setVisibility(View.INVISIBLE);
+                                    toPage.setVisibility(View.INVISIBLE);
+                                }
+
+                                for(GamesEntity entity : result.getData()){
+
+
+                                    GamesEntity entity1 = LitePal.where("id="+entity.getId()+" and account="+"'"+game_account+"'").findFirst(GamesEntity.class);
+                                    if( entity1 != null ){
+                                        // entity.setV(entity.getV()+1);
+
+                                        if(isAppByPackageID(entity.getPackname())){
 
 
 
-                                        if(entity.getV() > entity1.getV()){
+                                            if(entity.getV() > entity1.getV()){
 
-                                            entity.setNewGame(true);
+                                                entity.setNewGame(true);
+                                                entity.setGame(true);
+                                                getGames.add(entity);
+
+                                            }else {
+
+                                                entity.setGame(true);
+                                                getGames.add(entity);
+
+                                            }
+
+
+                                        }else {
+
+                                            entity1.save();
+                                            entity1.delete();
+                                            entity.setNewGame(false);
+                                            entity.setGame(false);
+                                            getGames.add(entity);
+
+                                        }
+
+                                    }else {
+
+                                        if(isAppByPackageID(entity.getPackname())){
+                                            entity.setNewGame(false);
                                             entity.setGame(true);
                                             getGames.add(entity);
 
                                         }else {
 
-                                            entity.setGame(true);
+                                            entity.setNewGame(false);
+                                            entity.setGame(false);
                                             getGames.add(entity);
 
                                         }
 
-
-                                    }else {
-
-                                        entity1.save();
-                                        entity1.delete();
-                                        entity.setNewGame(false);
-                                        entity.setGame(false);
-                                        getGames.add(entity);
-
                                     }
 
-                                }else {
 
-                                    if(isAppByPackageID(entity.getPackname())){
-                                        entity.setNewGame(false);
-                                        entity.setGame(true);
-                                        getGames.add(entity);
-
-                                    }else {
-
-                                        entity.setNewGame(false);
-                                        entity.setGame(false);
-                                        getGames.add(entity);
-
-                                    }
 
                                 }
 
+                                adapter.setNewData(getGames);
+
+
+                                mRefreshLayout.finishRefresh();
 
 
                             }
-
-                            adapter.setNewData(getGames);
-                            rightAdapter.setNewData(getGames);
-
-                            mRefreshLayout.finishRefresh();
-
-
-                        }
-                        else {
+                            else {
 
 //                            adapter.setNewData(result.getData());
 //                            rightAdapter.setNewData(result.getData());
 //                            mRefreshLayout.finishRefresh();
 
-                            //finish();
-
-                        }
-
-
+                                //finish();
 //                        adapter.addData(result.getData());
 
+                            }
+
+                        }else {
+
+                            Toast.makeText(mContext,result.getMsg(),Toast.LENGTH_SHORT).show();
+                            mRefreshLayout.finishRefresh();
+                        }
                     }
                 });
 

@@ -11,6 +11,8 @@ public class BaseResult implements Serializable {
 
     private int code;
     private String message;
+    private int err;
+    private String msg;
     private String detail;
 
     public boolean isSuccess() {
@@ -31,6 +33,22 @@ public class BaseResult implements Serializable {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public int getErr() {
+        return err;
+    }
+
+    public void setErr(int err) {
+        this.err = err;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
     }
 
     public String getDetail() {

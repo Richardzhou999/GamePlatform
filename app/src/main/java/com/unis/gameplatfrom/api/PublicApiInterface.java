@@ -25,8 +25,9 @@ public interface PublicApiInterface {
     /**
      * 获取游戏列表
      */
-    @GET("/{number}")
-    Observable<BaseCustomListResult<GamesEntity>> getGameList(@Path("number") int number);
+    @FormUrlEncoded
+    @POST("/gamelist")
+    Observable<BaseCustomListResult<GamesEntity>> getGameList(@Field("uuid") String uuid);
 
 
     /**
@@ -34,9 +35,8 @@ public interface PublicApiInterface {
      */
     @FormUrlEncoded
     @POST("/hz_login")
-    Observable<LoginResult<GamesEntity>> passwordLogin(@Field("acc") String account, @Field("pwd") String password
-            , @Field("key") String key);
-
+    Observable<LoginResult> passwordLogin(@Field("acc") String account, @Field("pwd") String password
+            ,@Field("netaddress") String netaddress,@Field("type") int type, @Field("key") String key);
 
 
 }

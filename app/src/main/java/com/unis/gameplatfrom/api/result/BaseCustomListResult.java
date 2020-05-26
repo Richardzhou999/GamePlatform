@@ -9,22 +9,14 @@ import java.util.List;
 @SuppressWarnings("DefaultFileTemplate")
 public class BaseCustomListResult<T> extends BaseResult {
 
-    private int err;
-    private List<T> game;
 
-    public int getErr() {
-        return err;
-    }
-
-    public void setErr(int err) {
-        this.err = err;
-    }
+    private List<T> glist ;
 
     public List<T> getData() {
-        return game;
+        return glist ;
     }
 
     public void setData(List<T> data) {
-        this.game = game;
+        this.glist  = glist ;
     }
 }

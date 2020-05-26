@@ -19,5 +19,4 @@ public class HttpResultFunc<T extends BaseResult> implements Function<T, T> {
         }
         return baseResult;
     }
-
 }

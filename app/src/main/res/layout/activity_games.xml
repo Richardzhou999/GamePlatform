@@ -6,29 +6,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/window_background2"
-    android:orientation="horizontal"
+    android:orientation="vertical"
     tools:context="com.unis.gameplatfrom.ui.GamesActivity">
 
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:visibility="visible">
 
         <android.support.v7.widget.Toolbar
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/white">
 
-
-
-            <TextView
-                android:id="@+id/user_account"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                />
 
 
             <TextView
@@ -49,10 +35,9 @@
                 android:layout_marginRight="@dimen/dp_10"
                 android:layout_gravity="right"/>
 
-
-
-
         </android.support.v7.widget.Toolbar>
+
+
 
 
 
@@ -61,14 +46,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical"
-                android:layout_weight="1">
+                android:layout_weight="1"
+                android:background="@color/white">
 
 
                 <com.scwang.smartrefresh.layout.SmartRefreshLayout
                     android:id="@+id/refresh_layout"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-
                     >
 
                     <android.support.v7.widget.RecyclerView
@@ -81,117 +66,48 @@
             </LinearLayout>
 
 
-        <!--<android.support.v7.widget.Toolbar-->
-
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:background="@color/white">-->
-
-
-            <!--<TextView-->
-                <!--android:id="@+id/toolbar_left"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:text="游戏大厅"-->
-                <!--style="@style/TitleBarTitleText"-->
-                <!--android:layout_gravity="center"-->
-               <!---->
-                <!--/>-->
-
-
-
-        <!--</android.support.v7.widget.Toolbar>-->
-
-
-
-
-
-    </LinearLayout>
-
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:visibility="gone">
-
-
-
-        <android.support.v7.widget.Toolbar
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/white">
-
-
-            <TextView
-                android:id="@+id/toolbar_right"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="游戏大厅"
-                style="@style/TitleBarTitleText"
-                android:layout_gravity="center"
-                />
-
-
-
-        </android.support.v7.widget.Toolbar>
-
-
-
-        <LinearLayout
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:layout_weight="1">
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:background="@color/white">
 
 
-                <com.scwang.smartrefresh.layout.SmartRefreshLayout
-                    android:id="@+id/refresh_layout_right"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    >
+                <ImageView
+                    android:id="@+id/back_page"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_left"
+                    android:paddingLeft="@dimen/dp_10"
+                    android:paddingRight="@dimen/dp_10"
+                    android:paddingTop="20dp"
+                    android:paddingBottom="20dp"
+                    android:visibility="invisible"/>
 
-                    <android.support.v7.widget.RecyclerView
-                        android:id="@+id/rv_games_right"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                       />
-                </com.scwang.smartrefresh.layout.SmartRefreshLayout>
+                <TextView
+                    android:id="@+id/txt_now_page"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="当前：1 页 "/>
 
+                <TextView
+                    android:id="@+id/txt_count_page"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="   共 1 页"/>
+
+                <ImageView
+                    android:id="@+id/to_page"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_right"
+                    android:paddingLeft="@dimen/dp_10"
+                    android:paddingRight="@dimen/dp_10"
+                    android:paddingTop="20dp"
+                    android:paddingBottom="20dp"
+                    android:visibility="invisible"/>
 
             </LinearLayout>
-
-
-        <!--<android.support.v7.widget.Toolbar-->
-
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:background="@color/white">-->
-
-
-            <!--<TextView-->
-                <!--android:id="@+id/toolbar_right"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:text="游戏大厅"-->
-                <!--style="@style/TitleBarTitleText"-->
-                <!--android:layout_gravity="center"-->
-                <!--android:rotation="180"-->
-                <!--/>-->
-
-
-
-        <!--</android.support.v7.widget.Toolbar>-->
-
-
-
-
-
-
-    </LinearLayout>
-
-
 
 
 
