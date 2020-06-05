@@ -61,13 +61,25 @@ public class DownloadAPk {
 
         private static String TAG = "DownloadAPk";
 
+        public interface GameProgressListener{
+
+            public void getProgress(int progress);
+
+            public void endDown();
+        }
+
+        private static GameProgressListener gameProgressListener;
+
+
 
     /**
          * 判断8.0 安装权限
          */
-        public static void downApk(Context context, String url,String localAddress,String iconUrl) {
+        public static void downApk(Context context, String url,String localAddress,String iconUrl,
+                                   GameProgressListener progressListener) {
             mContext = context;
             mIconUrl = iconUrl;
+            gameProgressListener = progressListener;
             if (Build.VERSION.SDK_INT >= 26) {
                 boolean b = context.getPackageManager().canRequestPackageInstalls();
                 if (b) {
@@ -153,15 +165,20 @@ public class DownloadAPk {
                     fos = new FileOutputStream(apkFile);
                     long sum = 0;
                     while ((len = is.read(buf)) != -1) {
+
+
+
                         fos.write(buf, 0, len);
                         sum += len;
                         int progress = (int) (sum * 1.0f / total * 100);
                         Log.e("download","下载进度"+progress);
                         //mView.onDownloading("",progress);
-                        upDataNotify(progress);
+                        //upDataNotify(progress);
+                        gameProgressListener.getProgress(progress);
                     }
                     fos.flush();
-                    finishNotify();
+                    //finishNotify();
+                    gameProgressListener.endDown();
                     LogUtil.e(TAG,"下载路径："+apkFile.getAbsolutePath());
                     LogUtil.e(TAG,"download success");
                     LogUtil.e(TAG,"totalTime="+ (System.currentTimeMillis() - startTime));
@@ -187,7 +204,7 @@ public class DownloadAPk {
 
     private static void upDataNotify(int progress)
     {
-        LinNotify.showProgress(mContext,null,0,
+        LinNotify.showProgress(mContext,mIconUrl,0,
                 "正在下载..."+progress+"%",null,
                 null,PRIORITY_DEFAULT,null,LinNotify.TYPE_PROGRESS,
                 LinNotify.NEW_MESSAGE,progress);
@@ -197,9 +214,17 @@ public class DownloadAPk {
     private static void finishNotify()
     {
 
-        Intent installAppIntent = getInstallAppIntent(APK_UPGRADE);
+        Intent installAppIntent = getInstallAppIntent(mContext,APK_UPGRADE);
         LinNotify.show(mContext,null,"下载完成",null,null,LinNotify.TYPE_PROGRESS,LinNotify.NEW_MESSAGE,null);
         //LinNotify.CannelNotificationChannel(mContext,0);
+        mContext.startActivity(installAppIntent);
+
+    }
+
+
+    public static void InstanllGame(){
+
+        Intent installAppIntent = getInstallAppIntent(mContext,APK_UPGRADE);
         mContext.startActivity(installAppIntent);
 
 
@@ -214,7 +239,8 @@ public class DownloadAPk {
      * 调往系统APK安装界面（适配7.0）
      * @return
      */
-    public static Intent getInstallAppIntent( String filePath) {
+    public static Intent getInstallAppIntent(Context context,String filePath) {
+        mContext  = context;
         //apk文件的本地路径
         File apkfile = new File(filePath);
         if (!apkfile.exists()) {

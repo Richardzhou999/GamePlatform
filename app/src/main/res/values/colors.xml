@@ -10,8 +10,13 @@
     <color name="window_background2">#f1f2f3</color>
     <color name="window_background3">#f5f6f7</color>
     <color name="border">#f1f2f3</color>
+    <color name="game_toolbar">#1A1A1A</color>
     <color name="white">#FFFFFF</color>
     <color name="transparent">#00000000</color>
+    <color name="game_item">#474747</color>
+    <color name="game_number">#21D1F5</color>
+    <color name="out_login">#2E2E2E</color>
+    <color name="out_login_txt">#999999</color>
 
     <color name="tv1">#505050</color>
     <color name="tv2">#787878</color>

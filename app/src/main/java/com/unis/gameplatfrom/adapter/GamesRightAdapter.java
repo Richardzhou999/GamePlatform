@@ -45,7 +45,7 @@ public class GamesRightAdapter extends BaseEmptyViewAdapter<GamesEntity> {
         }
 
 
-        if(entity.isGame()){
+        if(entity.isInstallGame()){
             down.setVisibility(View.VISIBLE);
         }else {
             down.setVisibility(View.INVISIBLE);

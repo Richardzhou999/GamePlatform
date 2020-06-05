@@ -3,6 +3,7 @@ package com.unis.gameplatfrom.ui;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.UserManager;
+import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -33,6 +34,7 @@ import com.unis.gameplatfrom.cache.UserCenter;
 import com.unis.gameplatfrom.model.GamesEntity;
 import com.unis.gameplatfrom.model.LoginResult;
 import com.unis.gameplatfrom.utils.PackageUtil;
+import com.unis.gameplatfrom.utils.udateapk.LinPermission;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -54,6 +56,15 @@ public class LoginActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        if(LinPermission.checkPermission(LoginActivity.this, new int[]{7,8})){
+
+
+
+        }else {
+
+            //首先申请权限
+            LinPermission.requestMultiplePermission(LoginActivity.this,new int[]{7,8});
+        }
 
     }
 
@@ -72,6 +83,8 @@ public class LoginActivity extends BaseActivity {
 
     @Override
     protected void initView(Bundle savedInstanceState) {
+
+
 
         passWordFragment = (PassWordFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_password_login);
         userIDFragment = (UserIDFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_sms_login);
@@ -123,6 +136,23 @@ public class LoginActivity extends BaseActivity {
 
     }
 
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        LinPermission.onRequestPermissionsResult(requestCode, permissions, grantResults, new LinPermission.PermissionsResultListener() {
+            @Override
+            public void onRequestPermissionSuccess(int pos, String permission) {
+
+            }
+
+            @Override
+            public void onRequestPermissionFailure(int pos, String permission) {
+                finish();
+            }
+        });
+    }
 
 
 

@@ -37,10 +37,10 @@
 
 
     <style name="TitleBarTitleText">
-        <item name="android:textSize">18sp</item>
+        <item name="android:textSize">24sp</item>
         <item name="android:lines">1</item>
         <item name="android:maxWidth">200dp</item>
-        <item name="android:textColor">@color/tv1</item>
+        <item name="android:textColor">@color/white</item>
     </style>
 
 

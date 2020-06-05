@@ -77,41 +77,41 @@ public class PassWordFragment extends BaseFragment {
         }
 
 
-        mPassword.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-                if(mAccount.getText().toString().length() != 0){
-
-                    if(charSequence.length() != 0){
-
-                        mLoginBtn.setEnabled(true);
-                        mLoginBtn.setBackgroundResource(R.drawable.button_round_bule_normal);
-
-                    }else {
-
-                        mLoginBtn.setEnabled(false);
-                        mLoginBtn.setBackgroundResource(R.drawable.button_round_bule_down);
-
-                    }
-
-                }else {
-
-                    mLoginBtn.setEnabled(false);
-                    mLoginBtn.setBackgroundResource(R.drawable.button_round_bule_down);
-
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-
-            }
-        });
+//        mPassword.addTextChangedListener(new TextWatcher() {
+//            @Override
+//            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+//            }
+//
+//            @Override
+//            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+//
+//                if(mAccount.getText().toString().length() != 0){
+//
+//                    if(charSequence.length() != 0){
+//
+//                        mLoginBtn.setEnabled(true);
+//                        mLoginBtn.setBackgroundResource(R.drawable.button_round_bule_normal);
+//
+//                    }else {
+//
+//                        mLoginBtn.setEnabled(false);
+//                        mLoginBtn.setBackgroundResource(R.drawable.button_round_bule_down);
+//
+//                    }
+//
+//                }else {
+//
+//                    mLoginBtn.setEnabled(false);
+//                    mLoginBtn.setBackgroundResource(R.drawable.button_round_bule_down);
+//
+//                }
+//            }
+//
+//            @Override
+//            public void afterTextChanged(Editable editable) {
+//
+//            }
+//        });
 
 
         mSaveBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -172,7 +172,6 @@ public class PassWordFragment extends BaseFragment {
                 .passwordLogin(mobile, password,"SerialNo",1, EncryptUtils.encryptMD5ToString(mobile+password+"UNIS").toLowerCase())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-
                 .compose(this.bindUntilEvent(FragmentEvent.DESTROY))
                 .subscribe(new HUDLoadDataSubscriber<LoginResult>(mContext) {
                     @Override
@@ -190,10 +189,14 @@ public class PassWordFragment extends BaseFragment {
                             }
 
 
+                            UserCenter.getInstance().save_uuid(mContext,result.getUuid());
 
-                           // UserCenter.getInstance().setGameAccount(mobile);
+                            //UserCenter.getInstance().setGameAccount(mobile);
+
                             Intent intent = new Intent(mContext,MainActivity.class);
 
+                            intent.putExtra("username",result.getName());
+                            intent.putExtra("userhead",result.getHead());
                             startActivity(intent);
                             UserCenter.getInstance().setToken(result.getUuid());
 

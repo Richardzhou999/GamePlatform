@@ -7,11 +7,16 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.os.Environment;
+import android.text.TextUtils;
 import android.widget.Toast;
 
 import com.unis.gameplatfrom.ui.GamesActivity;
 
+import java.io.File;
 import java.util.List;
+
+import static com.unis.gameplatfrom.utils.udateapk.DownloadAPk.APK_UPGRADE;
 
 public class PackageUtil {
 
@@ -54,14 +59,53 @@ public class PackageUtil {
     public static boolean isAppByPackageID(Context context,String packageName) {
         if (packageName == null || "".equals(packageName))
             return false;
+
         try {
+
             ApplicationInfo info = context.getPackageManager().getApplicationInfo(
                     packageName, PackageManager.GET_UNINSTALLED_PACKAGES);
             return true;
+
         } catch (PackageManager.NameNotFoundException e) {
             return false;
         }
     }
+
+
+
+    /**
+     * 检查应用是否已下载到本地
+     * @param packageFile
+     */
+    public static boolean isAppByLocal(String packageFile) {
+
+        if(!packageFile.contains("apk")){
+            return false;
+        }
+
+        String[] apk_path = packageFile.split("/");
+
+
+        String path = Environment.getExternalStorageDirectory()
+                + "/DownLoad/apk/"+apk_path[apk_path.length-1];
+
+
+        if(TextUtils.isEmpty(path)){
+            return false;
+        }
+
+        File apkFile = new File(path);
+        // 如果文件夹不存在则创建
+        if (!apkFile.exists())
+        {
+            return false;
+        }
+
+        return true;
+
+    }
+
+
 
 
     /**
@@ -132,6 +176,22 @@ public class PackageUtil {
 
 
 
+    //获取当前应用的版本号：
+
+    public static String getVersionName(Context context)
+    {
+        // 获取packagemanager的实例
+        PackageManager packageManager = context.getPackageManager();
+        // getPackageName()是你当前类的包名，0代表是获取版本信息
+        PackageInfo packInfo = null;
+        try {
+            packInfo = packageManager.getPackageInfo(context.getPackageName(),0);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        String version = packInfo.versionName;
+        return version;
+    }
 
 
 

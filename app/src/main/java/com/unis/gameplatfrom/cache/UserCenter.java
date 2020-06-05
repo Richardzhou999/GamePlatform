@@ -1,8 +1,19 @@
 package com.unis.gameplatfrom.cache;
 
+import android.content.Context;
+import android.os.Environment;
+import android.widget.Toast;
+
 import com.blankj.utilcode.util.EmptyUtils;
 import com.blankj.utilcode.util.SPUtils;
 import com.umeng.analytics.MobclickAgent;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import static com.unis.gameplatfrom.utils.udateapk.DownloadAPk.APK_UPGRADE;
 
 
 /**
@@ -22,6 +33,8 @@ public class UserCenter {
     public static final String SP_ACCOUNT = "sp_account";
     public static final String SP_USERID = "sp_userid";
     public static final String SP_PASSWORD = "sp_password";
+    public static final String SP_USERNAME = "sp_username";
+    public static final String SP_USERHEAD = "sp_userhead";
 
     private static UserCenter instance;
 
@@ -38,6 +51,9 @@ public class UserCenter {
     private String game_account;
 
     private String password;
+
+    private String userName;
+    private String userHead;
 
 
 
@@ -119,7 +135,23 @@ public class UserCenter {
     }
 
 
+    public String getUserName() {
+        return userName;
+    }
 
+    public void setUserName(String userName) {
+        this.userName = userName;
+        SPUtils.getInstance(SP_USERNAME).put(SP_USERNAME, userName);
+    }
+
+    public String getUserHead() {
+        return userHead;
+    }
+
+    public void setUserHead(String userHead) {
+        this.userHead = userHead;
+        SPUtils.getInstance(SP_USERHEAD).put(SP_USERHEAD, userHead);
+    }
 
     public String getPassword() {
         return password;
@@ -151,8 +183,49 @@ public class UserCenter {
 
 
 
+    public void save_uuid(Context context, String uuid){
 
-    /**
+        String filePath = null;
+        FileOutputStream outStream = null;
+        boolean hasSDCard =Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
+
+        if (hasSDCard) {
+
+            filePath = Environment.getExternalStorageDirectory() + "/UNIS_GameData/gameUid.txt";
+
+        } else {
+
+            filePath = Environment.getDownloadCacheDirectory() + "/UNIS_GameData/gameUid.txt";
+        }
+
+        try {
+
+            File uidFile = new File(filePath);
+            outStream = new FileOutputStream(uidFile);
+
+            outStream.write(uuid.getBytes());
+            outStream.flush();
+
+            } catch (Exception e) {
+
+            e.printStackTrace();
+
+        }finally {
+
+            try {
+                if (outStream != null)
+                    outStream.close();
+            } catch (IOException e) {
+            }
+        }
+
+
+
+
+    }
+
+
+   /**
      * 是否登录
      *
      * @return

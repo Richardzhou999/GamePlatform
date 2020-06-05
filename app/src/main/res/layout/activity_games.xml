@@ -5,41 +5,47 @@
     android:id="@+id/activity_games"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/window_background2"
+    android:background="@drawable/bg_login"
     android:orientation="vertical"
     tools:context="com.unis.gameplatfrom.ui.GamesActivity">
 
 
-        <android.support.v7.widget.Toolbar
+        <LinearLayout
+            android:id="@+id/layout_game"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/white">
+            android:background="@color/game_toolbar"
+            android:layout_marginBottom="@dimen/dp_10"
+            android:alpha="1">
 
+            <ImageView
+                android:id="@+id/back"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/game_back"/>
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"/>
 
             <TextView
                 android:id="@+id/toolbar_left"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="游戏大厅"
+                android:text="游戏列表"
                 style="@style/TitleBarTitleText"
-                android:layout_gravity="center"
-                />
+                android:layout_gravity="center_vertical"
+                 />
 
-
-            <TextView
-                android:id="@+id/login_out"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="退出"
-                android:layout_marginRight="@dimen/dp_10"
-                android:layout_gravity="right"/>
-
-        </android.support.v7.widget.Toolbar>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"/>
 
 
 
-
+        </LinearLayout>
 
 
             <LinearLayout
@@ -47,7 +53,7 @@
                 android:layout_height="match_parent"
                 android:orientation="vertical"
                 android:layout_weight="1"
-                android:background="@color/white">
+                android:background="@color/transparent">
 
 
                 <com.scwang.smartrefresh.layout.SmartRefreshLayout
@@ -66,48 +72,7 @@
             </LinearLayout>
 
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:background="@color/white">
 
-
-                <ImageView
-                    android:id="@+id/back_page"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_left"
-                    android:paddingLeft="@dimen/dp_10"
-                    android:paddingRight="@dimen/dp_10"
-                    android:paddingTop="20dp"
-                    android:paddingBottom="20dp"
-                    android:visibility="invisible"/>
-
-                <TextView
-                    android:id="@+id/txt_now_page"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="当前：1 页 "/>
-
-                <TextView
-                    android:id="@+id/txt_count_page"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="   共 1 页"/>
-
-                <ImageView
-                    android:id="@+id/to_page"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_right"
-                    android:paddingLeft="@dimen/dp_10"
-                    android:paddingRight="@dimen/dp_10"
-                    android:paddingTop="20dp"
-                    android:paddingBottom="20dp"
-                    android:visibility="invisible"/>
-
-            </LinearLayout>
 
 
 

@@ -1,7 +1,12 @@
 package com.unis.gameplatfrom.adapter;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.chad.library.adapter.base.BaseViewHolder;
@@ -12,14 +17,50 @@ import java.util.List;
 import com.unis.gameplatfrom.R;
 import com.unis.gameplatfrom.manager.GlideManager;
 import com.unis.gameplatfrom.model.GamesEntity;
+import com.unis.gameplatfrom.ui.GamesActivity;
 
 
 public class GamesAdapter extends BaseEmptyViewAdapter<GamesEntity> {
 
-
+    private int number = 1;
+    private List<GamesEntity> list;
 
     public GamesAdapter(Context mContext, List<GamesEntity> list) {
         super(mContext,true,R.layout.item_games, list);
+        this.list = list;
+    }
+
+
+    @Override
+    public void onBindViewHolder(@NonNull BaseViewHolder holder, int position, @NonNull List<Object> payloads) {
+
+
+        Log.e("xxxxx","xxxxxx"+payloads.size());
+        if(payloads.isEmpty()){
+            super.onBindViewHolder(holder, position, payloads);
+            return;
+        }
+
+//        int number = (int) payloads.get(0);
+//
+//            if(position == number){
+//
+//
+//
+//        }
+
+//        GamesEntity gamesEntity = list.get(position);
+//
+//        ProgressBar progressBar = holder.getView(R.id.item_progress);
+//        progressBar.setProgress(gamesEntity.getProgress());
+
+        //TextView
+
+
+
+
+
+
     }
 
     @Override
@@ -53,6 +94,10 @@ public class GamesAdapter extends BaseEmptyViewAdapter<GamesEntity> {
 //        }
 
 
+        RelativeLayout relativeLayout = holder.getView(R.id.game_item_layout);
+
+        relativeLayout.getBackground().setAlpha(50);
+
         GlideManager.loadImg(entity.getIcon(), holder.getView(R.id.item_games_icon));
 
         holder.setText(R.id.item_games_name, "游戏名："+entity.getName());
@@ -61,6 +106,9 @@ public class GamesAdapter extends BaseEmptyViewAdapter<GamesEntity> {
         //holder.setText(R.id.item_games_version, "版本："+entity.getV());
 
         TextView down = holder.getView(R.id.item_games_down);
+        TextView install = holder.getView(R.id.item_games_install);
+
+        holder.setText(R.id.game_number,String.valueOf(holder.getAdapterPosition()+1));
 
 
         if(entity.isNewGame()){
@@ -75,14 +123,37 @@ public class GamesAdapter extends BaseEmptyViewAdapter<GamesEntity> {
         }
 
 
-        if(entity.isGame()){
-            down.setVisibility(View.VISIBLE);
+
+        if(entity.isDownGame()){
+
+            holder.setVisible(R.id.lin_progress,true);
+
         }else {
-            down.setVisibility(View.INVISIBLE);
+
+            holder.setVisible(R.id.lin_progress,false);
         }
 
 
+        holder.setText(R.id.item_progress_number,String.valueOf(entity.getProgress())+"%");
+
+        ProgressBar progressBar = holder.getView(R.id.item_progress);
+        progressBar.setProgress(entity.getProgress());
 
 
+        if(entity.isInstallGame() && entity.isLocal()){
+            install.setVisibility(View.VISIBLE);
+            down.setVisibility(View.INVISIBLE);
+
+        }else if(!entity.isInstallGame() && entity.isLocal()){
+            down.setVisibility(View.VISIBLE);
+            install.setVisibility(View.INVISIBLE);
+        }else {
+            down.setVisibility(View.INVISIBLE);
+            install.setVisibility(View.INVISIBLE);
+        }
     }
+
+
+
+
 }

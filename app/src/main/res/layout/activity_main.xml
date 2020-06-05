@@ -6,539 +6,189 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.MainActivity"
-    android:background="@drawable/main_bg"
-    android:orientation="vertical">
 
-    <android.support.v7.widget.Toolbar
+    android:orientation="horizontal">
+
+    
+    <RelativeLayout
+        android:id="@+id/left_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone">
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_weight="3"
+        android:background="@color/game_toolbar">
+        
 
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/logo"
-            android:layout_marginTop="@dimen/dp_10"/>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="30dp">
+            <ImageView
+                android:id="@+id/user_image"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:src="@drawable/ic_right"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="51dp"
+                android:layout_marginBottom="16dp"
+                />
 
 
             <TextView
+                android:id="@+id/user_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/dp_10"
-                android:text="用户名："
+                android:src="@drawable/ic_right"
+                android:text="Chaozi"
                 android:textColor="@color/white"
+                android:layout_below="@id/user_image"
+                android:layout_marginBottom="20dp"
+                android:layout_centerHorizontal="true"
                 android:textSize="20sp"/>
+
+
 
             <TextView
-                android:id="@+id/user_account"
+                android:id="@+id/txt_month_week"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/dp_10"
-                android:text="11111"
-                android:textColor="@color/white"
-                android:textSize="20sp"/>
+                android:text="5yue"
+                android:layout_below="@id/user_name"
+                android:textColor="@color/game_number"
+                android:layout_alignLeft="@id/txt_now_time"
+                android:layout_marginTop="20dp"
+                android:textSize="17sp"/>
 
 
-        </LinearLayout>
+        <TextView
+            android:id="@+id/txt_now_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/txt_month_week"
+            android:layout_centerHorizontal="true"
+            android:text="12:20"
+            android:textColor="@color/game_number"
+            android:textSize="65sp" />
 
 
-    </android.support.v7.widget.Toolbar>
+
+
+        <TextView
+            android:id="@+id/login_out"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_right"
+            android:text="退出登录"
+            android:textColor="@color/out_login_txt"
+            android:background="@drawable/out_login"
+            android:paddingTop="@dimen/dp_10"
+            android:paddingBottom="@dimen/dp_10"
+            android:paddingLeft="25dp"
+            android:paddingRight="25dp"
+            android:layout_above="@id/txt_version"
+            android:layout_marginBottom="27dp"
+            android:layout_centerHorizontal="true"
+            android:textSize="20sp"/>
+
+
+        <TextView
+            android:id="@+id/txt_version"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="版本号： 1.0.1"
+            android:textColor="@color/out_login_txt"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="20dp"
+            android:textSize="18sp"/>
+        
+        
+        
+        
+        
+    </RelativeLayout>
 
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="horizontal">
-
+        android:orientation="vertical"
+        android:layout_weight="1">
 
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="2"
-            android:orientation="vertical"/>
+            android:layout_height="wrap_content">
 
+            <ImageView
+                android:id="@+id/push_image"
+                android:layout_width="253dp"
+                android:layout_height="253dp"
 
+                android:src="@mipmap/tuiguang_1"
+                android:layout_marginBottom="15dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"/>
 
-
-
-
-        <com.unis.gameplatfrom.ui.widget.SmoothHorizontalScrollView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:visibility="gone">
-
-            <com.unis.gameplatfrom.ui.widget.DrawingOrderRelativeLayout
-                android:id="@+id/draw_order_layout"
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_gravity="left|center"
-                android:clipToPadding="false"
-                android:focusable="false"
-                android:gravity="center"
-                android:paddingEnd="40dp"
-                android:paddingStart="40dp" >
+                android:layout_height="wrap_content"
+                >
 
-                <!--<com.unis.gameplatfrom.ui.widget.MetroItemFrameLayout-->
-                    <!--android:id="@+id/view"-->
-                    <!--android:layout_width="270dp"-->
-                    <!--android:layout_height="406dp"-->
-                    <!--android:layout_margin="5dp"-->
-                    <!--android:focusable="true"-->
-                    <!--android:focusableInTouchMode="true"-->
-                    <!--app:radius="4dp" >-->
+                <VideoView
+                    android:id="@+id/movie_image"
+                    android:layout_width="match_parent"
+                    android:layout_height="253dp"
+                    android:src="@drawable/icon_movie"
+                    />
 
-                    <!--<ImageView-->
-                        <!--android:layout_width="match_parent"-->
-                        <!--android:layout_height="match_parent"-->
-                        <!--android:scaleType="centerCrop"-->
-                        <!--android:src="@drawable/ic_post_1" />-->
+                <ImageView android:id="@+id/iv_first_frame"
+                    android:layout_width="match_parent"
+                    android:layout_height="253dp"
+                    android:scaleType="fitXY"
+                    />
 
-                    <!--<com.unis.gameplatfrom.ui.widget.CornerVew-->
-                        <!--android:layout_width="wrap_content"-->
-                        <!--android:layout_height="wrap_content"-->
-                        <!--android:layout_gravity="left"-->
-                        <!--android:tag="top"-->
-                        <!--cv:cv_background_color="#5EB335"-->
-                        <!--cv:cv_fill_triangle="true"-->
-                        <!--cv:cv_gravity="TOP_LEFT"-->
-                        <!--cv:cv_text="VIP"-->
-                        <!--cv:cv_text_size="15sp" />-->
+                <ImageView
+                    android:id="@+id/movie_play"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/play"
+                    android:layout_centerInParent="true"/>
 
-                    <!--<TextView-->
-                        <!--android:layout_width="match_parent"-->
-                        <!--android:layout_height="60dp"-->
-                        <!--android:layout_gravity="bottom"-->
-                        <!--android:background="@drawable/border_down_shape"-->
-                        <!--android:gravity="center|left"-->
-                        <!--android:padding="15px"-->
-                        <!--android:text="魔兽：最强游戏IP电影"-->
-                        <!--android:textColor="@color/white"-->
-                        <!--android:textSize="18dp" />-->
-                <!--</com.unis.gameplatfrom.ui.widget.MetroItemFrameLayout>-->
-
-                <!--<com.unis.gameplatfrom.ui.widget.MetroItemFrameLayout-->
-                    <!--android:id="@+id/view4"-->
-                    <!--android:layout_width="427dp"-->
-                    <!--android:layout_height="200dp"-->
-                    <!--android:layout_alignTop="@+id/view"-->
-                    <!--android:layout_marginBottom="5dp"-->
-                    <!--android:layout_marginLeft="5dp"-->
-                    <!--android:layout_marginRight="5dp"-->
-                    <!--android:layout_toEndOf="@+id/view"-->
-                    <!--android:background="@drawable/border_shape"-->
-                    <!--android:focusable="true"-->
-                    <!--android:focusableInTouchMode="true"-->
-
-                    <!--app:radius="4dp" >-->
-
-                    <!--<ImageView-->
-                        <!--android:layout_width="match_parent"-->
-                        <!--android:layout_height="match_parent"-->
-                        <!--android:scaleType="centerCrop"-->
-                        <!--android:src="@drawable/ic_post_2"/>-->
-
-                    <!--<com.unis.gameplatfrom.ui.widget.CornerVew-->
-                        <!--android:layout_width="wrap_content"-->
-                        <!--android:layout_height="wrap_content"-->
-                        <!--android:layout_gravity="left"-->
-                        <!--android:paddingLeft="5dp"-->
-                        <!--android:paddingRight="5dp"-->
-                        <!--cv:cv_background_color="#5EB335"-->
-                        <!--cv:cv_fill_triangle="true"-->
-                        <!--cv:cv_gravity="TOP_LEFT"-->
-                        <!--cv:cv_text="VIP"-->
-                        <!--cv:cv_text_size="15sp" />-->
-
-                    <!--<TextView-->
-                        <!--android:layout_width="match_parent"-->
-                        <!--android:layout_height="60dp"-->
-                        <!--android:layout_gravity="bottom"-->
-                        <!--android:background="@drawable/border_down_shape"-->
-                        <!--android:gravity="center|left"-->
-                        <!--android:padding="15px"-->
-                        <!--android:text="大海鱼棠：唯美惊艳中国风漫画"-->
-                        <!--android:textColor="@color/white"-->
-                        <!--android:textSize="18dp" />-->
-                <!--</com.unis.gameplatfrom.ui.widget.MetroItemFrameLayout>-->
-
-                <!--<com.unis.gameplatfrom.ui.widget.MetroItemFrameLayout-->
-                    <!--android:id="@+id/view2"-->
-                    <!--android:layout_width="208dp"-->
-                    <!--android:layout_height="200dp"-->
-                    <!--android:layout_alignBaseline="@+id/view"-->
-                    <!--android:layout_alignBottom="@+id/view"-->
-                    <!--android:layout_below="@+id/view4"-->
-                    <!--android:layout_gravity="bottom"-->
-                    <!--android:layout_marginLeft="5dp"-->
-                    <!--android:layout_marginRight="5dp"-->
-                    <!--android:layout_marginTop="5dp"-->
-                    <!--android:layout_toEndOf="@+id/view3"-->
-                    <!--android:background="@drawable/border_shape"-->
-                    <!--android:focusable="true"-->
-                    <!--android:focusableInTouchMode="true"-->
-                    <!--app:radius="4dp" >-->
-
-                    <!--<ImageView-->
-                        <!--android:layout_width="match_parent"-->
-                        <!--android:layout_height="match_parent"-->
-                        <!--android:layout_gravity="left|center_vertical"-->
-                        <!--android:scaleType="fitXY"-->
-                        <!--android:src="@drawable/ic_post_3" />-->
-
-
-                    <!--<com.unis.gameplatfrom.ui.widget.CornerVew-->
-                        <!--android:layout_width="wrap_content"-->
-                        <!--android:layout_height="wrap_content"-->
-                        <!--android:layout_gravity="left"-->
-                        <!--android:paddingLeft="5dp"-->
-                        <!--android:paddingRight="5dp"-->
-                        <!--cv:cv_background_color="#5EB335"-->
-                        <!--cv:cv_fill_triangle="true"-->
-                        <!--cv:cv_gravity="TOP_LEFT"-->
-                        <!--cv:cv_text="VIP"-->
-                        <!--cv:cv_text_size="15sp" />-->
-
-                    <!--<TextView-->
-                        <!--android:layout_width="match_parent"-->
-                        <!--android:layout_height="60dp"-->
-                        <!--android:layout_gravity="bottom"-->
-                        <!--android:background="@drawable/border_down_shape"-->
-                        <!--android:gravity="center|left"-->
-                        <!--android:padding="15px"-->
-                        <!--android:text="爱丽丝梦游仙境2"-->
-                        <!--android:textColor="@color/white"-->
-                        <!--android:textSize="18dp" />-->
-                <!--</com.unis.gameplatfrom.ui.widget.MetroItemFrameLayout>-->
-
-                <!--<com.unis.gameplatfrom.ui.widget.MetroItemFrameLayout-->
-                    <!--android:id="@+id/view3"-->
-                    <!--android:layout_width="208dp"-->
-                    <!--android:layout_height="200dp"-->
-                    <!--android:layout_alignBottom="@+id/view"-->
-                    <!--android:layout_below="@+id/view4"-->
-                    <!--android:layout_marginLeft="5dp"-->
-                    <!--android:layout_marginRight="5dp"-->
-                    <!--android:layout_marginTop="5dp"-->
-                    <!--android:layout_toEndOf="@+id/view"-->
-                    <!--android:background="@drawable/border_shape"-->
-                    <!--android:focusable="true"-->
-                    <!--android:focusableInTouchMode="true"-->
-                    <!--app:radius="4dp" >-->
-
-                    <!--<ImageView-->
-                        <!--android:layout_width="match_parent"-->
-                        <!--android:layout_height="match_parent"-->
-                        <!--android:layout_gravity="left|center_vertical"-->
-                        <!--android:scaleType="centerCrop"-->
-                        <!--android:src="@drawable/ic_post_4" />-->
-
-                    <!--<com.unis.gameplatfrom.ui.widget.CornerVew-->
-                        <!--android:layout_width="wrap_content"-->
-                        <!--android:layout_height="wrap_content"-->
-                        <!--android:layout_gravity="left"-->
-                        <!--android:paddingLeft="5dp"-->
-                        <!--android:paddingRight="5dp"-->
-                        <!--cv:cv_background_color="#5EB335"-->
-                        <!--cv:cv_fill_triangle="true"-->
-                        <!--cv:cv_gravity="TOP_LEFT"-->
-                        <!--cv:cv_text="VIP"-->
-                        <!--cv:cv_text_size="15sp" />-->
-
-                    <!--<TextView-->
-                        <!--android:layout_width="match_parent"-->
-                        <!--android:layout_height="60dp"-->
-                        <!--android:layout_gravity="bottom"-->
-                        <!--android:background="@drawable/border_down_shape"-->
-                        <!--android:gravity="center|left"-->
-                        <!--android:padding="15px"-->
-                        <!--android:text="寒战2"-->
-                        <!--android:textColor="@color/white"-->
-                        <!--android:textSize="18dp" />-->
-                <!--</com.unis.gameplatfrom.ui.widget.MetroItemFrameLayout>-->
-
-                <!--<com.unis.gameplatfrom.ui.widget.MetroItemFrameLayout-->
-                    <!--android:id="@+id/view5"-->
-                    <!--android:layout_width="208dp"-->
-                    <!--android:layout_height="200dp"-->
-                    <!--android:layout_alignBaseline="@+id/view"-->
-                    <!--android:layout_gravity="top"-->
-                    <!--android:layout_marginLeft="5dp"-->
-                    <!--android:layout_marginRight="5dp"-->
-                    <!--android:layout_marginTop="5dp"-->
-                    <!--android:layout_toEndOf="@+id/view4"-->
-                    <!--android:layout_toRightOf="@+id/view4"-->
-                    <!--android:layout_alignTop="@+id/view"-->
-                    <!--android:background="@drawable/border_shape"-->
-                    <!--android:focusable="true"-->
-                    <!--android:focusableInTouchMode="true"-->
-                    <!--app:radius="4dp" >-->
-
-                    <!--<ImageView-->
-                        <!--android:layout_width="match_parent"-->
-                        <!--android:layout_height="match_parent"-->
-                        <!--android:layout_gravity="left|center_vertical"-->
-                        <!--android:scaleType="fitXY"-->
-                        <!--android:src="@drawable/ic_post_5" />-->
-
-                    <!--<com.unis.gameplatfrom.ui.widget.CornerVew-->
-                        <!--android:layout_width="wrap_content"-->
-                        <!--android:layout_height="wrap_content"-->
-                        <!--android:layout_gravity="left"-->
-                        <!--android:paddingLeft="5dp"-->
-                        <!--android:paddingRight="5dp"-->
-                        <!--cv:cv_background_color="#5EB335"-->
-                        <!--cv:cv_fill_triangle="true"-->
-                        <!--cv:cv_gravity="TOP_LEFT"-->
-                        <!--cv:cv_text="VIP"-->
-                        <!--cv:cv_text_size="15sp" />-->
-
-                    <!--<TextView-->
-                        <!--android:layout_width="match_parent"-->
-                        <!--android:layout_height="60dp"-->
-                        <!--android:layout_gravity="bottom"-->
-                        <!--android:background="@drawable/border_down_shape"-->
-                        <!--android:gravity="center|left"-->
-                        <!--android:padding="15px"-->
-                        <!--android:text="忍着神龟2：破影..."-->
-                        <!--android:textColor="@color/white"-->
-                        <!--android:textSize="18dp" />-->
-
-                <!--</com.unis.gameplatfrom.ui.widget.MetroItemFrameLayout>-->
-
-                <!--<com.unis.gameplatfrom.ui.widget.MetroItemFrameLayout-->
-                    <!--android:id="@+id/view6"-->
-                    <!--android:layout_width="208dp"-->
-                    <!--android:layout_height="200dp"-->
-                    <!--android:layout_alignBottom="@+id/view"-->
-                    <!--android:layout_below="@+id/view5"-->
-                    <!--android:layout_alignLeft="@+id/view5"-->
-                    <!--android:layout_marginLeft="5dp"-->
-                    <!--android:layout_marginRight="5dp"-->
-                    <!--android:layout_marginTop="5dp"-->
-                    <!--android:layout_toEndOf="@+id/view5"-->
-                    <!--android:background="@drawable/border_shape"-->
-                    <!--android:focusable="true"-->
-                    <!--android:focusableInTouchMode="true"-->
-                    <!--app:radius="4dp" >-->
-
-                    <!--<ImageView-->
-                        <!--android:layout_width="match_parent"-->
-                        <!--android:layout_height="match_parent"-->
-                        <!--android:layout_gravity="left|center_vertical"-->
-                        <!--android:scaleType="centerCrop"-->
-                        <!--android:src="@drawable/ic_post_6" />-->
-
-                    <!--<com.unis.gameplatfrom.ui.widget.CornerVew-->
-                        <!--android:layout_width="wrap_content"-->
-                        <!--android:layout_height="wrap_content"-->
-                        <!--android:layout_gravity="left"-->
-                        <!--android:paddingLeft="5dp"-->
-                        <!--android:paddingRight="5dp"-->
-                        <!--cv:cv_background_color="#5EB335"-->
-                        <!--cv:cv_fill_triangle="true"-->
-                        <!--cv:cv_gravity="TOP_LEFT"-->
-                        <!--cv:cv_text="VIP"-->
-                        <!--cv:cv_text_size="15sp" />-->
-
-                    <!--<TextView-->
-                        <!--android:layout_width="match_parent"-->
-                        <!--android:layout_height="60dp"-->
-                        <!--android:layout_gravity="bottom"-->
-                        <!--android:background="@drawable/border_down_shape"-->
-                        <!--android:gravity="center|left"-->
-                        <!--android:padding="15px"-->
-                        <!--android:text="使徒行者"-->
-                        <!--android:textColor="@color/white"-->
-                        <!--android:textSize="18dp" />-->
-
-                <!--</com.unis.gameplatfrom.ui.widget.MetroItemFrameLayout>-->
-
-                <!--<com.unis.gameplatfrom.ui.widget.MetroItemFrameLayout-->
-                    <!--android:id="@+id/view12"-->
-                    <!--android:layout_width="208dp"-->
-                    <!--android:layout_height="200dp"-->
-                    <!--android:layout_alignBaseline="@+id/view"-->
-                    <!--android:layout_gravity="top"-->
-                    <!--android:layout_marginLeft="5dp"-->
-                    <!--android:layout_marginRight="5dp"-->
-                    <!--android:layout_marginTop="5dp"-->
-                    <!--android:layout_toEndOf="@+id/view5"-->
-                    <!--android:layout_toRightOf="@+id/view5"-->
-                    <!--android:layout_alignTop="@+id/view"-->
-                    <!--android:background="@drawable/border_shape"-->
-                    <!--android:focusable="true"-->
-                    <!--android:focusableInTouchMode="true"-->
-                    <!--app:radius="4dp" >-->
-
-                    <!--<ImageView-->
-                        <!--android:layout_width="match_parent"-->
-                        <!--android:layout_height="match_parent"-->
-                        <!--android:layout_gravity="left|center_vertical"-->
-                        <!--android:scaleType="fitXY"-->
-                        <!--android:src="@drawable/ic_post_7" />-->
-
-                    <!--<com.unis.gameplatfrom.ui.widget.CornerVew-->
-                        <!--android:layout_width="wrap_content"-->
-                        <!--android:layout_height="wrap_content"-->
-                        <!--android:layout_gravity="left"-->
-                        <!--android:paddingLeft="5dp"-->
-                        <!--android:paddingRight="5dp"-->
-                        <!--cv:cv_background_color="#5EB335"-->
-                        <!--cv:cv_fill_triangle="true"-->
-                        <!--cv:cv_gravity="TOP_LEFT"-->
-                        <!--cv:cv_text="VIP"-->
-                        <!--cv:cv_text_size="15sp" />-->
-
-                    <!--<TextView-->
-                        <!--android:layout_width="match_parent"-->
-                        <!--android:layout_height="60dp"-->
-                        <!--android:layout_gravity="bottom"-->
-                        <!--android:background="@drawable/border_down_shape"-->
-                        <!--android:gravity="center|left"-->
-                        <!--android:padding="15px"-->
-                        <!--android:text="W两个世界"-->
-                        <!--android:textColor="@color/white"-->
-                        <!--android:textSize="18dp" />-->
-
-                <!--</com.unis.gameplatfrom.ui.widget.MetroItemFrameLayout>-->
-
-                <!--<com.unis.gameplatfrom.ui.widget.MetroItemFrameLayout-->
-                    <!--android:id="@+id/view13"-->
-                    <!--android:layout_width="208dp"-->
-                    <!--android:layout_height="200dp"-->
-                    <!--android:layout_alignBottom="@+id/view"-->
-                    <!--android:layout_below="@+id/view12"-->
-                    <!--android:layout_alignLeft="@+id/view12"-->
-                    <!--android:layout_marginLeft="5dp"-->
-                    <!--android:layout_marginRight="5dp"-->
-                    <!--android:layout_marginTop="5dp"-->
-                    <!--android:layout_toEndOf="@+id/view12"-->
-                    <!--android:background="@drawable/border_shape"-->
-                    <!--android:focusable="true"-->
-                    <!--android:focusableInTouchMode="true"-->
-                    <!--app:radius="4dp" >-->
-
-                    <!--<ImageView-->
-                        <!--android:layout_width="match_parent"-->
-                        <!--android:layout_height="match_parent"-->
-                        <!--android:layout_gravity="left|center_vertical"-->
-                        <!--android:scaleType="centerCrop"-->
-                        <!--android:src="@drawable/ic_post_8" />-->
-
-                    <!--<com.unis.gameplatfrom.ui.widget.CornerVew-->
-                        <!--android:layout_width="wrap_content"-->
-                        <!--android:layout_height="wrap_content"-->
-                        <!--android:layout_gravity="left"-->
-                        <!--android:paddingLeft="5dp"-->
-                        <!--android:paddingRight="5dp"-->
-                        <!--cv:cv_background_color="#5EB335"-->
-                        <!--cv:cv_fill_triangle="true"-->
-                        <!--cv:cv_gravity="TOP_LEFT"-->
-                        <!--cv:cv_text="VIP"-->
-                        <!--cv:cv_text_size="15sp" />-->
-
-                    <!--<TextView-->
-                        <!--android:layout_width="match_parent"-->
-                        <!--android:layout_height="60dp"-->
-                        <!--android:layout_gravity="bottom"-->
-                        <!--android:background="@drawable/border_down_shape"-->
-                        <!--android:gravity="center|left"-->
-                        <!--android:padding="15px"-->
-                        <!--android:text="权利的游戏第六季..."-->
-                        <!--android:textColor="@color/white"-->
-                        <!--android:textSize="18dp" />-->
-
-                <!--</com.unis.gameplatfrom.ui.widget.MetroItemFrameLayout>-->
-
-
-                <com.unis.gameplatfrom.ui.widget.MetroItemFrameLayout
-                    android:id="@+id/game_view"
-                    android:layout_width="208dp"
-                    android:layout_height="200dp"
-                    android:layout_gravity="top"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginTop="5dp"
-                    android:layout_marginRight="30dp"
-                    android:background="@drawable/border_shape"
-                    android:focusable="true"
-                    android:focusableInTouchMode="true"
-                    app:radius="4dp">
-
-                    <ImageView
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_gravity="left|center_vertical"
-                        android:scaleType="fitXY"
-                        android:src="@drawable/ic_document" />
-
-                </com.unis.gameplatfrom.ui.widget.MetroItemFrameLayout>
-
-                <com.unis.gameplatfrom.ui.widget.MetroItemFrameLayout
-                    android:id="@+id/setting"
-                    android:layout_width="208dp"
-                    android:layout_height="200dp"
-                    android:layout_marginLeft="30dp"
-                    android:layout_marginRight="5dp"
-                    android:layout_marginTop="5dp"
-                    android:layout_toRightOf="@id/game_view"
-                    android:background="@drawable/border_shape"
-                    android:focusable="true"
-                    android:focusableInTouchMode="true"
-                    app:radius="4dp" >
-
-                    <ImageView
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_gravity="left|center_vertical"
-                        android:scaleType="centerCrop"
-                        android:src="@drawable/ic_variety" />
-
-                </com.unis.gameplatfrom.ui.widget.MetroItemFrameLayout>
-
-            </com.unis.gameplatfrom.ui.widget.DrawingOrderRelativeLayout>
-
-        </com.unis.gameplatfrom.ui.widget.SmoothHorizontalScrollView>
-
-
-
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:layout_weight="2">
-
-
-
-
+            </RelativeLayout>
 
 
         </LinearLayout>
 
 
 
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/push_image"
+            android:background="@drawable/bg_login"
+            android:layout_marginLeft="15dp">
+
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/rv_main"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@id/push_image"/>
+
+            <ImageView
+                android:id="@+id/into_game"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/all_game"
+                android:layout_gravity="right"
+                />
+
+
+
+        </FrameLayout>
+
+
+
+
     </LinearLayout>
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

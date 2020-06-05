@@ -11,12 +11,15 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -28,6 +31,7 @@ import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.scwang.smartrefresh.layout.SmartRefreshLayout;
 import com.scwang.smartrefresh.layout.api.RefreshLayout;
 import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
+import com.scwang.smartrefresh.layout.listener.OnRefreshLoadmoreListener;
 import com.trello.rxlifecycle2.android.ActivityEvent;
 
 
@@ -54,6 +58,7 @@ import com.unis.gameplatfrom.model.GamesEntity;
 import com.unis.gameplatfrom.model.LoginResult;
 import com.unis.gameplatfrom.ui.view.CustomText;
 import com.unis.gameplatfrom.utils.DialogHelper;
+import com.unis.gameplatfrom.utils.PackageUtil;
 import com.unis.gameplatfrom.utils.udateapk.DownLoadApkService;
 import com.unis.gameplatfrom.utils.udateapk.DownloadAPk;
 import com.unis.gameplatfrom.utils.udateapk.LinNotify;
@@ -69,6 +74,8 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
+import static com.unis.gameplatfrom.utils.udateapk.DownloadAPk.APK_UPGRADE;
+
 
 /**
  * Created by yong
@@ -78,8 +85,8 @@ import io.reactivex.schedulers.Schedulers;
 
 public class GamesActivity extends BaseActivity {
 
-//    @BindView(R.id.rlayout_login)
-//    RelativeLayout rlayoutLogin;
+    @BindView(R.id.layout_game)
+    LinearLayout gameLayout;
 
 
     @BindView(R.id.toolbar_left)
@@ -93,17 +100,7 @@ public class GamesActivity extends BaseActivity {
     SmartRefreshLayout mRefreshLayout;
 
 
-    @BindView(R.id.txt_now_page)
-    TextView nowPageText;
-    @BindView(R.id.txt_count_page)
-    TextView countpageText;
-
-    @BindView(R.id.back_page)
-    ImageView backPage;
-
-    @BindView(R.id.to_page)
-    ImageView toPage;
-
+    public static int mProgress;
 
     private GamesAdapter adapter;
     private GamesRightAdapter rightAdapter;
@@ -131,29 +128,58 @@ public class GamesActivity extends BaseActivity {
 
     private int page = 1;
 
+    public boolean cancle;
+
+    private View FooterView;
+
+
+    private Handler mHandler = new Handler(){
+
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+
+
+
+
+        }
+    };
+
+
+    private List<Integer> progressList = new ArrayList<>();
+
+
 
     @Override
     protected int getLayout() {
         return R.layout.activity_games;
     }
 
+
+
+
+
     @Override
     protected void initData() {
 
 
-
+        FooterView = getLayoutInflater().inflate(R.layout.item_footer,null);
 
         //左边
         games = new ArrayList<>();
         adapter = new GamesAdapter(mContext,games);
         gamesRv.setLayoutManager(new LinearLayoutManager(this));
+        adapter.addFooterView(FooterView);
+
         gamesRv.setAdapter(adapter);
 
         adapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
                 LitePal.getDatabase(); //创建数据表
-                GamesEntity  entity = (GamesEntity) adapter.getItem(position);
+
+
+                GamesEntity entity = (GamesEntity) adapter.getItem(position);
 
                 if (entity.getV() != 0) {
 
@@ -170,7 +196,7 @@ public class GamesActivity extends BaseActivity {
                              * 情况2：记录不在，游戏不在
                              * 情况3：两者都在
                              */
-                            GamesEntity entity1 = LitePal.where("id="+entity.getId()+" and account="+"'"+game_account+"'").findFirst(GamesEntity.class);
+                            GamesEntity entity1 = LitePal.where("id="+entity.getId()).findFirst(GamesEntity.class);
                             if(entity1 != null){
 
                                 //若游戏被删除，需清除游戏记录防止数据出错
@@ -206,12 +232,15 @@ public class GamesActivity extends BaseActivity {
 
 
                                         entity1.setV(entity.getV());
+
                                         entity1.save();
-                                        downApk(entity.getP(),entity.getIcon());
+                                        downApk(entity.getName(),entity.getP(),entity.getIcon(),
+                                                entity,position);
 
 
                                     }else {
 
+                                        entity.setDownGame(false);
                                         startAppByPackageID(entity.getPackname());
 
                                     }
@@ -220,15 +249,16 @@ public class GamesActivity extends BaseActivity {
 
                                 }else {
 
-                                    entity1.setV(entity.getV());
-                                    entity1.setId(entity.getId());
-                                    entity1.setName(entity.getName());
-                                    entity1.setP(entity.getP());
-                                    entity1.setPackname(entity.getPackname());
-                                    entity1.setIcon(entity.getIcon());
-                                    entity1.save();
-                                    downApk(entity.getP(),entity.getIcon());
-
+                                        entity1.setV(entity.getV());
+                                        entity1.setId(entity.getId());
+                                        entity1.setName(entity.getName());
+                                        entity1.setP(entity.getP());
+                                        entity1.setPackname(entity.getPackname());
+                                        entity1.setIcon(entity.getIcon());
+                                        entity1.save();
+                                        //entity.setDownGame(true);
+                                        downApk(entity.getName(), entity.getP(), entity.getIcon(),
+                                                entity,position);
 
 
 //                                    DialogHelper.showAlertDialog(mContext,"确定要下载吗", "确定", "取消", new DialogInterface.OnClickListener() {
@@ -248,6 +278,7 @@ public class GamesActivity extends BaseActivity {
 //                                        }
 //                                    });
 
+
                                 }
 
 
@@ -258,6 +289,7 @@ public class GamesActivity extends BaseActivity {
 
                                     entity.setAccount(game_account);
                                     entity.save();
+                                    entity.setDownGame(false);
                                     startAppByPackageID(entity.getPackname());
 
                                 }else {
@@ -266,7 +298,8 @@ public class GamesActivity extends BaseActivity {
 
                                     entity.setAccount(game_account);
                                     entity.save();
-                                    downApk(entity.getP(),entity.getIcon());
+                                    //entity.setDownGame(true);
+                                    downApk(entity.getName(),entity.getP(),entity.getIcon(),entity,position);
 
 
                                 }
@@ -297,7 +330,7 @@ public class GamesActivity extends BaseActivity {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
                                     dialogInterface.dismiss();
-                                    downApk(entity.getP(),entity.getIcon());
+                                    ///downApk(entity.getName(),entity.getP(),entity.getIcon());
                                 }
                             }, new DialogInterface.OnClickListener() {
                                 @Override
@@ -313,98 +346,54 @@ public class GamesActivity extends BaseActivity {
 
 
 
-        mRefreshLayout.setOnRefreshListener(new OnRefreshListener() {
+//        mRefreshLayout.setOnRefreshListener(new OnRefreshListener() {
+//            @Override
+//            public void onRefresh(RefreshLayout refreshlayout) {
+//
+//                loadData();
+//
+//            }
+//        });
+
+
+
+        mRefreshLayout.setOnRefreshLoadmoreListener(new OnRefreshLoadmoreListener() {
+            @Override
+            public void onLoadmore(RefreshLayout refreshlayout) {
+
+                loadData();
+
+            }
+
             @Override
             public void onRefresh(RefreshLayout refreshlayout) {
+               // refreshlayout.setRefreshFooter()
+                FooterView.setVisibility(View.VISIBLE);
+                loadData();
 
-                 loadData();
-                refresh =true;
             }
         });
+
+
+
+
     }
 
 
-    private boolean refresh;
 
-    @OnClick({R.id.login_out,R.id.back_page,R.id.to_page})
+
+    @OnClick({R.id.back})
     public void onClick(View view){
 
         switch (view.getId()){
 
-            case R.id.login_out:
-                startActivity(new Intent(GamesActivity.this,LoginActivity.class));
+            case R.id.back:
+                startActivity(new Intent(GamesActivity.this,MainActivity.class));
                 finish();
 
                 break;
-            case R.id.back_page:
-
-                if(gamesPage.size() != 0){
-                    gamesPage.clear();
-                }
-
-
-                if(getGames.size() > 10 ){
-
-
-
-                    nowPageText.setText("当前："+ page-- +" 页");
-                    countpageText.setText(" 共 2 页");
-
-                    for(int i=0 ; i<10; i++){
-
-                        gamesPage.add(getGames.get(i));
-
-                    }
-
-                    adapter.setNewData(gamesPage);
-
-
-                }
-                break;
-            case R.id.to_page:
-
-                if(gamesPage.size() != 0){
-                    gamesPage.clear();
-                }
-
-
-
-
-                if(getGames.size() > 10 && getGames.size() < 20){
-
-
-                    nowPageText.setText("当前："+ page++ +" 页");
-                    countpageText.setText(" 共 2 页");
-
-
-                    for(int i=10 ; i<getGames.size(); i++){
-
-                        gamesPage.add(getGames.get(i));
-
-                    }
-
-                    adapter.setNewData(gamesPage);
-
-
-                }else {
-
-                    nowPageText.setText("当前："+ page++ +" 页");
-                    countpageText.setText(" 共 3 页");
-
-
-                    for(int i=10 ; i<getGames.size(); i++){
-
-                        gamesPage.add(getGames.get(i));
-
-                    }
-
-                    adapter.setNewData(gamesPage);
-
-
-
-                }
-
-                break;
+           default:
+               break;
 
 
 
@@ -436,7 +425,7 @@ public class GamesActivity extends BaseActivity {
 
         game_account= UserCenter.getInstance().getGame_account();
 
-
+        gameLayout.getBackground().setAlpha(30);
 
 
 //        toolbarLeft.setRotation(180);
@@ -516,7 +505,7 @@ public class GamesActivity extends BaseActivity {
         }
 
 
-        String key = EncryptUtils.encryptMD5ToString(account+password+"UNIS").toLowerCase();
+
 
         RetrofitWrapper.getInstance().create(PublicApiInterface.class)
                 .getGameList(UserCenter.getInstance().getToken())
@@ -532,21 +521,11 @@ public class GamesActivity extends BaseActivity {
 
                             if (LinPermission.checkPermission(GamesActivity.this, new int[]{7,8})) {
 
-                                if(result.getData().size() > 10){
-
-                                    backPage.setVisibility(View.VISIBLE);
-                                    toPage.setVisibility(View.VISIBLE);
-
-                                }else {
-
-                                    backPage.setVisibility(View.INVISIBLE);
-                                    toPage.setVisibility(View.INVISIBLE);
-                                }
 
                                 for(GamesEntity entity : result.getData()){
 
 
-                                    GamesEntity entity1 = LitePal.where("id="+entity.getId()+" and account="+"'"+game_account+"'").findFirst(GamesEntity.class);
+                                    GamesEntity entity1 = LitePal.where("id="+entity.getId()).findFirst(GamesEntity.class);
                                     if( entity1 != null ){
                                         // entity.setV(entity.getV()+1);
 
@@ -557,12 +536,14 @@ public class GamesActivity extends BaseActivity {
                                             if(entity.getV() > entity1.getV()){
 
                                                 entity.setNewGame(true);
-                                                entity.setGame(true);
+                                                entity.setInstallGame(true);
+                                                entity.setLocal(true);
                                                 getGames.add(entity);
 
                                             }else {
 
-                                                entity.setGame(true);
+                                                entity.setLocal(true);
+                                                entity.setInstallGame(true);
                                                 getGames.add(entity);
 
                                             }
@@ -572,24 +553,54 @@ public class GamesActivity extends BaseActivity {
 
                                             entity1.save();
                                             entity1.delete();
-                                            entity.setNewGame(false);
-                                            entity.setGame(false);
-                                            getGames.add(entity);
 
+                                            if(PackageUtil.isAppByLocal(entity.getP())){
+
+                                                entity.setNewGame(false);
+                                                entity.setInstallGame(false);
+                                                entity.setLocal(true);
+                                                getGames.add(entity);
+
+                                            }else {
+
+                                                entity.setNewGame(false);
+                                                entity.setInstallGame(false);
+                                                entity.setLocal(false);
+                                                getGames.add(entity);
+
+                                            }
                                         }
 
                                     }else {
 
                                         if(isAppByPackageID(entity.getPackname())){
+
+
+                                            entity.setLocal(true);
                                             entity.setNewGame(false);
-                                            entity.setGame(true);
+                                            entity.setInstallGame(true);
                                             getGames.add(entity);
 
                                         }else {
 
-                                            entity.setNewGame(false);
-                                            entity.setGame(false);
-                                            getGames.add(entity);
+
+                                            if(PackageUtil.isAppByLocal(entity.getP())){
+
+                                                entity.setNewGame(false);
+                                                entity.setInstallGame(false);
+                                                entity.setLocal(true);
+                                                getGames.add(entity);
+
+                                            }else {
+
+                                                entity.setNewGame(false);
+                                                entity.setInstallGame(false);
+                                                entity.setLocal(false);
+                                                getGames.add(entity);
+
+                                            }
+
+
 
                                         }
 
@@ -601,8 +612,14 @@ public class GamesActivity extends BaseActivity {
 
                                 adapter.setNewData(getGames);
 
+                                if(mRefreshLayout.isRefreshing()){
+                                    mRefreshLayout.finishRefresh();
+                                }
+                                if(mRefreshLayout.isLoading()){
+                                    mRefreshLayout.finishLoadmore();
+                                    FooterView.setVisibility(View.GONE);
+                                }
 
-                                mRefreshLayout.finishRefresh();
 
 
                             }
@@ -620,7 +637,12 @@ public class GamesActivity extends BaseActivity {
                         }else {
 
                             Toast.makeText(mContext,result.getMsg(),Toast.LENGTH_SHORT).show();
-                            mRefreshLayout.finishRefresh();
+                            if(mRefreshLayout.isRefreshing()){
+                                mRefreshLayout.finishRefresh();
+                            }
+                            if(mRefreshLayout.isLoading()){
+                                mRefreshLayout.finishLoadmore();
+                            }
                         }
                     }
                 });
@@ -632,6 +654,7 @@ public class GamesActivity extends BaseActivity {
      */
 
     private boolean startAppByPackageID(String packageId) {
+
         PackageManager packageManager = getPackageManager();
         PackageInfo packageInfo;
         try {
@@ -663,6 +686,7 @@ public class GamesActivity extends BaseActivity {
      * @param packageName
      */
     public boolean isAppByPackageID(String packageName) {
+
         if (packageName == null || "".equals(packageName))
             return false;
         try {
@@ -679,20 +703,105 @@ public class GamesActivity extends BaseActivity {
 
 
 
+    private boolean DownGame = false;
 
 
 
+    private void downApk(String name,String filepath,String iconUrl,GamesEntity entity,int positoin){
 
 
-    private void downApk(String filepath,String iconUrl){
+        if(filepath.contains("apk")){
 
-        String[] apk_path = filepath.split("/");
-        String path = Environment.getExternalStorageDirectory()
-                + "/DownLoad/apk/"+apk_path[apk_path.length-1];
+            String[] apk_path = filepath.split("/");
 
 
+            String path = Environment.getExternalStorageDirectory()
+                    + "/DownLoad/apk/"+apk_path[apk_path.length-1];
 
-        DownloadAPk.downApk(GamesActivity.this, filepath,path,iconUrl);
+            if(!entity.isDownGame() && !DownGame) {
+
+                if (PackageUtil.isAppByLocal(filepath)) {
+
+                    entity.setDownGame(false);
+                    Intent installAppIntent = DownloadAPk.getInstallAppIntent(mContext, path);
+                    startActivity(installAppIntent);
+
+
+                } else {
+
+
+                    progressList.add(positoin);
+
+                    DownloadAPk.downApk(GamesActivity.this, filepath, path, iconUrl,
+                            new DownloadAPk.GameProgressListener() {
+                                @Override
+                                public void getProgress(int progress) {
+
+                                    DownGame = true;
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+
+                                            for (int positoin : progressList) {
+
+                                                GamesEntity gamesEntity = adapter.getItem(positoin);
+                                                gamesEntity.setProgress(progress);
+                                                gamesEntity.setDownGame(true);
+
+                                                //adapter.notifyItemChanged(positoin,positoin);
+                                                adapter.notifyItemChanged(positoin);
+
+                                            }
+
+
+                                        }
+                                    });
+
+
+                                }
+
+                                @Override
+                                public void endDown() {
+
+                                    DownGame = false;
+                                    if (progressList.size() != 0) {
+                                        progressList.clear();
+                                    }
+
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+
+                                            GamesEntity gamesEntity = adapter.getItem(positoin);
+                                            gamesEntity.setDownGame(false);
+                                            adapter.notifyItemChanged(positoin);
+
+                                            Intent installAppIntent = DownloadAPk.getInstallAppIntent(mContext, path);
+                                            startActivity(installAppIntent);
+
+                                        }
+                                    });
+
+
+                                }
+                            });
+
+                }
+
+            }else{
+
+                Toast.makeText(mContext, "游戏正在下载", Toast.LENGTH_SHORT).show();
+
+            }
+
+
+        }else {
+
+            Toast.makeText(mContext,"游戏未上传,请跟客服人员联系",Toast.LENGTH_SHORT).show();
+            entity.setDownGame(false);
+
+        }
+
 
 
     }
