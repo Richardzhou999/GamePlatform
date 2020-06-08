@@ -140,7 +140,37 @@
 
 
 
+    <TextView
+        android:id="@+id/item_game_down"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="下载游戏"
+        android:textColor="@color/white"
+        android:layout_alignParentRight="true"
+        android:paddingTop="@dimen/dp_10"
+        android:paddingBottom="@dimen/dp_10"
+        android:paddingLeft="25dp"
+        android:paddingRight="25dp"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="30dp"
+        android:background="@drawable/down_color"
+        android:visibility="gone"/>
 
+    <TextView
+        android:id="@+id/item_game_cancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="取消下载"
+        android:textColor="@color/white"
+        android:layout_alignParentRight="true"
+        android:paddingTop="@dimen/dp_10"
+        android:paddingBottom="@dimen/dp_10"
+        android:paddingLeft="25dp"
+        android:paddingRight="25dp"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="30dp"
+        android:background="@drawable/down_color"
+        android:visibility="gone"/>
 
 
     <ImageView

@@ -790,7 +790,7 @@ public class GamesActivity extends BaseActivity {
 
             }else{
 
-                Toast.makeText(mContext, "游戏正在下载", Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, entity.getName()+"游戏正在下载", Toast.LENGTH_SHORT).show();
 
             }
 

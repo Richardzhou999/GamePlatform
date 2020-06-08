@@ -17,6 +17,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.MediaController;
@@ -32,6 +33,7 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.request.RequestOptions;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.trello.rxlifecycle2.android.ActivityEvent;
+import com.unis.gameplatfrom.BuildConfig;
 import com.unis.gameplatfrom.R;
 import com.unis.gameplatfrom.adapter.GamesAdapter;
 import com.unis.gameplatfrom.adapter.MainAdapter;
@@ -63,6 +65,8 @@ import butterknife.BindView;
 import butterknife.OnClick;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+
+
 
 public class MainActivity extends BaseActivity {
 
@@ -103,7 +107,7 @@ public class MainActivity extends BaseActivity {
 
     private List<GamesEntity> gamesEntities  = new ArrayList<>();
 
-    private GamesAdapter adapter;
+    private MainAdapter adapter;
 
 
     private String userName;
@@ -126,7 +130,7 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void initData() {
 
-        adapter = new GamesAdapter(mContext,gamesEntities);
+        adapter = new MainAdapter(mContext,gamesEntities);
         mainRecycler.setLayoutManager(new LinearLayoutManager(this));
         mainRecycler.setAdapter(adapter);
 
@@ -295,7 +299,15 @@ public class MainActivity extends BaseActivity {
 
 
         userNameText.setText(userName);
-        versionText.setText("版本号： V"+PackageUtil.getVersionName(mContext));
+        if(BuildConfig.DEBUG){
+
+            versionText.setText("版本号： V"+PackageUtil.getVersionName(mContext));
+
+        }else {
+
+            versionText.setText("版本号： V"+PackageUtil.getVersionName(mContext));
+        }
+
         //
         Glide.with(mContext).load(userHead)
                 .apply(RequestOptions.bitmapTransform(new CircleCrop()))
@@ -571,7 +583,7 @@ public class MainActivity extends BaseActivity {
 
             }else{
 
-                Toast.makeText(mContext, "游戏正在下载", Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, entity.getName()+"游戏正在下载", Toast.LENGTH_SHORT).show();
 
 
             }

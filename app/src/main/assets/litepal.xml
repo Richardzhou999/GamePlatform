@@ -47,5 +47,5 @@
     -->
 
     <!-- 直接设置这个，就表示数据库存储的位置，直接打开手机存储就可以找到 -->
-    <storage value="guolin/database"/>
+    <storage value="GamePlatform/database"/>
 </litepal>
