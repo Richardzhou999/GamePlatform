@@ -4,6 +4,7 @@ package com.unis.gameplatfrom.api;
 import com.unis.gameplatfrom.api.result.BaseCustomListResult;
 import com.unis.gameplatfrom.api.result.BaseResult;
 import com.unis.gameplatfrom.model.GamesEntity;
+import com.unis.gameplatfrom.model.GamesListEntity;
 import com.unis.gameplatfrom.model.LoginResult;
 
 import io.reactivex.Observable;
@@ -28,6 +29,13 @@ public interface PublicApiInterface {
     @FormUrlEncoded
     @POST("/gamelist")
     Observable<BaseCustomListResult<GamesEntity>> getGameList(@Field("uuid") String uuid);
+
+    /**
+     * 获取游戏列表
+     */
+    @FormUrlEncoded
+    @POST("/gamelist")
+    Observable<BaseCustomListResult<GamesListEntity>> getGameList1(@Field("uuid") String uuid);
 
 
     /**

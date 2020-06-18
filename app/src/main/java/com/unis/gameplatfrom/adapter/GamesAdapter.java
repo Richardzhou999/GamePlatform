@@ -9,6 +9,7 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
 
 
@@ -151,6 +152,14 @@ public class GamesAdapter extends BaseEmptyViewAdapter<GamesEntity> {
             down.setVisibility(View.INVISIBLE);
             install.setVisibility(View.INVISIBLE);
         }
+
+
+        holder.addOnClickListener(R.id.item_game_down);
+        holder.addOnClickListener(R.id.item_game_cancel);
+
+
+
+
     }
 
 

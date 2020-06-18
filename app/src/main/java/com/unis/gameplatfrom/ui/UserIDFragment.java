@@ -5,16 +5,20 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.blankj.utilcode.util.EmptyUtils;
@@ -53,8 +57,16 @@ public class UserIDFragment extends BaseFragment {
     @BindView(R.id.save_account)
     CheckBox mSaveBtn;
 
+    @BindView(R.id.save_text)
+    TextView mSaveText;
+
+    @BindView(R.id.click_layout)
+    LinearLayout mClickLayout;
 
     private boolean saveaccount;
+
+    @BindView(R.id.login_password)
+    TextView mLoginPassword;
 
 
     @Override
@@ -114,6 +126,50 @@ public class UserIDFragment extends BaseFragment {
 //            }
 //        });
 
+        mAccount.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(hasFocus){
+                    mAccount.setSelected(true);
+                }else {
+                    mAccount.setSelected(false);
+                }
+            }
+        });
+
+//        mPassword.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+//            @Override
+//            public void onFocusChange(View v, boolean hasFocus) {
+//                if(hasFocus){
+//                    mAccount.setSelected(true);
+//                }else {
+//                    mAccount.setSelected(false);
+//                }
+//            }
+//        });
+
+        mClickLayout.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(hasFocus){
+                    mClickLayout.setBackgroundResource(R.drawable.border_color);
+                }else {
+                    mClickLayout.setBackgroundResource(android.R.color.transparent);
+                }
+            }
+        });
+
+        mLoginPassword.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(hasFocus){
+                    mLoginPassword.setBackgroundResource(R.drawable.border_color);
+                }else {
+                    mLoginPassword.setBackgroundResource(android.R.color.transparent);
+                }
+            }
+        });
+
 
         mSaveBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -126,6 +182,9 @@ public class UserIDFragment extends BaseFragment {
                 }
             }
         });
+
+
+
     }
 
     @Override
@@ -134,7 +193,7 @@ public class UserIDFragment extends BaseFragment {
     }
 
 
-    @OnClick({R.id.btn_login_userId,R.id.login_password})
+    @OnClick({R.id.btn_login_userId,R.id.login_password,R.id.click_layout})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.btn_login_userId:
@@ -143,6 +202,22 @@ public class UserIDFragment extends BaseFragment {
             case R.id.login_password:
                 LoginActivity loginActivity = (LoginActivity) getActivity();
                 loginActivity.changeFragment(1);
+                break;
+            case R.id.click_layout:
+
+                if(!saveaccount){
+
+                    saveaccount = true;
+                    mSaveBtn.setChecked(true);
+                    mSaveText.setTextColor(ContextCompat.getColor(mContext,R.color.text_blue));
+
+
+                }else {
+                    saveaccount = false;
+                    mSaveBtn.setChecked(false);
+                    mSaveText.setTextColor(ContextCompat.getColor(mContext,R.color.white));
+                }
+
                 break;
             default:
                 break;
@@ -204,6 +279,7 @@ public class UserIDFragment extends BaseFragment {
                             UserCenter.getInstance().setToken(result.getUuid());
 
                             mContext.finish();
+
                         }if (result.getErr() == 1){
 
                             Toast.makeText(mContext,result.getMsg(),Toast.LENGTH_SHORT).show();

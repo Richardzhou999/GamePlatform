@@ -37,8 +37,8 @@ public class MetroViewBorderImpl<X extends View> implements ViewTreeObserver.OnG
     private X mView;
     private View mLastView;
 
-    public MetroViewBorderImpl(Context context) {
-        this(context, null, 0);
+    public MetroViewBorderImpl(Context context,boolean main) {
+        this(context, null, 0,main);
     }
 
     public MetroViewBorderImpl(Context context, AttributeSet attrs) {
@@ -49,9 +49,27 @@ public class MetroViewBorderImpl<X extends View> implements ViewTreeObserver.OnG
         init(context, attrs, defStyleAttr);
     }
 
+    public MetroViewBorderImpl(Context context, AttributeSet attrs, int defStyleAttr,boolean main) {
+        init(context, attrs, defStyleAttr,main);
+    }
+
     private void init(Context context, AttributeSet attrs, int defStyleAttr) {
         mMetroViewBorder = new MetroViewBorderHandler();
         mView = (X) new View(context, attrs, defStyleAttr);
+    }
+
+    private void init(Context context, AttributeSet attrs, int defStyleAttr,boolean main) {
+        if(main){
+
+            mMetroViewBorder = new MainMetroViewBorderHandler();
+            mView = (X) new View(context, attrs, defStyleAttr);
+
+        }else {
+
+            mMetroViewBorder = new MetroViewBorderHandler();
+            mView = (X) new View(context, attrs, defStyleAttr);
+        }
+
     }
 
     public MetroViewBorderImpl(X view) {

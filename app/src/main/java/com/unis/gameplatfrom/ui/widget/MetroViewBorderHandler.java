@@ -28,6 +28,9 @@ import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.LinearLayout;
+
+import com.unis.gameplatfrom.R;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,7 +44,7 @@ public class MetroViewBorderHandler implements IMetroViewBorder {
 
     private String TAG = MetroViewBorderHandler.class.getSimpleName();
     protected boolean mScalable = true;
-    protected float mScale = 1.1f;
+    protected float mScale = 1.03f;
 
     protected long mDurationTraslate = 200;
     protected int mMargin = 0;
@@ -69,10 +72,42 @@ public class MetroViewBorderHandler implements IMetroViewBorder {
     public FocusListener mFocusScaleListener = new FocusListener() {
         @Override
         public void onFocusChanged(View oldFocus, View newFocus) {
-            mAnimatorList.addAll(getScaleAnimator(newFocus, true));
-            if (oldFocus != null) {
-                mAnimatorList.addAll(getScaleAnimator(oldFocus, false));
-            }
+
+            LinearLayout linearLayout = newFocus.findViewById(R.id.lin_progress);
+            int visibility = linearLayout.getVisibility();
+
+           if(linearLayout != null && visibility == View.VISIBLE){
+               //正在下载中
+                mAnimatorList.addAll(getScaleAnimator(newFocus, true));
+
+                if (oldFocus != null ) {
+                    LinearLayout oldLinearLayout = oldFocus.findViewById(R.id.lin_progress);
+                    if(oldLinearLayout.getVisibility() == View.GONE){
+                       mAnimatorList.addAll(getScaleAnimator(oldFocus, false));
+                    }else {
+                        oldFocus.setAlpha(0f);
+
+                    }
+
+
+                }
+
+            }else {
+
+               //未下载
+
+               mAnimatorList.addAll(getScaleAnimator(newFocus, true));
+
+               if (oldFocus != null ) {
+                   LinearLayout oldLinearLayout = oldFocus.findViewById(R.id.lin_progress);
+                   if(oldLinearLayout.getVisibility() == View.GONE){
+                       mAnimatorList.addAll(getScaleAnimator(oldFocus, false));
+                   }else {
+                       oldFocus.setAlpha(0f);
+                   }
+               }
+           }
+
         }
     };
 
@@ -107,6 +142,7 @@ public class MetroViewBorderHandler implements IMetroViewBorder {
         public void onFocusChanged(View oldFocus, View newFocus) {
             if (newFocus == null) return;
             try {
+
                 mAnimatorList.addAll(getMoveAnimator(newFocus, 0, 0));
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -591,6 +627,7 @@ public class MetroViewBorderHandler implements IMetroViewBorder {
 
 
                 oldFocus = newFocus;
+
             } catch (Exception ex) {
                 ex.printStackTrace();
             }

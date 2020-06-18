@@ -9,7 +9,9 @@
     android:background="@color/game_item"
     android:paddingBottom="@dimen/dp_10"
     android:layout_marginTop="5dp"
-    android:id="@+id/game_item_layout">
+    android:id="@+id/game_item_layout"
+    android:focusable="true"
+    android:focusableInTouchMode="true">
 
 
     <TextView
@@ -99,9 +101,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/item_games_version"
-        android:layout_toRightOf="@id/item_games_name"
+        android:layout_toRightOf="@id/item_games_new_version"
         android:layout_marginLeft="23dp"
-        android:visibility="gone">
+        android:visibility="visible">
 
         <TextView
             android:id="@+id/item_progress_text"
@@ -146,14 +148,14 @@
         android:layout_height="wrap_content"
         android:text="下载游戏"
         android:textColor="@color/white"
-        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
         android:paddingTop="@dimen/dp_10"
         android:paddingBottom="@dimen/dp_10"
         android:paddingLeft="25dp"
         android:paddingRight="25dp"
-        android:layout_centerVertical="true"
         android:layout_marginRight="30dp"
         android:background="@drawable/down_color"
+        android:layout_toLeftOf="@id/item_game_cancel"
         android:visibility="gone"/>
 
     <TextView
@@ -168,6 +170,7 @@
         android:paddingLeft="25dp"
         android:paddingRight="25dp"
         android:layout_centerVertical="true"
+
         android:layout_marginRight="30dp"
         android:background="@drawable/down_color"
         android:visibility="gone"/>

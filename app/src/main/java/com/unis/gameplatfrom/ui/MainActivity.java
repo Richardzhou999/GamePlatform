@@ -20,6 +20,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.MediaController;
 import android.widget.RelativeLayout;
 import android.widget.TextClock;
@@ -34,6 +35,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.trello.rxlifecycle2.android.ActivityEvent;
 import com.unis.gameplatfrom.BuildConfig;
+import com.unis.gameplatfrom.Constant;
 import com.unis.gameplatfrom.R;
 import com.unis.gameplatfrom.adapter.GamesAdapter;
 import com.unis.gameplatfrom.adapter.MainAdapter;
@@ -45,6 +47,7 @@ import com.unis.gameplatfrom.base.BaseActivity;
 import com.unis.gameplatfrom.cache.UserCenter;
 import com.unis.gameplatfrom.model.GamesEntity;
 import com.unis.gameplatfrom.model.LoginResult;
+import com.unis.gameplatfrom.ui.widget.MetroItemFrameLayout;
 import com.unis.gameplatfrom.ui.widget.MetroViewBorderHandler;
 import com.unis.gameplatfrom.ui.widget.MetroViewBorderImpl;
 import com.unis.gameplatfrom.utils.DialogHelper;
@@ -103,6 +106,24 @@ public class MainActivity extends BaseActivity {
     @BindView(R.id.left_layout)
     RelativeLayout leftLayout;
 
+    @BindView(R.id.login_out)
+    TextView mLoginOut;
+
+    @BindView(R.id.push_layout)
+    LinearLayout mPushLayout;
+    @BindView(R.id.movie_layout)
+    RelativeLayout mMovieLayout;
+
+
+    @BindView(R.id.into_game)
+    ImageView IntoAllGame;
+
+    @BindView(R.id.rv_layout)
+    RelativeLayout mRecyclerLayout;
+
+
+
+
     private MainAdapter mainAdapter;
 
     private List<GamesEntity> gamesEntities  = new ArrayList<>();
@@ -118,6 +139,13 @@ public class MainActivity extends BaseActivity {
 
     private MediaController localMediaController;
 
+    private MetroViewBorderImpl mMetroViewBorderImpl;
+
+    private boolean movie;
+    private boolean fristplay;
+
+
+
 
     @Override
     protected int getLayout() {
@@ -132,7 +160,9 @@ public class MainActivity extends BaseActivity {
 
         adapter = new MainAdapter(mContext,gamesEntities);
         mainRecycler.setLayoutManager(new LinearLayoutManager(this));
+        mMetroViewBorderImpl.attachTo(mainRecycler);
         mainRecycler.setAdapter(adapter);
+        mainRecycler.scrollToPosition(0);
 
         adapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
             @Override
@@ -298,10 +328,19 @@ public class MainActivity extends BaseActivity {
         firstImage.setVisibility(View.VISIBLE);
 
 
+
+
+        mPushLayout.setFocusable(true);
+        mMovieLayout.setFocusable(false);
+        videoDetails.setFocusable(false);
+        //mRecyclerLayout.setFocusable(true);
+
+
+
         userNameText.setText(userName);
         if(BuildConfig.DEBUG){
 
-            versionText.setText("版本号： V"+PackageUtil.getVersionName(mContext));
+            versionText.setText("版本号： V"+Constant.DEBUG);
 
         }else {
 
@@ -336,10 +375,54 @@ public class MainActivity extends BaseActivity {
 
         firstImage.setImageBitmap(getVideoThumb(url));
 
+        mMetroViewBorderImpl = new MetroViewBorderImpl(this,true);
+        mMetroViewBorderImpl.setBackgroundResource(R.drawable.border_color);
+
+
 
         leftLayout.setBackgroundColor(ContextCompat.getColor(mContext,R.color.game_toolbar));
 
+        mLoginOut.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(hasFocus){
 
+                    mLoginOut.setSelected(true);
+                    mLoginOut.setTextColor(ContextCompat.getColor(mContext,R.color.white));
+
+                }else {
+                    mLoginOut.setSelected(false);
+                    mLoginOut.setTextColor(ContextCompat.getColor(mContext,R.color.out_login_txt));
+                }
+            }
+        });
+
+
+
+        mPushLayout.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(hasFocus){
+
+                    mPushLayout.setBackgroundResource(R.drawable.border_color);
+                }else {
+                    mPushLayout.setBackgroundResource(android.R.color.transparent);
+                }
+              }
+        });
+
+        mMovieLayout.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(hasFocus){
+
+                    mMovieLayout.setBackgroundResource(R.drawable.border_color);
+                }else {
+
+                    mMovieLayout.setBackgroundResource(android.R.color.transparent);
+                }
+            }
+        });
 
 
         // finish();
@@ -373,105 +456,208 @@ public class MainActivity extends BaseActivity {
                     public void onNext(BaseCustomListResult<GamesEntity> result) {
 
 
-                        if(result.getErr() == 0){
+                        mMovieLayout.setFocusable(true);
+                        IntoAllGame.setFocusable(true);
+
+                        if(result.getErr() == 0 && result.getData().size() != 0){
 
                             if (LinPermission.checkPermission(MainActivity.this, new int[]{7,8})) {
 
 
-                                for(int i = 0 ; i < 3 ; i ++){
+                                if(result.getData().size() < 3){
 
-                                    GamesEntity entity = result.getData().get(i);
 
-                                    GamesEntity entity1 = LitePal.where("id="+entity.getId()).findFirst(GamesEntity.class);
-                                    if( entity1 != null ){
-                                        // entity.setV(entity.getV()+1);
-
-                                        if(PackageUtil.isAppByPackageID(mContext,entity.getPackname())){
+                                    for(int i = 0 ; i < result.getData().size() ; i ++){
 
 
 
-                                            if(entity.getV() > entity1.getV()){
+                                        GamesEntity entity = result.getData().get(i);
 
-                                                entity.setNewGame(true);
-                                                entity.setInstallGame(true);
-                                                entity.setLocal(true);
-                                                gamesEntities.add(entity);
+                                        GamesEntity entity1 = LitePal.where("id="+entity.getId()).findFirst(GamesEntity.class);
+                                        if( entity1 != null ){
+                                            // entity.setV(entity.getV()+1);
+
+                                            if(PackageUtil.isAppByPackageID(mContext,entity.getPackname())){
+
+
+
+                                                if(entity.getV() > entity1.getV()){
+
+                                                    entity.setNewGame(true);
+                                                    entity.setInstallGame(true);
+                                                    entity.setLocal(true);
+                                                    gamesEntities.add(entity);
+
+                                                }else {
+
+                                                    entity.setLocal(true);
+                                                    entity.setInstallGame(true);
+                                                    gamesEntities.add(entity);
+
+                                                }
+
 
                                             }else {
 
-                                                entity.setLocal(true);
-                                                entity.setInstallGame(true);
-                                                gamesEntities.add(entity);
+                                                entity1.save();
+                                                entity1.delete();
 
+                                                if(PackageUtil.isAppByLocal(entity.getP())){
+
+                                                    entity.setNewGame(false);
+                                                    entity.setInstallGame(false);
+                                                    entity.setLocal(true);
+                                                    gamesEntities.add(entity);
+
+                                                }else {
+
+                                                    entity.setNewGame(false);
+                                                    entity.setInstallGame(false);
+                                                    entity.setLocal(false);
+                                                    gamesEntities.add(entity);
+
+                                                }
                                             }
-
 
                                         }else {
 
-                                            entity1.save();
-                                            entity1.delete();
+                                            if(PackageUtil.isAppByPackageID(mContext,entity.getPackname())){
 
-                                            if(PackageUtil.isAppByLocal(entity.getP())){
 
-                                                entity.setNewGame(false);
-                                                entity.setInstallGame(false);
                                                 entity.setLocal(true);
+                                                entity.setNewGame(false);
+                                                entity.setInstallGame(true);
                                                 gamesEntities.add(entity);
 
                                             }else {
 
-                                                entity.setNewGame(false);
-                                                entity.setInstallGame(false);
-                                                entity.setLocal(false);
-                                                gamesEntities.add(entity);
 
-                                            }
-                                        }
+                                                if(PackageUtil.isAppByLocal(entity.getP())){
 
-                                    }else {
+                                                    entity.setNewGame(false);
+                                                    entity.setInstallGame(false);
+                                                    entity.setLocal(true);
+                                                    gamesEntities.add(entity);
 
-                                        if(PackageUtil.isAppByPackageID(mContext,entity.getPackname())){
+                                                }else {
 
+                                                    entity.setNewGame(false);
+                                                    entity.setInstallGame(false);
+                                                    entity.setLocal(false);
+                                                    gamesEntities.add(entity);
 
-                                            entity.setLocal(true);
-                                            entity.setNewGame(false);
-                                            entity.setInstallGame(true);
-                                            gamesEntities.add(entity);
-
-                                        }else {
+                                                }
 
 
-                                            if(PackageUtil.isAppByLocal(entity.getP())){
-
-                                                entity.setNewGame(false);
-                                                entity.setInstallGame(false);
-                                                entity.setLocal(true);
-                                                gamesEntities.add(entity);
-
-                                            }else {
-
-                                                entity.setNewGame(false);
-                                                entity.setInstallGame(false);
-                                                entity.setLocal(false);
-                                                gamesEntities.add(entity);
 
                                             }
 
-
-
                                         }
+
+
 
                                     }
 
 
+                                }else {
+
+                                    for(int i = 0 ; i < 3 ; i ++){
+
+
+
+                                        GamesEntity entity = result.getData().get(i);
+
+                                        GamesEntity entity1 = LitePal.where("id="+entity.getId()).findFirst(GamesEntity.class);
+                                        if( entity1 != null ){
+                                            // entity.setV(entity.getV()+1);
+
+                                            if(PackageUtil.isAppByPackageID(mContext,entity.getPackname())){
+
+
+
+                                                if(entity.getV() > entity1.getV()){
+
+                                                    entity.setNewGame(true);
+                                                    entity.setInstallGame(true);
+                                                    entity.setLocal(true);
+                                                    gamesEntities.add(entity);
+
+                                                }else {
+
+                                                    entity.setLocal(true);
+                                                    entity.setInstallGame(true);
+                                                    gamesEntities.add(entity);
+
+                                                }
+
+
+                                            }else {
+
+                                                entity1.save();
+                                                entity1.delete();
+
+                                                if(PackageUtil.isAppByLocal(entity.getP())){
+
+                                                    entity.setNewGame(false);
+                                                    entity.setInstallGame(false);
+                                                    entity.setLocal(true);
+                                                    gamesEntities.add(entity);
+
+                                                }else {
+
+                                                    entity.setNewGame(false);
+                                                    entity.setInstallGame(false);
+                                                    entity.setLocal(false);
+                                                    gamesEntities.add(entity);
+
+                                                }
+                                            }
+
+                                        }else {
+
+                                            if(PackageUtil.isAppByPackageID(mContext,entity.getPackname())){
+
+
+                                                entity.setLocal(true);
+                                                entity.setNewGame(false);
+                                                entity.setInstallGame(true);
+                                                gamesEntities.add(entity);
+
+                                            }else {
+
+
+                                                if(PackageUtil.isAppByLocal(entity.getP())){
+
+                                                    entity.setNewGame(false);
+                                                    entity.setInstallGame(false);
+                                                    entity.setLocal(true);
+                                                    gamesEntities.add(entity);
+
+                                                }else {
+
+                                                    entity.setNewGame(false);
+                                                    entity.setInstallGame(false);
+                                                    entity.setLocal(false);
+                                                    gamesEntities.add(entity);
+
+                                                }
+
+
+
+                                            }
+
+                                        }
+
+
+
+                                    }
+
 
                                 }
 
+
+
                                 adapter.setNewData(gamesEntities);
-
-
-
-
 
                             }
                             else {
@@ -602,7 +788,7 @@ public class MainActivity extends BaseActivity {
     }
 
 
-    @OnClick({R.id.into_game,R.id.login_out,R.id.movie_play})
+    @OnClick({R.id.into_game,R.id.login_out,R.id.movie_layout})
     public void onViewClicked(View view){
 
         switch (view.getId()){
@@ -624,10 +810,36 @@ public class MainActivity extends BaseActivity {
 
                 break;
 
-            case R.id.movie_play:
-                moviePlay.setVisibility(View.GONE);
-                firstImage.setVisibility(View.GONE);
-                videoDetails.start();
+            case R.id.movie_layout:
+                if(!fristplay){
+
+                    moviePlay.setVisibility(View.GONE);
+                    firstImage.setVisibility(View.GONE);
+                    videoDetails.start();
+                    fristplay = true;
+
+                }else {
+
+                    if(!movie){
+
+                        moviePlay.setVisibility(View.VISIBLE);
+                        videoDetails.pause();
+                        movie = true;
+
+
+                    }else {
+
+                        moviePlay.setVisibility(View.GONE);
+                        videoDetails.start();
+                        movie = false;
+
+
+                    }
+
+
+
+                }
+
                 break;
 
             default:

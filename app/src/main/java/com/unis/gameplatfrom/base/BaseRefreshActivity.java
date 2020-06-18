@@ -28,7 +28,7 @@ public abstract class BaseRefreshActivity extends BaseActivity implements IRefre
     SmartRefreshLayout mRefreshLayout;
 
     private int page = 1;
-    private int pageSize = Constant.PAGE_SIZE;
+
     private int operateState = OPERATE_NORMAL;
 
     @Override
@@ -36,9 +36,6 @@ public abstract class BaseRefreshActivity extends BaseActivity implements IRefre
         initRefreshLayout();
     }
 
-    public int getPageSize() {
-        return pageSize;
-    }
 
     public int getPage() {
         return page;

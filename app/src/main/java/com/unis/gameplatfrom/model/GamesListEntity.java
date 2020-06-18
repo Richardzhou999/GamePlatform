@@ -1,10 +1,16 @@
 package com.unis.gameplatfrom.model;
 
+import android.annotation.SuppressLint;
+import android.os.Parcel;
+import android.os.Parcelable;
+
+
 
 
 import org.litepal.crud.LitePalSupport;
 
-public class GamesEntity extends LitePalSupport {
+
+public class GamesListEntity extends LitePalSupport{
 
      private int id;
      private int v;
@@ -21,13 +27,9 @@ public class GamesEntity extends LitePalSupport {
      private int progress;
 
 
-
-
-
     public int getId() {
         return id;
     }
-
 
     public void setId(int id) {
         this.id = id;

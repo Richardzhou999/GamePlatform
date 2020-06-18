@@ -2,9 +2,11 @@ package com.unis.gameplatfrom.ui;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -15,6 +17,8 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.blankj.utilcode.util.EmptyUtils;
@@ -52,8 +56,16 @@ public class PassWordFragment extends BaseFragment {
     @BindView(R.id.save_account)
     CheckBox mSaveBtn;
 
+    @BindView(R.id.save_text)
+    TextView mSaveText;
+
+    @BindView(R.id.click_layout)
+    LinearLayout mClickLayout;
 
     private boolean saveaccount;
+
+    @BindView(R.id.login_id)
+    TextView mLoginID;
 
 
     @Override
@@ -113,6 +125,50 @@ public class PassWordFragment extends BaseFragment {
 //            }
 //        });
 
+        mAccount.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(hasFocus){
+                    mAccount.setSelected(true);
+                }else {
+                    mAccount.setSelected(false);
+                }
+            }
+        });
+
+//        mPassword.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+//            @Override
+//            public void onFocusChange(View v, boolean hasFocus) {
+//                if(hasFocus){
+//                    mAccount.setSelected(true);
+//                }else {
+//                    mAccount.setSelected(false);
+//                }
+//            }
+//        });
+
+        mClickLayout.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(hasFocus){
+                    mClickLayout.setBackgroundResource(R.drawable.border_color);
+                }else {
+                    mClickLayout.setBackgroundResource(android.R.color.transparent);
+                }
+            }
+        });
+
+        mLoginID.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(hasFocus){
+                    mLoginID.setBackgroundResource(R.drawable.border_color);
+                }else {
+                    mLoginID.setBackgroundResource(android.R.color.transparent);
+                }
+            }
+        });
+
 
         mSaveBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -125,6 +181,8 @@ public class PassWordFragment extends BaseFragment {
                 }
             }
         });
+
+
     }
 
     @Override
@@ -133,7 +191,7 @@ public class PassWordFragment extends BaseFragment {
     }
 
 
-    @OnClick({R.id.btn_login_password,R.id.login_id})
+    @OnClick({R.id.btn_login_password,R.id.login_id,R.id.click_layout})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.btn_login_password:
@@ -142,6 +200,22 @@ public class PassWordFragment extends BaseFragment {
             case R.id.login_id:
                 LoginActivity loginActivity = (LoginActivity) getActivity();
                 loginActivity.changeFragment(2);
+                break;
+            case R.id.click_layout:
+
+                    if(!saveaccount){
+
+                        saveaccount = true;
+                        mSaveBtn.setChecked(true);
+                        mSaveText.setTextColor(ContextCompat.getColor(mContext,R.color.text_blue));
+
+
+                    }else {
+                        saveaccount = false;
+                        mSaveBtn.setChecked(false);
+                        mSaveText.setTextColor(ContextCompat.getColor(mContext,R.color.white));
+                    }
+
                 break;
             default:
                 break;
@@ -191,7 +265,8 @@ public class PassWordFragment extends BaseFragment {
 
                             UserCenter.getInstance().save_uuid(mContext,result.getUuid());
 
-                            //UserCenter.getInstance().setGameAccount(mobile);
+                            UserCenter.getInstance().setUserName(result.getName());
+                            UserCenter.getInstance().setUserHead(result.getHead());
 
                             Intent intent = new Intent(mContext,MainActivity.class);
 

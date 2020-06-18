@@ -27,13 +27,11 @@ public abstract class BaseToolbarRefreshActivity extends BaseToolBarActivity imp
     SmartRefreshLayout mRefreshLayout;
 
     private int page = 1;
-    private int pageSize = Constant.PAGE_SIZE;
+
 
     private int operateState = OPERATE_NORMAL;
 
-    public int getPageSize() {
-        return pageSize;
-    }
+
 
     public int getPage() {
         return page;

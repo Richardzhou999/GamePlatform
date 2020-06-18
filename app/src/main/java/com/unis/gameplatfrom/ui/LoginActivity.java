@@ -91,7 +91,7 @@ public class LoginActivity extends BaseActivity {
 
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
-        transaction.show(passWordFragment).hide(userIDFragment).commit();
+        transaction.show(userIDFragment).hide(passWordFragment).commit();
 
 
 

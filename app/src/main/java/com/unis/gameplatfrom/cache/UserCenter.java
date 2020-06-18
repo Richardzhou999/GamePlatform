@@ -71,6 +71,8 @@ public class UserCenter {
             this.host = SPUtils.getInstance(SP_NAME).getString(SP_HOST);
             this.account = SPUtils.getInstance(SP_NAME).getString(SP_ACCOUNT);
             this.userid = SPUtils.getInstance(SP_NAME).getString(SP_USERID);
+            this.userName = SPUtils.getInstance(SP_NAME).getString(SP_USERNAME);
+            this.userHead = SPUtils.getInstance(SP_NAME).getString(SP_USERHEAD);
 
 
         } catch (Exception e) {
@@ -141,7 +143,7 @@ public class UserCenter {
 
     public void setUserName(String userName) {
         this.userName = userName;
-        SPUtils.getInstance(SP_USERNAME).put(SP_USERNAME, userName);
+        SPUtils.getInstance(SP_NAME).put(SP_USERNAME, userName);
     }
 
     public String getUserHead() {
@@ -150,7 +152,7 @@ public class UserCenter {
 
     public void setUserHead(String userHead) {
         this.userHead = userHead;
-        SPUtils.getInstance(SP_USERHEAD).put(SP_USERHEAD, userHead);
+        SPUtils.getInstance(SP_NAME).put(SP_USERHEAD, userHead);
     }
 
     public String getPassword() {

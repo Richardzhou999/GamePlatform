@@ -84,6 +84,7 @@
         </receiver>
 
         <activity android:name=".ui.MainActivity"></activity>
+        <activity android:name=".ui.GamesListActivity"></activity>
 
     </application>
 

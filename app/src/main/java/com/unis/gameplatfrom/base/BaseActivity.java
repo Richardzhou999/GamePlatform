@@ -31,7 +31,7 @@ import com.unis.gameplatfrom.utils.StatusBarUtil;
  */
 
 @SuppressWarnings("DefaultFileTemplate")
-public abstract class BaseActivity extends RxAppCompatActivity {
+public abstract class BaseActivity extends RxAppCompatActivity{
     protected Activity mContext;
     private Unbinder mUnbinder;
 

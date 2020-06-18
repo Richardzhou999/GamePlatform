@@ -77,7 +77,7 @@
             android:src="@drawable/ic_right"
             android:text="退出登录"
             android:textColor="@color/out_login_txt"
-            android:background="@drawable/out_login"
+            android:background="@drawable/out_login_select"
             android:paddingTop="@dimen/dp_10"
             android:paddingBottom="@dimen/dp_10"
             android:paddingLeft="25dp"
@@ -85,6 +85,7 @@
             android:layout_above="@id/txt_version"
             android:layout_marginBottom="27dp"
             android:layout_centerHorizontal="true"
+            android:focusable="true"
             android:textSize="20sp"/>
 
 
@@ -118,26 +119,41 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <ImageView
-                android:id="@+id/push_image"
-                android:layout_width="253dp"
-                android:layout_height="253dp"
 
-                android:src="@mipmap/tuiguang_1"
+            <LinearLayout
+                android:id="@+id/push_layout"
+                android:layout_width="260dp"
+                android:layout_height="260dp"
                 android:layout_marginBottom="15dp"
                 android:layout_marginLeft="15dp"
-                android:layout_marginRight="15dp"/>
+                android:layout_marginRight="15dp"
+                android:padding="3dp"
+                android:focusable="true"
+                android:nextFocusDown="@id/into_game">
+
+                <ImageView
+                    android:id="@+id/push_image"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@mipmap/tuiguang_1" />
+
+            </LinearLayout>
+
 
             <RelativeLayout
+                android:id="@+id/movie_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                >
+                android:focusable="true"
+                android:padding="3dp"
+                android:nextFocusDown="@id/into_game">
 
                 <VideoView
                     android:id="@+id/movie_image"
                     android:layout_width="match_parent"
                     android:layout_height="253dp"
                     android:src="@drawable/icon_movie"
+
                     />
 
                 <ImageView android:id="@+id/iv_first_frame"
@@ -160,31 +176,42 @@
 
 
 
-        <FrameLayout
+        <RelativeLayout
+            android:id="@+id/rv_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_below="@id/push_image"
             android:background="@drawable/bg_login"
-            android:layout_marginLeft="15dp">
+            android:layout_marginLeft="15dp"
+
+            >
+
+
 
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/rv_main"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_below="@id/push_image"/>
+                android:clipToPadding="false"
+                />
+
+
 
             <ImageView
                 android:id="@+id/into_game"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/all_game"
+                android:src="@drawable/all_game_select"
                 android:layout_gravity="right"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:layout_alignParentRight="true"
+
                 />
 
 
-
-        </FrameLayout>
+        </RelativeLayout>
 
 
 
