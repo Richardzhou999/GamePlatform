@@ -200,9 +200,14 @@ public class UserCenter {
             filePath = Environment.getDownloadCacheDirectory() + "/UNIS_GameData/gameUid.txt";
         }
 
+
+
         try {
 
             File uidFile = new File(filePath);
+            if(!uidFile.exists()){
+                uidFile.mkdirs();
+            }
             outStream = new FileOutputStream(uidFile);
 
             outStream.write(uuid.getBytes());

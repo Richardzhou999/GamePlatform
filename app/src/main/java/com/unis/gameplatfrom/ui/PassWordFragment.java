@@ -136,6 +136,9 @@ public class PassWordFragment extends BaseFragment {
             }
         });
 
+        mAccount.setSelection(mAccount.getText().toString().length());
+        mPassword.setSelection(mAccount.getText().toString().length());
+
 //        mPassword.setOnFocusChangeListener(new View.OnFocusChangeListener() {
 //            @Override
 //            public void onFocusChange(View v, boolean hasFocus) {

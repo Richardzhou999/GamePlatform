@@ -21,6 +21,7 @@ import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
 import android.graphics.Rect;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
@@ -44,7 +45,7 @@ public class MetroViewBorderHandler implements IMetroViewBorder {
 
     private String TAG = MetroViewBorderHandler.class.getSimpleName();
     protected boolean mScalable = true;
-    protected float mScale = 1.03f;
+    protected float mScale = 1.0f;
 
     protected long mDurationTraslate = 200;
     protected int mMargin = 0;
@@ -73,6 +74,8 @@ public class MetroViewBorderHandler implements IMetroViewBorder {
         @Override
         public void onFocusChanged(View oldFocus, View newFocus) {
 
+
+
             LinearLayout linearLayout = newFocus.findViewById(R.id.lin_progress);
             int visibility = linearLayout.getVisibility();
 
@@ -85,25 +88,23 @@ public class MetroViewBorderHandler implements IMetroViewBorder {
                     if(oldLinearLayout.getVisibility() == View.GONE){
                        mAnimatorList.addAll(getScaleAnimator(oldFocus, false));
                     }else {
-                        oldFocus.setAlpha(0f);
+                        oldFocus.setAlpha(1f);
+                        oldFocus.setBackgroundColor(ContextCompat.getColor(oldFocus.getContext(),R.color.btn_red_nor));
 
                     }
-
 
                 }
 
             }else {
 
                //未下载
-
                mAnimatorList.addAll(getScaleAnimator(newFocus, true));
-
                if (oldFocus != null ) {
                    LinearLayout oldLinearLayout = oldFocus.findViewById(R.id.lin_progress);
                    if(oldLinearLayout.getVisibility() == View.GONE){
                        mAnimatorList.addAll(getScaleAnimator(oldFocus, false));
                    }else {
-                       oldFocus.setAlpha(0f);
+                       oldFocus.setAlpha(0.5f);
                    }
                }
            }

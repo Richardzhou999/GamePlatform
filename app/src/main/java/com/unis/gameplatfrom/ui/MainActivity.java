@@ -50,6 +50,7 @@ import com.unis.gameplatfrom.model.LoginResult;
 import com.unis.gameplatfrom.ui.widget.MetroItemFrameLayout;
 import com.unis.gameplatfrom.ui.widget.MetroViewBorderHandler;
 import com.unis.gameplatfrom.ui.widget.MetroViewBorderImpl;
+import com.unis.gameplatfrom.ui.widget.SWRecyclerView;
 import com.unis.gameplatfrom.utils.DialogHelper;
 import com.unis.gameplatfrom.utils.PackageUtil;
 import com.unis.gameplatfrom.utils.TimeUtil;
@@ -81,7 +82,7 @@ public class MainActivity extends BaseActivity {
     TextView userNameText;
 
     @BindView(R.id.rv_main)
-    RecyclerView mainRecycler;
+    SWRecyclerView mainRecycler;
 
 
     @BindView(R.id.txt_month_week)
@@ -109,8 +110,14 @@ public class MainActivity extends BaseActivity {
     @BindView(R.id.login_out)
     TextView mLoginOut;
 
+
+
     @BindView(R.id.push_layout)
     LinearLayout mPushLayout;
+
+    @BindView(R.id.push_image)
+    ImageView mPushImage;
+
     @BindView(R.id.movie_layout)
     RelativeLayout mMovieLayout;
 
@@ -146,6 +153,8 @@ public class MainActivity extends BaseActivity {
 
 
 
+    private boolean refresh = false;
+
 
     @Override
     protected int getLayout() {
@@ -161,13 +170,15 @@ public class MainActivity extends BaseActivity {
         adapter = new MainAdapter(mContext,gamesEntities);
         mainRecycler.setLayoutManager(new LinearLayoutManager(this));
         mMetroViewBorderImpl.attachTo(mainRecycler);
+
         mainRecycler.setAdapter(adapter);
-        mainRecycler.scrollToPosition(0);
+        LitePal.getDatabase(); //创建数据表
+
 
         adapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
-                LitePal.getDatabase(); //创建数据表
+
                 GamesEntity  entity = (GamesEntity) adapter.getItem(position);
 
                 if (entity.getV() != 0) {
@@ -315,6 +326,9 @@ public class MainActivity extends BaseActivity {
             }
         });
 
+
+
+
     }
 
     @Override
@@ -330,9 +344,7 @@ public class MainActivity extends BaseActivity {
 
 
 
-        mPushLayout.setFocusable(true);
-        mMovieLayout.setFocusable(false);
-        videoDetails.setFocusable(false);
+
         //mRecyclerLayout.setFocusable(true);
 
 
@@ -399,6 +411,8 @@ public class MainActivity extends BaseActivity {
 
 
 
+
+
         mPushLayout.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
@@ -430,12 +444,42 @@ public class MainActivity extends BaseActivity {
     }
 
 
+
+
     @Override
     protected void onResume() {
         super.onResume();
-
+        videoDetails.setFocusable(false);
+        videoDetails.setFocusableInTouchMode(false);
         loadData();
+
+        mainRecycler.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+
+
+
+            }
+        });
+
+        mPushLayout.setFocusable(false);
+        mPushLayout.setFocusableInTouchMode(false);
+        mLoginOut.setFocusable(false);
+        mLoginOut.setFocusableInTouchMode(false);
+        mMovieLayout.setFocusable(false);
+        mMovieLayout.setFocusableInTouchMode(false);
+
+        mainRecycler.setFocusable(true);
+        mainRecycler.setFocusableInTouchMode(true);
+
+        if(!refresh) {
+            mainRecycler.requestFocus();
+        }
+
+
     }
+
+
 
     private void loadData() {
 
@@ -456,8 +500,10 @@ public class MainActivity extends BaseActivity {
                     public void onNext(BaseCustomListResult<GamesEntity> result) {
 
 
-                        mMovieLayout.setFocusable(true);
                         IntoAllGame.setFocusable(true);
+                        mPushLayout.setFocusable(true);
+                        mLoginOut.setFocusable(true);
+                        mMovieLayout.setFocusable(true);
 
                         if(result.getErr() == 0 && result.getData().size() != 0){
 
@@ -559,7 +605,7 @@ public class MainActivity extends BaseActivity {
                                     }
 
 
-                                }else {
+                                } else {
 
                                     for(int i = 0 ; i < 3 ; i ++){
 
@@ -656,8 +702,14 @@ public class MainActivity extends BaseActivity {
                                 }
 
 
+                                if(!refresh){
+                                    refresh = true;
+                                    adapter.setNewData(gamesEntities);
+                                }
+                                //mainRecycler.smoothScrollToPosition(1);
 
-                                adapter.setNewData(gamesEntities);
+
+
 
                             }
                             else {
@@ -753,6 +805,8 @@ public class MainActivity extends BaseActivity {
 
                                         GamesEntity gamesEntity = adapter.getItem(positoin);
                                         gamesEntity.setDownGame(false);
+                                        entity.setInstallGame(true);
+                                        entity.setLocal(true);
                                         adapter.notifyItemChanged(positoin);
 
                                         Intent installAppIntent = DownloadAPk.getInstallAppIntent(mContext, path);
@@ -841,6 +895,8 @@ public class MainActivity extends BaseActivity {
                 }
 
                 break;
+
+
 
             default:
                 break;

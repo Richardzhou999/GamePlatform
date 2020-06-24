@@ -51,6 +51,7 @@
         android:roundIcon="@drawable/logo"
         android:theme="@style/AppTheme.NoActionBar"
         tools:replace="android:allowBackup">
+
         <activity android:name=".ui.LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

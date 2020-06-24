@@ -6,7 +6,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.MainActivity"
-
     android:orientation="horizontal">
 
     
@@ -70,6 +69,7 @@
 
 
 
+
         <TextView
             android:id="@+id/login_out"
             android:layout_width="wrap_content"
@@ -86,6 +86,8 @@
             android:layout_marginBottom="27dp"
             android:layout_centerHorizontal="true"
             android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:nextFocusRight="@id/rv_main"
             android:textSize="20sp"/>
 
 
@@ -129,6 +131,7 @@
                 android:layout_marginRight="15dp"
                 android:padding="3dp"
                 android:focusable="true"
+                android:focusableInTouchMode="true"
                 android:nextFocusDown="@id/into_game">
 
                 <ImageView
@@ -145,6 +148,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:focusable="true"
+                android:focusableInTouchMode="true"
                 android:padding="3dp"
                 android:nextFocusDown="@id/into_game">
 
@@ -153,7 +157,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="253dp"
                     android:src="@drawable/icon_movie"
-
                     />
 
                 <ImageView android:id="@+id/iv_first_frame"
@@ -189,11 +192,13 @@
 
 
 
-            <android.support.v7.widget.RecyclerView
+            <com.unis.gameplatfrom.ui.widget.SWRecyclerView
                 android:id="@+id/rv_main"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:clipToPadding="false"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
                 />
 
 
@@ -207,6 +212,9 @@
                 android:focusable="true"
                 android:focusableInTouchMode="true"
                 android:layout_alignParentRight="true"
+                android:nextFocusDown="@id/rv_main"
+                android:nextFocusLeft="@id/rv_main"
+                android:layout_marginTop="5dp"
 
                 />
 

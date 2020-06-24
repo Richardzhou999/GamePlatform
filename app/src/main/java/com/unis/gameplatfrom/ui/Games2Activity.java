@@ -601,42 +601,10 @@ public class Games2Activity extends BaseActivity {
         gameLayout.getBackground().setAlpha(30);
 
 
-//        toolbarLeft.setRotation(180);
-//        toolbarLeft.setText(toolbarLeft.ReversalByString("游戏大厅"));
-        //toolbarLeft.setText("游戏大厅");
-
-        //toolbarRight.setText(toolbarRight.ReversalByString("游戏"));
-
-
-
-//        toolbarLeft.setText(builder1.reverse().toString());
-//        toolbarRight.setText(builder.reverse().toString());
-
-//        if (UserCenter.getInstance().isLogin()) {
-//            rlayoutLogin.setVisibility(View.GONE);
-//        } else {
-//            rlayoutLogin.setVisibility(View.VISIBLE);
-//        }
-
-//        Intent intent = new Intent(this, DownloadService.class);
-//        startService(intent);
-//        bindService(intent, mConnection, BIND_AUTO_CREATE);//绑定服务
 
 
     }
 
-
-//    private ServiceConnection mConnection = new ServiceConnection() {
-//        @Override
-//        public void onServiceConnected(ComponentName name, IBinder service) {
-//            mDownloadBinder = (DownLoadApkService.DownloadBinder) service;
-//        }
-//
-//        @Override
-//        public void onServiceDisconnected(ComponentName name) {
-//            mDownloadBinder = null;
-//        }
-//    };
 
 
 
@@ -654,20 +622,6 @@ public class Games2Activity extends BaseActivity {
         loadData();
     }
 
-
-
-
-    @Override
-    protected void registEventBus() {
-
-       // EventBus.getDefault().register(this);
-    }
-
-    @Override
-    protected void unRegistEventBus() {
-
-       // EventBus.getDefault().unregister(this);
-    }
 
 
 

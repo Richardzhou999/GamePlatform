@@ -108,19 +108,20 @@ public class GamesAdapter extends BaseEmptyViewAdapter<GamesEntity> {
 
         TextView down = holder.getView(R.id.item_games_down);
         TextView install = holder.getView(R.id.item_games_install);
+        TextView newVersion = holder.getView(R.id.item_games_new_version);
 
         holder.setText(R.id.game_number,String.valueOf(holder.getAdapterPosition()+1));
 
 
         if(entity.isNewGame()){
             holder.setText(R.id.item_games_version, "版本："+(entity.getV()-1));
-            holder.setVisible(R.id.item_games_new_version,true);
+            newVersion.setVisibility(View.VISIBLE);
             holder.setText(R.id.item_games_new_version, "发现新版本："+entity.getV());
 
         }else {
             holder.setText(R.id.item_games_version, "版本："+entity.getV());
 
-            holder.setVisible(R.id.item_games_new_version,false);
+            newVersion.setVisibility(View.INVISIBLE);
         }
 
 

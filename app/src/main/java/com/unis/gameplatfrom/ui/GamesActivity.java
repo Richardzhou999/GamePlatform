@@ -1,70 +1,49 @@
 package com.unis.gameplatfrom.ui;
 
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
+import android.support.v7.widget.SimpleItemAnimator;
+import android.view.KeyEvent;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.blankj.utilcode.util.EncryptUtils;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 
-import com.scwang.smartrefresh.layout.SmartRefreshLayout;
-import com.scwang.smartrefresh.layout.api.RefreshLayout;
-import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
-import com.scwang.smartrefresh.layout.listener.OnRefreshLoadmoreListener;
 import com.trello.rxlifecycle2.android.ActivityEvent;
 
 
 import org.litepal.LitePal;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 
-import com.tsy.sdk.myokhttp.MyOkHttp;
-import com.tsy.sdk.myokhttp.download_mgr.DownloadTask;
-import com.tsy.sdk.myokhttp.download_mgr.DownloadTaskListener;
-import com.unis.gameplatfrom.Constant;
 import com.unis.gameplatfrom.R;
 import com.unis.gameplatfrom.adapter.GamesAdapter;
 import com.unis.gameplatfrom.adapter.GamesRightAdapter;
 import com.unis.gameplatfrom.api.HUDLoadDataSubscriber;
 import com.unis.gameplatfrom.api.PublicApiInterface;
 import com.unis.gameplatfrom.api.RetrofitWrapper;
-import com.unis.gameplatfrom.api.SimpleDataSubscriber;
 import com.unis.gameplatfrom.api.result.BaseCustomListResult;
 import com.unis.gameplatfrom.base.BaseActivity;
-import com.unis.gameplatfrom.base.BaseToolBarActivity;
 import com.unis.gameplatfrom.cache.UserCenter;
 import com.unis.gameplatfrom.model.GamesEntity;
-import com.unis.gameplatfrom.model.LoginResult;
-import com.unis.gameplatfrom.ui.view.CustomText;
 import com.unis.gameplatfrom.ui.widget.MetroViewBorderImpl;
 import com.unis.gameplatfrom.utils.DialogHelper;
-import com.unis.gameplatfrom.utils.DownloadMgr;
 import com.unis.gameplatfrom.utils.PackageUtil;
 import com.unis.gameplatfrom.utils.udateapk.DownLoadApkService;
 import com.unis.gameplatfrom.utils.udateapk.DownloadAPk;
@@ -74,14 +53,9 @@ import com.unis.gameplatfrom.utils.udateapk.LinPermission;
 
 import butterknife.BindView;
 import butterknife.OnClick;
-import io.reactivex.Observable;
-import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
-
-import static com.unis.gameplatfrom.utils.udateapk.DownloadAPk.APK_UPGRADE;
 
 
 /**
@@ -101,11 +75,10 @@ public class GamesActivity extends BaseActivity {
 
 
     @BindView(R.id.rv_games)
-    RecyclerView gamesRecyler;
+    RecyclerView gamesRecycler;
 
 
-    @BindView(R.id.activity_games)
-    RelativeLayout gameHeadLayout;
+
 
     @BindView(R.id.back)
     ImageView mGameBack;
@@ -151,6 +124,9 @@ public class GamesActivity extends BaseActivity {
 
     private List<Integer> progressList = new ArrayList<>();
 
+    private boolean refresh = false;
+    private LinearLayoutManager layoutManager;
+
     @Override
     protected int getLayout() {
         return R.layout.activity_games;
@@ -172,12 +148,19 @@ public class GamesActivity extends BaseActivity {
         //左边
         games = new ArrayList<>();
         adapter = new GamesAdapter(mContext,games);
-        gamesRecyler.setLayoutManager(new LinearLayoutManager(this));
-        mGameBack.setFocusable(false);
+        layoutManager = new LinearLayoutManager(this);
+        gamesRecycler.setLayoutManager(layoutManager);
+        gamesRecycler.getItemAnimator().setAddDuration(0);
+        gamesRecycler.getItemAnimator().setChangeDuration(0);
+        gamesRecycler.getItemAnimator().setMoveDuration(0);
+        gamesRecycler.getItemAnimator().setRemoveDuration(0);
+        ((SimpleItemAnimator) gamesRecycler.getItemAnimator()).setSupportsChangeAnimations(false);
         adapter.addFooterView(FooterView);
-        mMetroViewBorderImpl.attachTo(gamesRecyler);
-        gamesRecyler.setAdapter(adapter);
+        mMetroViewBorderImpl.attachTo(gamesRecycler);
+        gamesRecycler.setAdapter(adapter);
 
+
+        //layoutManager.setStackFromEnd(true);
 
         adapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
             @Override
@@ -214,10 +197,8 @@ public class GamesActivity extends BaseActivity {
 
 
                                     if(number > entity1.getV()){
+
                                         //String content = String.format("发现新版本:V%s\n%s", entity., result.getData().getUpdateContent());
-
-
-
 //                                        DialogHelper.showAlertDialog(mContext, "发现新版本", "立即更新", "暂不更新", new DialogInterface.OnClickListener() {
 //                                            @Override
 //                                            public void onClick(DialogInterface dialogInterface, int i) {
@@ -352,23 +333,7 @@ public class GamesActivity extends BaseActivity {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
-
-
 
 
     @OnClick({R.id.back})
@@ -377,21 +342,19 @@ public class GamesActivity extends BaseActivity {
         switch (view.getId()){
 
             case R.id.back:
-                startActivity(new Intent(GamesActivity.this,MainActivity.class));
-                finish();
+
+                if (!DownGame) {
+                    startActivity(new Intent(GamesActivity.this,MainActivity.class));
+                    finish();
+                } else {
+                    Toast.makeText(mContext, saveDownName + "  正在下载, 请勿退出", Toast.LENGTH_SHORT).show();
+                }
 
                 break;
            default:
                break;
 
-
-
-
-
-
         }
-
-
     }
 
 
@@ -431,84 +394,56 @@ public class GamesActivity extends BaseActivity {
             }
         });
 
-//        toolbarLeft.setRotation(180);
-//        toolbarLeft.setText(toolbarLeft.ReversalByString("游戏大厅"));
-        //toolbarLeft.setText("游戏大厅");
-
-        //toolbarRight.setText(toolbarRight.ReversalByString("游戏"));
-
-
-
-//        toolbarLeft.setText(builder1.reverse().toString());
-//        toolbarRight.setText(builder.reverse().toString());
-
-//        if (UserCenter.getInstance().isLogin()) {
-//            rlayoutLogin.setVisibility(View.GONE);
-//        } else {
-//            rlayoutLogin.setVisibility(View.VISIBLE);
-//        }
-
-//        Intent intent = new Intent(this, DownloadService.class);
-//        startService(intent);
-//        bindService(intent, mConnection, BIND_AUTO_CREATE);//绑定服务
-
 
     }
-
-
-//    private ServiceConnection mConnection = new ServiceConnection() {
-//        @Override
-//        public void onServiceConnected(ComponentName name, IBinder service) {
-//            mDownloadBinder = (DownLoadApkService.DownloadBinder) service;
-//        }
-//
-//        @Override
-//        public void onServiceDisconnected(ComponentName name) {
-//            mDownloadBinder = null;
-//        }
-//    };
-
-
 
 
 
     @Override
     protected void onStart() {
         super.onStart();
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
+        mGameBack.setFocusable(false);
+        mGameBack.setFocusableInTouchMode(false);
         loadData();
+//        gameLayout.setFocusable(false);
+//        gameLayout.setFocusableInTouchMode(false);
+
+        gamesRecycler.setFocusable(true);
+        gamesRecycler.setFocusableInTouchMode(true);
+        if(!refresh)
+        gamesRecycler.requestFocus();
+
+
+
     }
 
 
-
-
+    //防止下载游戏中退出
     @Override
-    protected void registEventBus() {
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
 
-       // EventBus.getDefault().register(this);
+            if (keyCode == KeyEvent.KEYCODE_BACK) {
+                if (!DownGame) {
+                    finish();
+                } else {
+                    Toast.makeText(mContext, saveDownName + "  正在下载, 请勿退出", Toast.LENGTH_SHORT).show();
+                }
+                return true;//不执行父类点击事件
+            }
+            return super.onKeyDown(keyCode, event);//继续执行父类其他点击事件
     }
-
-    @Override
-    protected void unRegistEventBus() {
-
-       // EventBus.getDefault().unregister(this);
-    }
-
-
 
     private void loadData() {
 
         if(getGames.size() != 0 ){
             getGames.clear();
         }
-
-
-
 
         RetrofitWrapper.getInstance().create(PublicApiInterface.class)
                 .getGameList(UserCenter.getInstance().getToken())
@@ -520,6 +455,7 @@ public class GamesActivity extends BaseActivity {
                     public void onNext(BaseCustomListResult<GamesEntity> result) {
 
                         mGameBack.setFocusable(true);
+                        mGameBack.setFocusableInTouchMode(true);
 
                         if(result.getErr() == 0){
 
@@ -613,8 +549,11 @@ public class GamesActivity extends BaseActivity {
 
                                 }
 
-                                adapter.setNewData(getGames);
+                                if(!refresh){
 
+                                    refresh = true;
+                                    adapter.setNewData(getGames);
+                                }
 
                                 FooterView.setVisibility(View.GONE);
 
@@ -780,11 +719,6 @@ public class GamesActivity extends BaseActivity {
 
                                 }
                             });
-
-
-
-
-
 
                 }
 

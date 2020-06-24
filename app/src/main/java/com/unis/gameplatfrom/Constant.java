@@ -22,6 +22,6 @@ public class Constant {
     /**
      * 测试版
      */
-    public static String DEBUG = "1.6.4-020617-beta";
+    public static String DEBUG = "1.6.5-020622-beta";
 
 }

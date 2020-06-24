@@ -11,6 +11,10 @@
     android:paddingBottom="13dp"
     android:layout_marginTop="5dp"
     android:focusable="true"
+    android:focusableInTouchMode="true"
+    android:nextFocusUp="@id/into_game"
+    android:nextFocusRight="@id/into_game"
+
     android:id="@+id/game_item_layout">
 
 
@@ -101,7 +105,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/item_games_version"
-        android:layout_toRightOf="@id/item_games_name"
+        android:layout_toRightOf="@id/item_games_new_version"
         android:layout_marginLeft="23dp"
         android:visibility="gone">
 

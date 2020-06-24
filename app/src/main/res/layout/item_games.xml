@@ -7,10 +7,12 @@
     android:gravity="center_vertical"
     xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/game_item"
+    android:paddingTop="10dp"
     android:paddingBottom="@dimen/dp_10"
     android:layout_marginTop="5dp"
     android:id="@+id/game_item_layout"
     android:focusable="true"
+    android:clipChildren="false"
     android:focusableInTouchMode="true">
 
 
@@ -103,7 +105,7 @@
         android:layout_alignTop="@id/item_games_version"
         android:layout_toRightOf="@id/item_games_new_version"
         android:layout_marginLeft="23dp"
-        android:visibility="visible">
+        android:visibility="gone">
 
         <TextView
             android:id="@+id/item_progress_text"
