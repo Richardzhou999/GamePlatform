@@ -187,27 +187,39 @@ public class UserCenter {
 
     public void save_uuid(Context context, String uuid){
 
+
         String filePath = null;
+
         FileOutputStream outStream = null;
         boolean hasSDCard =Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
 
         if (hasSDCard) {
 
-            filePath = Environment.getExternalStorageDirectory() + "/UNIS_GameData/gameUid.txt";
+            filePath = Environment.getExternalStorageDirectory() + "/UNIS_GameData";
+
 
         } else {
 
-            filePath = Environment.getDownloadCacheDirectory() + "/UNIS_GameData/gameUid.txt";
+            filePath = Environment.getDownloadCacheDirectory() + "/UNIS_GameData";
+
         }
+
+
 
 
 
         try {
 
-            File uidFile = new File(filePath);
-            if(!uidFile.exists()){
-                uidFile.mkdirs();
+            File uidFiles = new File(filePath);
+            if(!uidFiles.exists()){
+                uidFiles.mkdirs();
             }
+
+            File uidFile = new File(filePath,"gameUid.txt");
+            if (!uidFile.exists()){
+                uidFile.createNewFile();//创建文件TXT
+            }
+
             outStream = new FileOutputStream(uidFile);
 
             outStream.write(uuid.getBytes());

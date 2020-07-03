@@ -3,17 +3,21 @@ package com.unis.gameplatfrom.ui;
 import android.animation.Animator;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.icu.lang.UCharacter;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SimpleItemAnimator;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,6 +38,9 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.request.RequestOptions;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.trello.rxlifecycle2.android.ActivityEvent;
+import com.tsy.sdk.myokhttp.MyOkHttp;
+import com.tsy.sdk.myokhttp.download_mgr.DownloadTask;
+import com.tsy.sdk.myokhttp.download_mgr.DownloadTaskListener;
 import com.unis.gameplatfrom.BuildConfig;
 import com.unis.gameplatfrom.Constant;
 import com.unis.gameplatfrom.R;
@@ -44,6 +51,8 @@ import com.unis.gameplatfrom.api.PublicApiInterface;
 import com.unis.gameplatfrom.api.RetrofitWrapper;
 import com.unis.gameplatfrom.api.result.BaseCustomListResult;
 import com.unis.gameplatfrom.base.BaseActivity;
+import com.unis.gameplatfrom.cache.InnerReceiver;
+import com.unis.gameplatfrom.cache.NetConnectionReceiver;
 import com.unis.gameplatfrom.cache.UserCenter;
 import com.unis.gameplatfrom.model.GamesEntity;
 import com.unis.gameplatfrom.model.LoginResult;
@@ -52,6 +61,7 @@ import com.unis.gameplatfrom.ui.widget.MetroViewBorderHandler;
 import com.unis.gameplatfrom.ui.widget.MetroViewBorderImpl;
 import com.unis.gameplatfrom.ui.widget.SWRecyclerView;
 import com.unis.gameplatfrom.utils.DialogHelper;
+import com.unis.gameplatfrom.utils.DownloadMgr;
 import com.unis.gameplatfrom.utils.PackageUtil;
 import com.unis.gameplatfrom.utils.TimeUtil;
 import com.unis.gameplatfrom.utils.udateapk.DownloadAPk;
@@ -59,6 +69,7 @@ import com.unis.gameplatfrom.utils.udateapk.LinPermission;
 
 import org.litepal.LitePal;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -151,9 +162,32 @@ public class MainActivity extends BaseActivity {
     private boolean movie;
     private boolean fristplay;
 
+    private MyOkHttp myOkHttp;
+    private DownloadMgr mDownloadMgr;
+    private DownloadTask mDownloadTask;
+    private DownloadTaskListener mDownloadTaskListener;
 
 
     private boolean refresh = false;
+
+    private boolean mReceiverTag = false;   //广播接受者标识
+
+    private String saveDownName = "";
+
+    private  InnerReceiver innerReceiver;
+
+    private Handler handler = new Handler() {
+
+        @Override
+        public void handleMessage(Message msg) {
+
+            SimpleDateFormat TimeFormat = new SimpleDateFormat("HH:mm");// HH:mm:ss
+            //获取当前时间
+            Date date1 = new Date(System.currentTimeMillis());
+            nowTimeText.setText(TimeFormat.format(date1));
+
+        }
+    };
 
 
     @Override
@@ -169,10 +203,27 @@ public class MainActivity extends BaseActivity {
 
         adapter = new MainAdapter(mContext,gamesEntities);
         mainRecycler.setLayoutManager(new LinearLayoutManager(this));
+        mainRecycler.getItemAnimator().setAddDuration(0);
+        mainRecycler.getItemAnimator().setChangeDuration(0);
+        mainRecycler.getItemAnimator().setMoveDuration(0);
+        mainRecycler.getItemAnimator().setRemoveDuration(0);
+        ((SimpleItemAnimator) mainRecycler.getItemAnimator()).setSupportsChangeAnimations(false);
         mMetroViewBorderImpl.attachTo(mainRecycler);
 
         mainRecycler.setAdapter(adapter);
         LitePal.getDatabase(); //创建数据表
+
+        myOkHttp = new MyOkHttp();
+        mDownloadMgr = (DownloadMgr) new DownloadMgr.Builder()
+                .myOkHttp(myOkHttp)
+                .maxDownloadIngNum(5)       //设置最大同时下载数量（不设置默认5）
+                .saveProgressBytes(50 * 1024)  //设置每50kb触发一次saveProgress保存进度 （不能在onProgress每次都保存 过于频繁） 不设置默认50kb
+                .build();
+
+
+        innerReceiver = new InnerReceiver(mDownloadMgr);
+        IntentFilter filter = new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+        registerReceiver(innerReceiver, filter);
 
 
         adapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
@@ -239,7 +290,7 @@ public class MainActivity extends BaseActivity {
 
                                 }else {
 
-                                    PackageUtil.startAppByPackageID(mContext,entity.getPackname());
+                                    PackageUtil.startAppByPackageID(mContext,entity.getPackname(),mDownloadMgr);
 
                                 }
 
@@ -286,7 +337,7 @@ public class MainActivity extends BaseActivity {
 
                                 entity.setAccount(game_account);
                                 entity.save();
-                                PackageUtil.startAppByPackageID(mContext,entity.getPackname());
+                                PackageUtil.startAppByPackageID(mContext,entity.getPackname(),mDownloadMgr);
 
                             }else {
 
@@ -357,6 +408,7 @@ public class MainActivity extends BaseActivity {
         }else {
 
             versionText.setText("版本号： V"+PackageUtil.getVersionName(mContext));
+
         }
 
         //
@@ -371,9 +423,10 @@ public class MainActivity extends BaseActivity {
         //获取当前时间
         Date date1 = new Date(System.currentTimeMillis());
 
-
         monthWeekText.setText(TimeUtil.StringData());
         nowTimeText.setText(TimeFormat.format(date1));
+
+        new TimeThread().start();
 
 
         //设置有进度条可以拖动快进
@@ -457,8 +510,6 @@ public class MainActivity extends BaseActivity {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
 
-
-
             }
         });
 
@@ -468,7 +519,6 @@ public class MainActivity extends BaseActivity {
         mLoginOut.setFocusableInTouchMode(false);
         mMovieLayout.setFocusable(false);
         mMovieLayout.setFocusableInTouchMode(false);
-
         mainRecycler.setFocusable(true);
         mainRecycler.setFocusableInTouchMode(true);
 
@@ -480,6 +530,14 @@ public class MainActivity extends BaseActivity {
     }
 
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        unregisterReceiver(innerReceiver);
+
+
+    }
 
     private void loadData() {
 
@@ -508,7 +566,6 @@ public class MainActivity extends BaseActivity {
                         if(result.getErr() == 0 && result.getData().size() != 0){
 
                             if (LinPermission.checkPermission(MainActivity.this, new int[]{7,8})) {
-
 
                                 if(result.getData().size() < 3){
 
@@ -687,24 +744,21 @@ public class MainActivity extends BaseActivity {
                                                     gamesEntities.add(entity);
 
                                                 }
-
-
-
                                             }
-
                                         }
-
-
-
                                     }
-
-
                                 }
 
 
                                 if(!refresh){
                                     refresh = true;
                                     adapter.setNewData(gamesEntities);
+                                }else {
+
+                                    if(mDownloadMgr != null){
+                                        mDownloadMgr.startAllTask();//开始所有下载任务
+                                    }
+
                                 }
                                 //mainRecycler.smoothScrollToPosition(1);
 
@@ -726,6 +780,7 @@ public class MainActivity extends BaseActivity {
                         }else {
 
                             Toast.makeText(mContext,result.getMsg(),Toast.LENGTH_SHORT).show();
+                            finish();
 
                         }
                     }
@@ -761,63 +816,92 @@ public class MainActivity extends BaseActivity {
 
             } else {
 
+                final NetConnectionReceiver[] netConnectionReceiver = new NetConnectionReceiver[1];
 
                 progressList.add(positoin);
 
-                DownloadAPk.downApk(MainActivity.this, filepath, path, iconUrl,
-                        new DownloadAPk.GameProgressListener() {
-                            @Override
-                            public void getProgress(int progress) {
+                //显示activity时加入监听
+                mDownloadTaskListener = new DownloadTaskListener() {
+                    @Override
+                    public void onStart(String taskId, long completeBytes, long totalBytes) {
+                        mDownloadTask = mDownloadMgr.getDownloadTask(taskId);
+                        DownGame = true;
+                        saveDownName = entity.getName();
+                        netConnectionReceiver[0] = new NetConnectionReceiver(mDownloadMgr);
+                        RegisterReceiver(netConnectionReceiver[0]);
+                    }
 
-                                DownGame = true;
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
+                    @Override
+                    public void onProgress(String taskId, long currentBytes, long totalBytes) {
+                        mDownloadTask = mDownloadMgr.getDownloadTask(taskId);
 
-                                        for (int positoin : progressList) {
+//                                  runOnUiThread(new Runnable() {
+//                                      @Override
+//                                      public void run() {
 
-                                            GamesEntity gamesEntity = adapter.getItem(positoin);
-                                            gamesEntity.setProgress(progress);
-                                            gamesEntity.setDownGame(true);
+                        for (int positoin : progressList) {
+                            //ps:建议不要每次刷新 可以通过handler postDelay延时刷新 防止刷新频率过快
+                            int progress = (int) (((float) currentBytes / totalBytes) * 100);
+                            GamesEntity gamesEntity = adapter.getItem(positoin);
+                             gamesEntity.setProgress(progress);
+                            gamesEntity.setDownGame(true);
+                            gamesEntity.setInstallGame(false);
+                            gamesEntity.setLocal(false);
+                            adapter.notifyItemChanged(positoin);
+                        }
+//                                      }
+//                                  });
+                    }
 
-                                            adapter.notifyItemChanged(positoin);
+                    @Override
+                    public void onPause(String taskId, long currentBytes, long totalBytes) {
+                        mDownloadTask = mDownloadMgr.getDownloadTask(taskId);
+                    }
 
-                                        }
-
-
-                                    }
-                                });
-
-
-                            }
-
-                            @Override
-                            public void endDown() {
-
-                                DownGame = false;
-                                if (progressList.size() != 0) {
-                                    progressList.clear();
-                                }
-
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-
-                                        GamesEntity gamesEntity = adapter.getItem(positoin);
-                                        gamesEntity.setDownGame(false);
-                                        entity.setInstallGame(true);
-                                        entity.setLocal(true);
-                                        adapter.notifyItemChanged(positoin);
-
-                                        Intent installAppIntent = DownloadAPk.getInstallAppIntent(mContext, path);
-                                        startActivity(installAppIntent);
-
-                                    }
-                                });
+                    @Override
+                    public void onFinish(String taskId, File file) {
+                        mDownloadTask = mDownloadMgr.getDownloadTask(taskId);
+                        DownGame = false;
+                        mDownloadMgr.removeListener(mDownloadTaskListener);
+                        if (progressList.size() != 0) {
+                            progressList.clear();
+                        }
 
 
-                            }
-                        });
+//                                    runOnUiThread(new Runnable() {
+//                                        @Override
+//                                        public void run() {
+
+                        unregisterReceiver(netConnectionReceiver[0]);
+                        GamesEntity gamesEntity = adapter.getItem(positoin);
+                        gamesEntity.setDownGame(false);
+                        gamesEntity.setInstallGame(true);
+                        gamesEntity.setLocal(true);
+                        adapter.notifyItemChanged(positoin);
+
+                        Intent installAppIntent = DownloadAPk.getInstallAppIntent(mContext, path);
+                        startActivity(installAppIntent);
+
+//                                        }
+//                                    });
+                    }
+
+                    @Override
+                    public void onFailure(String taskId, String error_msg) {
+                        mDownloadTask = mDownloadMgr.getDownloadTask(taskId);
+                    }
+                };
+
+                mDownloadMgr.addListener(mDownloadTaskListener);
+
+
+                DownloadMgr.Task task = new DownloadMgr.Task();
+                task.setTaskId(mDownloadMgr.genTaskId()+entity.getName());       //生成一个taskId
+                task.setUrl(entity.getP());   //下载地址
+                task.setFilePath(path);    //下载后文件保存位置
+                task.setDefaultStatus(DownloadMgr.DEFAULT_TASK_STATUS_START);       //任务添加后开始状态 如果不设置 默认任务添加后就自动开始
+
+                mDownloadTask = mDownloadMgr.addTask(task);
 
             }
 
@@ -849,18 +933,34 @@ public class MainActivity extends BaseActivity {
 
             case R.id.into_game:
 
-                if (LinPermission.checkPermission(MainActivity.this, new int[]{7,8})) {
-                    Intent intent = new Intent(MainActivity.this,GamesActivity.class);
-                    startActivity(intent);
-                    finish();
+                if (!DownGame) {
+                    if (LinPermission.checkPermission(MainActivity.this, new int[]{7,8})) {
+                        Intent intent = new Intent(MainActivity.this,GamesActivity.class);
+                        startActivity(intent);
+                        finish();
+                    }
+
+                } else {
+
+                    Toast.makeText(mContext, saveDownName + "  正在下载, 请勿退出", Toast.LENGTH_SHORT).show();
                 }
+
 
                 break;
 
             case R.id.login_out:
-                Intent intent = new Intent(MainActivity.this,LoginActivity.class);
-                startActivity(intent);
-                finish();
+
+                if (!DownGame) {
+                    Intent intent = new Intent(MainActivity.this,LoginActivity.class);
+                    startActivity(intent);
+                    finish();
+
+                } else {
+
+                    Toast.makeText(mContext, saveDownName + "  正在下载, 请勿退出", Toast.LENGTH_SHORT).show();
+                }
+
+
 
                 break;
 
@@ -934,6 +1034,50 @@ public class MainActivity extends BaseActivity {
 
         return  media.getFrameAtTime();
 
+    }
+
+
+    //态注册广播
+    private void RegisterReceiver(NetConnectionReceiver mReceiver) {
+        if (!mReceiverTag){     //在注册广播接受者的时候 判断是否已被注册,避免重复多次注册广播
+            IntentFilter mFileter = new IntentFilter();
+            mReceiverTag = true;    //标识值 赋值为 true 表示广播已被注册
+            mFileter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
+            this.registerReceiver(mReceiver, mFileter);
+        }
+    }
+
+    //注销广播
+    private void unregisterReceiver(NetConnectionReceiver mReceiver) {
+        if (mReceiverTag) {   //判断广播是否注册
+            mReceiverTag = false;   //Tag值 赋值为false 表示该广播已被注销
+            this.unregisterReceiver(mReceiver);   //注销广播
+        }
+
+    }
+
+
+    /**
+     * 开启一个线程，每个一秒钟更新时间
+     */
+    public class TimeThread extends Thread {
+        //重写run方法
+        @Override
+        public void run() {
+            super.run();
+
+            do {
+                try {
+                    //每隔一秒 发送一次消息
+                    Thread.sleep(1000*60);
+                    Message msg = handler.obtainMessage();
+                    //发送
+                    handler.sendMessage(msg);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            } while (true);
+        }
     }
 
 

@@ -84,7 +84,10 @@
             </intent-filter>
         </receiver>
 
+
+
         <activity android:name=".ui.MainActivity"></activity>
+        <activity android:name=".ui.Games2Activity"></activity>
         <activity android:name=".ui.GamesListActivity"></activity>
 
     </application>

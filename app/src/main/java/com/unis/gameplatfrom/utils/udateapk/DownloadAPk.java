@@ -166,8 +166,6 @@ public class DownloadAPk {
                     long sum = 0;
                     while ((len = is.read(buf)) != -1) {
 
-
-
                         fos.write(buf, 0, len);
                         sum += len;
                         int progress = (int) (sum * 1.0f / total * 100);

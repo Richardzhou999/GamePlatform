@@ -3,10 +3,12 @@ package com.unis.gameplatfrom.ui;
 import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -28,10 +30,14 @@ import com.trello.rxlifecycle2.android.ActivityEvent;
 
 import org.litepal.LitePal;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 
+import com.tsy.sdk.myokhttp.MyOkHttp;
+import com.tsy.sdk.myokhttp.download_mgr.DownloadTask;
+import com.tsy.sdk.myokhttp.download_mgr.DownloadTaskListener;
 import com.unis.gameplatfrom.R;
 import com.unis.gameplatfrom.adapter.GamesAdapter;
 import com.unis.gameplatfrom.adapter.GamesRightAdapter;
@@ -40,10 +46,13 @@ import com.unis.gameplatfrom.api.PublicApiInterface;
 import com.unis.gameplatfrom.api.RetrofitWrapper;
 import com.unis.gameplatfrom.api.result.BaseCustomListResult;
 import com.unis.gameplatfrom.base.BaseActivity;
+import com.unis.gameplatfrom.cache.InnerReceiver;
+import com.unis.gameplatfrom.cache.NetConnectionReceiver;
 import com.unis.gameplatfrom.cache.UserCenter;
 import com.unis.gameplatfrom.model.GamesEntity;
 import com.unis.gameplatfrom.ui.widget.MetroViewBorderImpl;
 import com.unis.gameplatfrom.utils.DialogHelper;
+import com.unis.gameplatfrom.utils.DownloadMgr;
 import com.unis.gameplatfrom.utils.PackageUtil;
 import com.unis.gameplatfrom.utils.udateapk.DownLoadApkService;
 import com.unis.gameplatfrom.utils.udateapk.DownloadAPk;
@@ -101,8 +110,6 @@ public class GamesActivity extends BaseActivity {
 
     private ProgressBar mProgressBar;
 
-    private DownLoadApkService.DownloadBinder mDownloadBinder;
-    private Disposable mDisposable;//可以取消观察者
 
     private String BaseUrl = "http://s.health.shiyugame.com";
 
@@ -126,6 +133,16 @@ public class GamesActivity extends BaseActivity {
 
     private boolean refresh = false;
     private LinearLayoutManager layoutManager;
+
+    private MyOkHttp myOkHttp;
+    private DownloadMgr mDownloadMgr;
+    private DownloadTask mDownloadTask;
+    private DownloadTaskListener mDownloadTaskListener;
+
+    private boolean mReceiverTag = false;   //广播接受者标识
+
+    private  InnerReceiver innerReceiver;
+
 
     @Override
     protected int getLayout() {
@@ -158,6 +175,19 @@ public class GamesActivity extends BaseActivity {
         adapter.addFooterView(FooterView);
         mMetroViewBorderImpl.attachTo(gamesRecycler);
         gamesRecycler.setAdapter(adapter);
+        LitePal.getDatabase(); //创建数据表
+
+        myOkHttp = new MyOkHttp();
+        mDownloadMgr = (DownloadMgr) new DownloadMgr.Builder()
+                .myOkHttp(myOkHttp)
+                .maxDownloadIngNum(5)       //设置最大同时下载数量（不设置默认5）
+                .saveProgressBytes(50 * 1024)  //设置每50kb触发一次saveProgress保存进度 （不能在onProgress每次都保存 过于频繁） 不设置默认50kb
+                .build();
+
+        innerReceiver = new InnerReceiver(mDownloadMgr);
+        IntentFilter filter = new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+        registerReceiver(innerReceiver, filter);
+
 
 
         //layoutManager.setStackFromEnd(true);
@@ -165,8 +195,6 @@ public class GamesActivity extends BaseActivity {
         adapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
-                LitePal.getDatabase(); //创建数据表
-
 
                 GamesEntity entity = (GamesEntity) adapter.getItem(position);
 
@@ -194,7 +222,6 @@ public class GamesActivity extends BaseActivity {
 
                                     System.out.print(entity.getV()+"");
                                     int number = entity.getV();
-
 
                                     if(number > entity1.getV()){
 
@@ -246,6 +273,7 @@ public class GamesActivity extends BaseActivity {
                                         //entity.setDownGame(true);
                                         downApk(entity.getName(), entity.getP(), entity.getIcon(),
                                                 entity,position);
+
 
 
 //                                    DialogHelper.showAlertDialog(mContext,"确定要下载吗", "确定", "取消", new DialogInterface.OnClickListener() {
@@ -403,6 +431,8 @@ public class GamesActivity extends BaseActivity {
     protected void onStart() {
         super.onStart();
 
+
+
     }
 
     @Override
@@ -423,6 +453,14 @@ public class GamesActivity extends BaseActivity {
 
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        unregisterReceiver(innerReceiver);
+
+
+    }
 
     //防止下载游戏中退出
     @Override
@@ -453,7 +491,6 @@ public class GamesActivity extends BaseActivity {
                 .subscribe(new HUDLoadDataSubscriber<BaseCustomListResult<GamesEntity>>(mContext) {
                     @Override
                     public void onNext(BaseCustomListResult<GamesEntity> result) {
-
                         mGameBack.setFocusable(true);
                         mGameBack.setFocusableInTouchMode(true);
 
@@ -469,7 +506,7 @@ public class GamesActivity extends BaseActivity {
                                     if( entity1 != null ){
                                         // entity.setV(entity.getV()+1);
 
-                                        if(isAppByPackageID(entity.getPackname())){
+                                        if(PackageUtil.isAppByPackageID(mContext,entity.getPackname())){
 
 
 
@@ -487,6 +524,7 @@ public class GamesActivity extends BaseActivity {
                                                 getGames.add(entity);
 
                                             }
+
 
                                         }else {
 
@@ -512,8 +550,9 @@ public class GamesActivity extends BaseActivity {
 
                                     }else {
 
-                                        if(isAppByPackageID(entity.getPackname())){
+                                        boolean appby = PackageUtil.isAppByPackageID(mContext,entity.getPackname());
 
+                                        if(appby){
 
                                             entity.setLocal(true);
                                             entity.setNewGame(false);
@@ -547,12 +586,21 @@ public class GamesActivity extends BaseActivity {
 
 
 
+
+
+
                                 }
 
                                 if(!refresh){
 
                                     refresh = true;
                                     adapter.setNewData(getGames);
+                                }else {
+
+                                    if(mDownloadMgr != null){
+                                        mDownloadMgr.startAllTask();//开始所有下载任务
+                                    }
+
                                 }
 
                                 FooterView.setVisibility(View.GONE);
@@ -597,12 +645,14 @@ public class GamesActivity extends BaseActivity {
             Toast.makeText(GamesActivity.this, "没有找到应用", Toast.LENGTH_SHORT).show();
             return false;
         }
+
         Intent resolveIntent = new Intent(Intent.ACTION_MAIN, null);
         resolveIntent.addCategory(Intent.CATEGORY_LAUNCHER);
         resolveIntent.setPackage(packageInfo.packageName);
         List<ResolveInfo> apps = packageManager.queryIntentActivities(resolveIntent, 0);
         ResolveInfo ri = apps.iterator().next();
-        if (ri != null) {
+        if (ri != null && mDownloadMgr != null) {
+            mDownloadMgr.pauseAllTask();//暂停所有下载任务
             String className = ri.activityInfo.name;
             Intent intent = new Intent(Intent.ACTION_MAIN);
             intent.addCategory(Intent.CATEGORY_LAUNCHER);
@@ -654,71 +704,162 @@ public class GamesActivity extends BaseActivity {
             if(!entity.isDownGame() && !DownGame) {
 
                 if (PackageUtil.isAppByLocal(filepath)) {
+                    if(mDownloadMgr !=  null){
+                        mDownloadMgr.pauseAllTask();//暂停所有下载任务
+                        entity.setDownGame(false);
+                        Intent installAppIntent = DownloadAPk.getInstallAppIntent(mContext, path);
+                        startActivity(installAppIntent);
 
-                    entity.setDownGame(false);
-                    Intent installAppIntent = DownloadAPk.getInstallAppIntent(mContext, path);
-                    startActivity(installAppIntent);
-
+                    }
 
                 } else {
 
 
+                    final NetConnectionReceiver[] netConnectionReceiver = new NetConnectionReceiver[1];
+
+
                     progressList.add(positoin);
 
-                    DownloadAPk.downApk(GamesActivity.this, filepath, path, iconUrl,
-                            new DownloadAPk.GameProgressListener() {
-                                @Override
-                                public void getProgress(int progress) {
 
-                                    DownGame = true;
-                                    saveDownName = entity.getName();
-                                    runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
+                    //显示activity时加入监听
+                    mDownloadTaskListener = new DownloadTaskListener() {
+                        @Override
+                        public void onStart(String taskId, long completeBytes, long totalBytes) {
+                            mDownloadTask = mDownloadMgr.getDownloadTask(taskId);
+                            DownGame = true;
+                            saveDownName = entity.getName();
+                            netConnectionReceiver[0] = new NetConnectionReceiver(mDownloadMgr);
+                            RegisterReceiver(netConnectionReceiver[0]);
+                        }
 
-                                            for (int positoin : progressList) {
+                        @Override
+                        public void onProgress(String taskId, long currentBytes, long totalBytes) {
+                            mDownloadTask = mDownloadMgr.getDownloadTask(taskId);
 
-                                                GamesEntity gamesEntity = adapter.getItem(positoin);
-                                                gamesEntity.setProgress(progress);
-                                                gamesEntity.setDownGame(true);
+//                                  runOnUiThread(new Runnable() {
+//                                      @Override
+//                                      public void run() {
 
-                                                //adapter.notifyItemChanged(positoin,positoin);
-                                                adapter.notifyItemChanged(positoin);
+                                          for (int positoin : progressList) {
+                                              //ps:建议不要每次刷新 可以通过handler postDelay延时刷新 防止刷新频率过快
+                                              int progress = (int) (((float) currentBytes / totalBytes) * 100);
+                                              GamesEntity gamesEntity = adapter.getItem(positoin);
+                                              gamesEntity.setProgress(progress);
+                                              gamesEntity.setDownGame(true);
+                                              gamesEntity.setInstallGame(false);
+                                              gamesEntity.setLocal(false);
+                                              adapter.notifyItemChanged(positoin);
+                                          }
+//                                      }
+//                                  });
+                        }
 
-                                            }
+                        @Override
+                        public void onPause(String taskId, long currentBytes, long totalBytes) {
+                            mDownloadTask = mDownloadMgr.getDownloadTask(taskId);
+                        }
 
-
-                                        }
-                                    });
-
-
-                                }
-
-                                @Override
-                                public void endDown() {
-
-                                    DownGame = false;
-                                    if (progressList.size() != 0) {
+                        @Override
+                        public void onFinish(String taskId, File file) {
+                            mDownloadTask = mDownloadMgr.getDownloadTask(taskId);
+                            DownGame = false;
+                            mDownloadMgr.removeListener(mDownloadTaskListener);
+                            if (progressList.size() != 0) {
                                         progressList.clear();
                                     }
 
-                                    runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
 
+//                                    runOnUiThread(new Runnable() {
+//                                        @Override
+//                                        public void run() {
+
+                                            unregisterReceiver(netConnectionReceiver[0]);
                                             GamesEntity gamesEntity = adapter.getItem(positoin);
                                             gamesEntity.setDownGame(false);
+                                            gamesEntity.setInstallGame(true);
+                                            gamesEntity.setLocal(true);
                                             adapter.notifyItemChanged(positoin);
 
                                             Intent installAppIntent = DownloadAPk.getInstallAppIntent(mContext, path);
                                             startActivity(installAppIntent);
 
-                                        }
-                                    });
+//                                        }
+//                                    });
+                        }
+
+                        @Override
+                        public void onFailure(String taskId, String error_msg) {
+                            mDownloadTask = mDownloadMgr.getDownloadTask(taskId);
+                        }
+                    };
+
+                    mDownloadMgr.addListener(mDownloadTaskListener);
 
 
-                                }
-                            });
+                    DownloadMgr.Task task = new DownloadMgr.Task();
+                    task.setTaskId(mDownloadMgr.genTaskId()+entity.getName());       //生成一个taskId
+                    task.setUrl(entity.getP());   //下载地址
+                    task.setFilePath(path);    //下载后文件保存位置
+                    task.setDefaultStatus(DownloadMgr.DEFAULT_TASK_STATUS_START);       //任务添加后开始状态 如果不设置 默认任务添加后就自动开始
+
+                    mDownloadTask = mDownloadMgr.addTask(task);
+
+
+
+//                    DownloadAPk.downApk(GamesActivity.this, filepath, path, iconUrl,
+//                            new DownloadAPk.GameProgressListener() {
+//                                @Override
+//                                public void getProgress(int progress) {
+//
+//                                    DownGame = true;
+//                                    saveDownName = entity.getName();
+//                                    runOnUiThread(new Runnable() {
+//                                        @Override
+//                                        public void run() {
+//
+//                                            for (int positoin : progressList) {
+//
+//                                                GamesEntity gamesEntity = adapter.getItem(positoin);
+//                                                gamesEntity.setProgress(progress);
+//                                                gamesEntity.setDownGame(true);
+//
+//                                                //adapter.notifyItemChanged(positoin,positoin);
+//                                                adapter.notifyItemChanged(positoin);
+//
+//                                            }
+//
+//
+//                                        }
+//                                    });
+//
+//
+//                                }
+//
+//                                @Override
+//                                public void endDown() {
+//
+//                                    DownGame = false;
+//                                    if (progressList.size() != 0) {
+//                                        progressList.clear();
+//                                    }
+//
+//                                    runOnUiThread(new Runnable() {
+//                                        @Override
+//                                        public void run() {
+//
+//                                            GamesEntity gamesEntity = adapter.getItem(positoin);
+//                                            gamesEntity.setDownGame(false);
+//                                            adapter.notifyItemChanged(positoin);
+//
+//                                            Intent installAppIntent = DownloadAPk.getInstallAppIntent(mContext, path);
+//                                            startActivity(installAppIntent);
+//
+//                                        }
+//                                    });
+//
+//
+//                                }
+//                            });
 
                 }
 
@@ -739,6 +880,26 @@ public class GamesActivity extends BaseActivity {
 
 
     }
+
+    //态注册广播
+    private void RegisterReceiver(NetConnectionReceiver mReceiver) {
+        if (!mReceiverTag){     //在注册广播接受者的时候 判断是否已被注册,避免重复多次注册广播
+            IntentFilter mFileter = new IntentFilter();
+            mReceiverTag = true;    //标识值 赋值为 true 表示广播已被注册
+            mFileter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
+            this.registerReceiver(mReceiver, mFileter);
+        }
+    }
+
+    //注销广播
+    private void unregisterReceiver(NetConnectionReceiver mReceiver) {
+        if (mReceiverTag) {   //判断广播是否注册
+            mReceiverTag = false;   //Tag值 赋值为false 表示该广播已被注销
+            this.unregisterReceiver(mReceiver);   //注销广播
+        }
+
+    }
+
 
 
 

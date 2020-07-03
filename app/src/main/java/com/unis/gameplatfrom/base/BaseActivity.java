@@ -23,6 +23,7 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.unis.gameplatfrom.AppManager;
 import com.unis.gameplatfrom.R;
+import com.unis.gameplatfrom.cache.InnerReceiver;
 import com.unis.gameplatfrom.utils.StatusBarUtil;
 
 
@@ -78,6 +79,10 @@ public abstract class BaseActivity extends RxAppCompatActivity{
 //        友盟
         MobclickAgent.onPageStart(this.getClass().getName());
         MobclickAgent.onResume(this);
+
+
+
+
     }
 
     @Override
