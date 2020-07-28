@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import com.blankj.utilcode.util.EmptyUtils;
 import com.blankj.utilcode.util.EncryptUtils;
+import com.blankj.utilcode.util.NetworkUtils;
 import com.trello.rxlifecycle2.android.FragmentEvent;
 import com.unis.gameplatfrom.R;
 import com.unis.gameplatfrom.api.HUDLoadDataSubscriber;
@@ -248,50 +249,57 @@ public class UserIDFragment extends BaseFragment {
             return;
         }
 
-        RetrofitWrapper.getInstance().create(PublicApiInterface.class)
-                .passwordLogin(mobile, password,"123",2, EncryptUtils.encryptMD5ToString(mobile+password+"UNIS").toLowerCase())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+        if(NetworkUtils.isConnected()) {
 
-                .compose(this.bindUntilEvent(FragmentEvent.DESTROY))
-                .subscribe(new HUDLoadDataSubscriber<LoginResult>(mContext) {
-                    @Override
-                    public void onNext(LoginResult result) {
+            RetrofitWrapper.getInstance().create(PublicApiInterface.class)
+                    .passwordLogin(mobile, password, "123", 2, EncryptUtils.encryptMD5ToString(mobile + password + "UNIS").toLowerCase())
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
 
-                        if(result.getErr() == 0){
+                    .compose(this.bindUntilEvent(FragmentEvent.DESTROY))
+                    .subscribe(new HUDLoadDataSubscriber<LoginResult>(mContext) {
+                        @Override
+                        public void onNext(LoginResult result) {
+
+                            if (result.getErr() == 0) {
 //                            Intent intent = new Intent();
 //                            intent.putExtra("account",mobile);
 //                            intent.putExtra("password",password);
 
-                            if(saveaccount){
+                                if (saveaccount) {
 
-                                UserCenter.getInstance().setUserid(mobile);
+                                    UserCenter.getInstance().setUserid(mobile);
+
+                                }
+
+                                UserCenter.getInstance().save_uuid(mContext, result.getUuid());
+
+                                UserCenter.getInstance().setUserName(result.getName());
+                                UserCenter.getInstance().setUserHead(result.getHead());
+
+                                //UserCenter.getInstance().setGameAccount(mobile);
+
+                                Intent intent = new Intent(mContext, MainActivity.class);
+                                intent.putExtra("username", result.getName());
+                                intent.putExtra("userhead", result.getHead());
+                                startActivity(intent);
+                                UserCenter.getInstance().setToken(result.getUuid());
+
+                                mContext.finish();
+
+                            }
+                            if (result.getErr() == 1) {
+
+                                Toast.makeText(mContext, result.getMsg(), Toast.LENGTH_SHORT).show();
 
                             }
 
-                            UserCenter.getInstance().save_uuid(mContext,result.getUuid());
-
-                            UserCenter.getInstance().setUserName(result.getName());
-                            UserCenter.getInstance().setUserHead(result.getHead());
-
-                            //UserCenter.getInstance().setGameAccount(mobile);
-
-                            Intent intent = new Intent(mContext,MainActivity.class);
-                            intent.putExtra("username",result.getName());
-                            intent.putExtra("userhead",result.getHead());
-                            startActivity(intent);
-                            UserCenter.getInstance().setToken(result.getUuid());
-
-                            mContext.finish();
-
-                        }if (result.getErr() == 1){
-
-                            Toast.makeText(mContext,result.getMsg(),Toast.LENGTH_SHORT).show();
-
                         }
+                    });
 
-                    }
-                });
+        }else {
+            Toast.makeText(mContext, "网络异常,请检查网络", Toast.LENGTH_SHORT).show();
+        }
     }
 
 }

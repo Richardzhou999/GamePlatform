@@ -8,6 +8,7 @@ public class GamesEntity extends LitePalSupport {
 
      private int id;
      private int v;
+     private int gameId;
      private String p;
      private String icon;
      private String packname;
@@ -17,10 +18,12 @@ public class GamesEntity extends LitePalSupport {
      private boolean isDownGame;//是否开始下载
      private boolean isLocal;//判断游戏是否存在本地
      private boolean isNewGame;//测试是否有新版本
+     /**
+     * 单位转换后的速度
+     */
+     private String convertSpeed;
 
      private int progress;
-
-
 
 
 
@@ -28,9 +31,16 @@ public class GamesEntity extends LitePalSupport {
         return id;
     }
 
+    public int getGameId(){
+        return gameId;
+    }
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public void setGameId(int id){
+        this.gameId = id;
     }
 
     public int getV() {

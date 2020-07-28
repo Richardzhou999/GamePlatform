@@ -11,6 +11,7 @@ import android.os.Environment;
 import android.text.TextUtils;
 import android.widget.Toast;
 
+import com.unis.gameplatfrom.cache.UserCenter;
 import com.unis.gameplatfrom.ui.GamesActivity;
 
 import java.io.File;
@@ -25,7 +26,8 @@ public class PackageUtil {
      *  检查应用是否存在，若存在便打开
      */
 
-    public static boolean startAppByPackageID(Context context, String packageId) {
+    public static boolean startAppByPackageID(Context context, String packageId,
+            Integer gameid,DownloadMgr mDownloadMgr) {
         PackageManager packageManager = context.getPackageManager();
         PackageInfo packageInfo;
         try {
@@ -40,7 +42,10 @@ public class PackageUtil {
         resolveIntent.setPackage(packageInfo.packageName);
         List<ResolveInfo> apps = packageManager.queryIntentActivities(resolveIntent, 0);
         ResolveInfo ri = apps.iterator().next();
-        if (ri != null) {
+
+        if (ri != null && mDownloadMgr != null) {
+            mDownloadMgr.pauseAllTask();//暂停所有下载任务
+            UserCenter.getInstance().save_gameId(context,gameid);
             String className = ri.activityInfo.name;
             Intent intent = new Intent(Intent.ACTION_MAIN);
             intent.addCategory(Intent.CATEGORY_LAUNCHER);

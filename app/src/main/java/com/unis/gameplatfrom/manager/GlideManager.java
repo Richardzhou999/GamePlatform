@@ -21,6 +21,7 @@ import com.bumptech.glide.request.RequestOptions;
 import java.io.File;
 import java.security.MessageDigest;
 
+import com.unis.gameplatfrom.GlideOptions;
 import com.unis.gameplatfrom.R;
 
 /**
@@ -30,7 +31,7 @@ public final class GlideManager {
 
     private static int sCommonPlaceholder = R.drawable.logo;
 
-    private static int sRoundPlaceholder = R.drawable.logo;
+    private static int sRoundPlaceholder = R.drawable.logo_login;
 
     /**
      * 设置圆形图片占位图
@@ -90,6 +91,7 @@ public final class GlideManager {
     public static void loadImg(Object obj, ImageView iv, int placeholder) {
         Context context = iv.getContext();
         RequestManager manager = Glide.with(context);
+
         RequestBuilder<Drawable> drawableTypeRequest = null;
 
         if (obj instanceof String) {
@@ -106,9 +108,13 @@ public final class GlideManager {
         }
 
         RequestOptions options = new RequestOptions()
+                .diskCacheStrategy(DiskCacheStrategy.DATA)
                 .placeholder(placeholder)
                 .error(placeholder)
-                .dontAnimate();
+                .centerCrop();
+
+
+                //.dontAnimate();
 
         drawableTypeRequest.apply(options)
                 .into(iv);

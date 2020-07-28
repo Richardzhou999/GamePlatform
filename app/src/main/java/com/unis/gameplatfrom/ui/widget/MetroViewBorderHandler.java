@@ -104,7 +104,7 @@ public class MetroViewBorderHandler implements IMetroViewBorder {
                    if(oldLinearLayout.getVisibility() == View.GONE){
                        mAnimatorList.addAll(getScaleAnimator(oldFocus, false));
                    }else {
-                       oldFocus.setAlpha(0.5f);
+                       oldFocus.setAlpha(0.9f);
                    }
                }
            }

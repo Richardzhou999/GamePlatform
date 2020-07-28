@@ -1,13 +1,19 @@
 package com.unis.gameplatfrom.ui;
 
 import android.animation.Animator;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.icu.lang.UCharacter;
 import android.media.MediaMetadataRetriever;
+import android.media.MediaPlayer;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
@@ -33,14 +39,18 @@ import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.blankj.utilcode.util.EncryptUtils;
+import com.blankj.utilcode.util.NetworkUtils;
+import com.blankj.utilcode.util.ToastUtils;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.request.RequestOptions;
 import com.chad.library.adapter.base.BaseQuickAdapter;
+import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.NetworkPolicy;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.RequestCreator;
 import com.trello.rxlifecycle2.android.ActivityEvent;
-import com.tsy.sdk.myokhttp.MyOkHttp;
-import com.tsy.sdk.myokhttp.download_mgr.DownloadTask;
-import com.tsy.sdk.myokhttp.download_mgr.DownloadTaskListener;
+
 import com.unis.gameplatfrom.BuildConfig;
 import com.unis.gameplatfrom.Constant;
 import com.unis.gameplatfrom.R;
@@ -52,24 +62,31 @@ import com.unis.gameplatfrom.api.RetrofitWrapper;
 import com.unis.gameplatfrom.api.result.BaseCustomListResult;
 import com.unis.gameplatfrom.base.BaseActivity;
 import com.unis.gameplatfrom.cache.InnerReceiver;
+
 import com.unis.gameplatfrom.cache.NetConnectionReceiver;
 import com.unis.gameplatfrom.cache.UserCenter;
 import com.unis.gameplatfrom.model.GamesEntity;
 import com.unis.gameplatfrom.model.LoginResult;
+import com.unis.gameplatfrom.ui.widget.CircleTransform;
 import com.unis.gameplatfrom.ui.widget.MetroItemFrameLayout;
 import com.unis.gameplatfrom.ui.widget.MetroViewBorderHandler;
 import com.unis.gameplatfrom.ui.widget.MetroViewBorderImpl;
 import com.unis.gameplatfrom.ui.widget.SWRecyclerView;
 import com.unis.gameplatfrom.utils.DialogHelper;
 import com.unis.gameplatfrom.utils.DownloadMgr;
+import com.unis.gameplatfrom.utils.ImageUtils;
 import com.unis.gameplatfrom.utils.PackageUtil;
 import com.unis.gameplatfrom.utils.TimeUtil;
+import com.unis.gameplatfrom.utils.download_mgr.DownloadTask;
+import com.unis.gameplatfrom.utils.download_mgr.DownloadTaskListener;
+import com.unis.gameplatfrom.utils.download_mgr.MyOkHttp;
 import com.unis.gameplatfrom.utils.udateapk.DownloadAPk;
 import com.unis.gameplatfrom.utils.udateapk.LinPermission;
 
 import org.litepal.LitePal;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -80,7 +97,6 @@ import butterknife.BindView;
 import butterknife.OnClick;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-
 
 
 public class MainActivity extends BaseActivity {
@@ -122,7 +138,6 @@ public class MainActivity extends BaseActivity {
     TextView mLoginOut;
 
 
-
     @BindView(R.id.push_layout)
     LinearLayout mPushLayout;
 
@@ -140,11 +155,9 @@ public class MainActivity extends BaseActivity {
     RelativeLayout mRecyclerLayout;
 
 
-
-
     private MainAdapter mainAdapter;
 
-    private List<GamesEntity> gamesEntities  = new ArrayList<>();
+    private List<GamesEntity> gamesEntities = new ArrayList<>();
 
     private MainAdapter adapter;
 
@@ -171,16 +184,31 @@ public class MainActivity extends BaseActivity {
     private boolean refresh = false;
 
     private boolean mReceiverTag = false;   //广播接受者标识
+    private boolean mConnectTag;            //防止刷新列表数据
 
     private String saveDownName = "";
 
-    private  InnerReceiver innerReceiver;
+    private InnerReceiver innerReceiver;
+
+    private boolean nowTime;
+
+    private String Movieurl = "http://oa47.oss-cn-shenzhen.aliyuncs.com/2.mp4";
+    ;
+
+
+    private NetConnectionReceiver netConnectionReceiver;
+    private ItemNetConnectionReceiver itemNetConnectionReceiver;
+    private IntentFilter mFilter;
+
+    private RecyclerView.RecycledViewPool pool;
+
+    private Bitmap HeadBitmap;
 
     private Handler handler = new Handler() {
 
         @Override
         public void handleMessage(Message msg) {
-
+            super.handleMessage(msg);
             SimpleDateFormat TimeFormat = new SimpleDateFormat("HH:mm");// HH:mm:ss
             //获取当前时间
             Date date1 = new Date(System.currentTimeMillis());
@@ -201,7 +229,7 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void initData() {
 
-        adapter = new MainAdapter(mContext,gamesEntities);
+        adapter = new MainAdapter(mContext, gamesEntities);
         mainRecycler.setLayoutManager(new LinearLayoutManager(this));
         mainRecycler.getItemAnimator().setAddDuration(0);
         mainRecycler.getItemAnimator().setChangeDuration(0);
@@ -209,7 +237,9 @@ public class MainActivity extends BaseActivity {
         mainRecycler.getItemAnimator().setRemoveDuration(0);
         ((SimpleItemAnimator) mainRecycler.getItemAnimator()).setSupportsChangeAnimations(false);
         mMetroViewBorderImpl.attachTo(mainRecycler);
-
+        pool = mainRecycler.getRecycledViewPool();
+        pool.setMaxRecycledViews(0, 10);
+        mainRecycler.setRecycledViewPool(pool);
         mainRecycler.setAdapter(adapter);
         LitePal.getDatabase(); //创建数据表
 
@@ -217,7 +247,7 @@ public class MainActivity extends BaseActivity {
         mDownloadMgr = (DownloadMgr) new DownloadMgr.Builder()
                 .myOkHttp(myOkHttp)
                 .maxDownloadIngNum(5)       //设置最大同时下载数量（不设置默认5）
-                .saveProgressBytes(50 * 1024)  //设置每50kb触发一次saveProgress保存进度 （不能在onProgress每次都保存 过于频繁） 不设置默认50kb
+                .saveProgressBytes(20 * 1024)  //设置每20kb触发一次saveProgress保存进度 （不能在onProgress每次都保存 过于频繁） 不设置默认50kb
                 .build();
 
 
@@ -225,16 +255,20 @@ public class MainActivity extends BaseActivity {
         IntentFilter filter = new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         registerReceiver(innerReceiver, filter);
 
+        itemNetConnectionReceiver = new ItemNetConnectionReceiver();
+        mFilter = new IntentFilter();
+        mFilter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
+        registerReceiver(itemNetConnectionReceiver, mFilter);
 
         adapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
 
-                GamesEntity  entity = (GamesEntity) adapter.getItem(position);
+                GamesEntity entity = (GamesEntity) adapter.getItem(position);
 
                 if (entity.getV() != 0) {
 
-                    if (LinPermission.checkPermission(MainActivity.this, new int[]{7,8})) {
+                    if (LinPermission.checkPermission(MainActivity.this, new int[]{7, 8})) {
 
 //                            if (mDownloadBinder != null) {
 //                                long downloadId = mDownloadBinder.startDownload(APK_URL);
@@ -247,20 +281,20 @@ public class MainActivity extends BaseActivity {
                          * 情况2：记录不在，游戏不在
                          * 情况3：两者都在
                          */
-                        GamesEntity entity1 = LitePal.where("id="+entity.getId()).findFirst(GamesEntity.class);
-                        if(entity1 != null){
+                        GamesEntity entity1 = LitePal.where("id=" + entity.getId()).findFirst(GamesEntity.class);
+                        if (entity1 != null) {
 
                             //若游戏被删除，需清除游戏记录防止数据出错
-                            if (PackageUtil.isAppByPackageID(mContext,entity.getPackname())) {
+                            if (PackageUtil.isAppByPackageID(mContext, entity.getPackname())) {
 
 
-                                System.out.print(entity.getV()+"");
+                                System.out.print(entity.getV() + "");
                                 int number = entity.getV();
 
 
-                                if(number > entity1.getV()){
+                                if (number > entity1.getV()) {
+                                    
                                     //String content = String.format("发现新版本:V%s\n%s", entity., result.getData().getUpdateContent());
-
 
 
 //                                        DialogHelper.showAlertDialog(mContext, "发现新版本", "立即更新", "暂不更新", new DialogInterface.OnClickListener() {
@@ -281,22 +315,22 @@ public class MainActivity extends BaseActivity {
 //                                        });
 
 
-
                                     entity1.setV(entity.getV());
+                                    entity.setGameId(entity.getId());
+                                    UserCenter.getInstance().deleteGameFile(entity.getPackname());
+                                    downApk(entity.getName(), entity.getP(), entity.getIcon(),
+                                            entity, position);
                                     entity1.save();
-                                    downApk(entity.getName(),entity.getP(),entity.getIcon(),
-                                            entity,position);
 
+                                } else {
 
-                                }else {
-
-                                    PackageUtil.startAppByPackageID(mContext,entity.getPackname(),mDownloadMgr);
+                                    PackageUtil.startAppByPackageID(mContext, entity.getPackname(),
+                                            entity.getId(),mDownloadMgr);
 
                                 }
 
 
-
-                            }else {
+                            } else {
 
                                 entity1.setV(entity.getV());
                                 entity1.setId(entity.getId());
@@ -305,9 +339,8 @@ public class MainActivity extends BaseActivity {
                                 entity1.setPackname(entity.getPackname());
                                 entity1.setIcon(entity.getIcon());
                                 entity1.save();
-                                downApk(entity.getName(),entity.getP(),entity.getIcon(),
-                                        entity,position);
-
+                                downApk(entity.getName(), entity.getP(), entity.getIcon(),
+                                        entity, position);
 
 
 //                                    DialogHelper.showAlertDialog(mContext,"确定要下载吗", "确定", "取消", new DialogInterface.OnClickListener() {
@@ -330,27 +363,27 @@ public class MainActivity extends BaseActivity {
                             }
 
 
-                        }else {
+                        } else {
 
 
-                            if(PackageUtil.isAppByPackageID(mContext,entity.getPackname())){
+                            if (PackageUtil.isAppByPackageID(mContext, entity.getPackname())) {
 
                                 entity.setAccount(game_account);
+                                entity.setGameId(entity.getId());
+                                PackageUtil.startAppByPackageID(mContext, entity.getPackname()
+                                        ,entity.getId() , mDownloadMgr);
                                 entity.save();
-                                PackageUtil.startAppByPackageID(mContext,entity.getPackname(),mDownloadMgr);
-
-                            }else {
+                            } else {
 
                                 //第一次下载
 
                                 entity.setAccount(game_account);
+                                entity.setGameId(entity.getId());
+                                downApk(entity.getName(), entity.getP(), entity.getIcon(),
+                                        entity, position);
                                 entity.save();
-                                downApk(entity.getName(),entity.getP(),entity.getIcon(),
-                                        entity,position);
-
 
                             }
-
 
 
 //                                    DialogHelper.showAlertDialog(mContext,"确定要下载吗", "确定", "取消", new DialogInterface.OnClickListener() {
@@ -370,7 +403,7 @@ public class MainActivity extends BaseActivity {
                         }
 
 
-                    }else {
+                    } else {
 
                     }
                 }
@@ -378,45 +411,54 @@ public class MainActivity extends BaseActivity {
         });
 
 
-
-
     }
 
     @Override
     protected void initView(Bundle savedInstanceState) {
 
-
-        userName =  UserCenter.getInstance().getUserName();
-        userHead =   UserCenter.getInstance().getUserHead();
+        nowTime = true;
+        userName = UserCenter.getInstance().getUserName();
+        userHead = UserCenter.getInstance().getUserHead();
 
         moviePlay.setVisibility(View.VISIBLE);
         firstImage.setVisibility(View.VISIBLE);
 
 
-
-
-
         //mRecyclerLayout.setFocusable(true);
 
 
-
         userNameText.setText(userName);
-        if(BuildConfig.DEBUG){
+        if (BuildConfig.DEBUG) {
 
-            versionText.setText("版本号： V"+Constant.DEBUG);
+            versionText.setText("版本号： V" + Constant.DEBUG);
 
-        }else {
+        } else {
 
-            versionText.setText("版本号： V"+PackageUtil.getVersionName(mContext));
+            versionText.setText("版本号： V" + PackageUtil.getVersionName(mContext));
 
         }
 
         //
-        Glide.with(mContext).load(userHead)
-                .apply(RequestOptions.bitmapTransform(new CircleCrop()))
+//        Glide.with(mContext).load(userHead)
+//                .apply(RequestOptions.bitmapTransform(new CircleCrop()))
+//                .into(userImage);
+
+//        RequestCreator requestCreator =  Picasso.with(mContext).load(userHead);
+//        try {
+//
+//            HeadBitmap  = requestCreator.get();
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+         Picasso.with(mContext).load(userHead)
+                .transform(new CircleTransform())
+//                .memoryPolicy(MemoryPolicy.NO_CACHE)
+//                .networkPolicy(NetworkPolicy.NO_CACHE)
+                .placeholder(R.drawable.logo)
+                .error(R.drawable.logo)
                 .into(userImage);
-
-
 
 
         SimpleDateFormat TimeFormat = new SimpleDateFormat("HH:mm");// HH:mm:ss
@@ -426,65 +468,48 @@ public class MainActivity extends BaseActivity {
         monthWeekText.setText(TimeUtil.StringData());
         nowTimeText.setText(TimeFormat.format(date1));
 
-        new TimeThread().start();
 
-
-        //设置有进度条可以拖动快进
-        String url = "http://oa47.oss-cn-shenzhen.aliyuncs.com/2.mp4";
-         localMediaController = new MediaController(this);
-        //拿到MediaController
-        videoDetails.setMediaController(localMediaController);
-        //先加载地址
-        videoDetails.setVideoPath(url);
-        //localMediaController.show();
-
-        firstImage.setImageBitmap(getVideoThumb(url));
-
-        mMetroViewBorderImpl = new MetroViewBorderImpl(this,true);
+        mMetroViewBorderImpl = new MetroViewBorderImpl(this, true);
         mMetroViewBorderImpl.setBackgroundResource(R.drawable.border_color);
 
 
-
-        leftLayout.setBackgroundColor(ContextCompat.getColor(mContext,R.color.game_toolbar));
+        leftLayout.setBackgroundColor(ContextCompat.getColor(mContext, R.color.game_toolbar));
 
         mLoginOut.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if(hasFocus){
+                if (hasFocus) {
 
                     mLoginOut.setSelected(true);
-                    mLoginOut.setTextColor(ContextCompat.getColor(mContext,R.color.white));
+                    mLoginOut.setTextColor(ContextCompat.getColor(mContext, R.color.white));
 
-                }else {
+                } else {
                     mLoginOut.setSelected(false);
-                    mLoginOut.setTextColor(ContextCompat.getColor(mContext,R.color.out_login_txt));
+                    mLoginOut.setTextColor(ContextCompat.getColor(mContext, R.color.out_login_txt));
                 }
             }
         });
 
 
-
-
-
         mPushLayout.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if(hasFocus){
+                if (hasFocus) {
 
                     mPushLayout.setBackgroundResource(R.drawable.border_color);
-                }else {
+                } else {
                     mPushLayout.setBackgroundResource(android.R.color.transparent);
                 }
-              }
+            }
         });
 
         mMovieLayout.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if(hasFocus){
+                if (hasFocus) {
 
                     mMovieLayout.setBackgroundResource(R.drawable.border_color);
-                }else {
+                } else {
 
                     mMovieLayout.setBackgroundResource(android.R.color.transparent);
                 }
@@ -492,41 +517,63 @@ public class MainActivity extends BaseActivity {
         });
 
 
-        // finish();
+        new TimeThread().start();
+
+
+        videoDetails.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+
+                videoDetails.setVideoPath(Movieurl);
+                firstImage.setImageBitmap(getVideoThumb(Movieurl));
+                firstImage.setVisibility(View.VISIBLE);
+                moviePlay.setVisibility(View.VISIBLE);
+            }
+        });
+
 
     }
-
-
-
 
     @Override
     protected void onResume() {
         super.onResume();
-        videoDetails.setFocusable(false);
-        videoDetails.setFocusableInTouchMode(false);
-        loadData();
 
-        mainRecycler.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
+        //设置有进度条可以拖动快进
+        localMediaController = new MediaController(this);
+        //拿到MediaController
+        videoDetails.setMediaController(localMediaController);
 
+        if (NetworkUtils.isConnected()) {
+
+            //需要网络的情况下先加载地址
+            videoDetails.setVideoPath(Movieurl);
+            //localMediaController.show();
+            firstImage.setImageBitmap(getVideoThumb(Movieurl));
+
+
+            videoDetails.setFocusable(false);
+            videoDetails.setFocusableInTouchMode(false);
+            loadData();
+
+            mPushLayout.setFocusable(false);
+            mPushLayout.setFocusableInTouchMode(false);
+            mLoginOut.setFocusable(false);
+            mLoginOut.setFocusableInTouchMode(false);
+            mMovieLayout.setFocusable(false);
+            mMovieLayout.setFocusableInTouchMode(false);
+            mainRecycler.setFocusable(true);
+            mainRecycler.setFocusableInTouchMode(true);
+
+            if (!refresh) {
+                mainRecycler.requestFocus();
             }
-        });
 
-        mPushLayout.setFocusable(false);
-        mPushLayout.setFocusableInTouchMode(false);
-        mLoginOut.setFocusable(false);
-        mLoginOut.setFocusableInTouchMode(false);
-        mMovieLayout.setFocusable(false);
-        mMovieLayout.setFocusableInTouchMode(false);
-        mainRecycler.setFocusable(true);
-        mainRecycler.setFocusableInTouchMode(true);
+        } else {
 
-        if(!refresh) {
-            mainRecycler.requestFocus();
+            Toast.makeText(mContext, "当前网络异常,请检查网络.网络无异常将自动刷新列表", Toast.LENGTH_LONG).show();
+            mConnectTag = true;
+
         }
-
-
     }
 
 
@@ -535,6 +582,7 @@ public class MainActivity extends BaseActivity {
         super.onDestroy();
 
         unregisterReceiver(innerReceiver);
+        unregisterReceiver(itemNetConnectionReceiver);
 
 
     }
@@ -542,7 +590,7 @@ public class MainActivity extends BaseActivity {
     private void loadData() {
 
 
-        if(gamesEntities.size() != 0 ){
+        if (gamesEntities.size() != 0) {
             gamesEntities.clear();
         }
 
@@ -563,35 +611,33 @@ public class MainActivity extends BaseActivity {
                         mLoginOut.setFocusable(true);
                         mMovieLayout.setFocusable(true);
 
-                        if(result.getErr() == 0 && result.getData().size() != 0){
+                        if (result.getErr() == 0 && result.getData().size() != 0) {
 
-                            if (LinPermission.checkPermission(MainActivity.this, new int[]{7,8})) {
+                            if (LinPermission.checkPermission(MainActivity.this, new int[]{7, 8})) {
 
-                                if(result.getData().size() < 3){
+                                if (result.getData().size() < 3) {
 
 
-                                    for(int i = 0 ; i < result.getData().size() ; i ++){
-
+                                    for (int i = 0; i < result.getData().size(); i++) {
 
 
                                         GamesEntity entity = result.getData().get(i);
 
-                                        GamesEntity entity1 = LitePal.where("id="+entity.getId()).findFirst(GamesEntity.class);
-                                        if( entity1 != null ){
+                                        GamesEntity entity1 = LitePal.where("id=" + entity.getId()).findFirst(GamesEntity.class);
+                                        if (entity1 != null) {
                                             // entity.setV(entity.getV()+1);
 
-                                            if(PackageUtil.isAppByPackageID(mContext,entity.getPackname())){
+                                            if (PackageUtil.isAppByPackageID(mContext, entity.getPackname())) {
 
 
-
-                                                if(entity.getV() > entity1.getV()){
+                                                if (entity.getV() > entity1.getV()) {
 
                                                     entity.setNewGame(true);
                                                     entity.setInstallGame(true);
                                                     entity.setLocal(true);
                                                     gamesEntities.add(entity);
 
-                                                }else {
+                                                } else {
 
                                                     entity.setLocal(true);
                                                     entity.setInstallGame(true);
@@ -600,19 +646,19 @@ public class MainActivity extends BaseActivity {
                                                 }
 
 
-                                            }else {
+                                            } else {
 
                                                 entity1.save();
                                                 entity1.delete();
 
-                                                if(PackageUtil.isAppByLocal(entity.getP())){
+                                                if (PackageUtil.isAppByLocal(entity.getP())) {
 
                                                     entity.setNewGame(false);
                                                     entity.setInstallGame(false);
                                                     entity.setLocal(true);
                                                     gamesEntities.add(entity);
 
-                                                }else {
+                                                } else {
 
                                                     entity.setNewGame(false);
                                                     entity.setInstallGame(false);
@@ -622,9 +668,9 @@ public class MainActivity extends BaseActivity {
                                                 }
                                             }
 
-                                        }else {
+                                        } else {
 
-                                            if(PackageUtil.isAppByPackageID(mContext,entity.getPackname())){
+                                            if (PackageUtil.isAppByPackageID(mContext, entity.getPackname())) {
 
 
                                                 entity.setLocal(true);
@@ -632,17 +678,17 @@ public class MainActivity extends BaseActivity {
                                                 entity.setInstallGame(true);
                                                 gamesEntities.add(entity);
 
-                                            }else {
+                                            } else {
 
 
-                                                if(PackageUtil.isAppByLocal(entity.getP())){
+                                                if (PackageUtil.isAppByLocal(entity.getP())) {
 
                                                     entity.setNewGame(false);
                                                     entity.setInstallGame(false);
                                                     entity.setLocal(true);
                                                     gamesEntities.add(entity);
 
-                                                }else {
+                                                } else {
 
                                                     entity.setNewGame(false);
                                                     entity.setInstallGame(false);
@@ -652,11 +698,9 @@ public class MainActivity extends BaseActivity {
                                                 }
 
 
-
                                             }
 
                                         }
-
 
 
                                     }
@@ -664,28 +708,26 @@ public class MainActivity extends BaseActivity {
 
                                 } else {
 
-                                    for(int i = 0 ; i < 3 ; i ++){
-
+                                    for (int i = 0; i < 3; i++) {
 
 
                                         GamesEntity entity = result.getData().get(i);
 
-                                        GamesEntity entity1 = LitePal.where("id="+entity.getId()).findFirst(GamesEntity.class);
-                                        if( entity1 != null ){
+                                        GamesEntity entity1 = LitePal.where("id=" + entity.getId()).findFirst(GamesEntity.class);
+                                        if (entity1 != null) {
                                             // entity.setV(entity.getV()+1);
 
-                                            if(PackageUtil.isAppByPackageID(mContext,entity.getPackname())){
+                                            if (PackageUtil.isAppByPackageID(mContext, entity.getPackname())) {
 
 
-
-                                                if(entity.getV() > entity1.getV()){
+                                                if (entity.getV() > entity1.getV()) {
 
                                                     entity.setNewGame(true);
                                                     entity.setInstallGame(true);
                                                     entity.setLocal(true);
                                                     gamesEntities.add(entity);
 
-                                                }else {
+                                                } else {
 
                                                     entity.setLocal(true);
                                                     entity.setInstallGame(true);
@@ -694,19 +736,19 @@ public class MainActivity extends BaseActivity {
                                                 }
 
 
-                                            }else {
+                                            } else {
 
                                                 entity1.save();
                                                 entity1.delete();
 
-                                                if(PackageUtil.isAppByLocal(entity.getP())){
+                                                if (PackageUtil.isAppByLocal(entity.getP())) {
 
                                                     entity.setNewGame(false);
                                                     entity.setInstallGame(false);
                                                     entity.setLocal(true);
                                                     gamesEntities.add(entity);
 
-                                                }else {
+                                                } else {
 
                                                     entity.setNewGame(false);
                                                     entity.setInstallGame(false);
@@ -716,9 +758,9 @@ public class MainActivity extends BaseActivity {
                                                 }
                                             }
 
-                                        }else {
+                                        } else {
 
-                                            if(PackageUtil.isAppByPackageID(mContext,entity.getPackname())){
+                                            if (PackageUtil.isAppByPackageID(mContext, entity.getPackname())) {
 
 
                                                 entity.setLocal(true);
@@ -726,17 +768,17 @@ public class MainActivity extends BaseActivity {
                                                 entity.setInstallGame(true);
                                                 gamesEntities.add(entity);
 
-                                            }else {
+                                            } else {
 
 
-                                                if(PackageUtil.isAppByLocal(entity.getP())){
+                                                if (PackageUtil.isAppByLocal(entity.getP())) {
 
                                                     entity.setNewGame(false);
                                                     entity.setInstallGame(false);
                                                     entity.setLocal(true);
                                                     gamesEntities.add(entity);
 
-                                                }else {
+                                                } else {
 
                                                     entity.setNewGame(false);
                                                     entity.setInstallGame(false);
@@ -750,12 +792,12 @@ public class MainActivity extends BaseActivity {
                                 }
 
 
-                                if(!refresh){
+                                if (!refresh) {
                                     refresh = true;
                                     adapter.setNewData(gamesEntities);
-                                }else {
+                                } else {
 
-                                    if(mDownloadMgr != null){
+                                    if (mDownloadMgr != null) {
                                         mDownloadMgr.startAllTask();//开始所有下载任务
                                     }
 
@@ -763,10 +805,7 @@ public class MainActivity extends BaseActivity {
                                 //mainRecycler.smoothScrollToPosition(1);
 
 
-
-
-                            }
-                            else {
+                            } else {
 
 //                            adapter.setNewData(result.getData());
 //                            rightAdapter.setNewData(result.getData());
@@ -777,165 +816,171 @@ public class MainActivity extends BaseActivity {
 
                             }
 
-                        }else {
+                        } else {
 
-                            Toast.makeText(mContext,result.getMsg(),Toast.LENGTH_SHORT).show();
-                            finish();
+                            Toast.makeText(mContext, result.getMsg(), Toast.LENGTH_LONG).show();
+
+                            //finish();
+                            startActivity(new Intent(mContext, LoginActivity.class));
 
                         }
                     }
                 });
 
 
-
-
-
     }
 
     private boolean DownGame = false;
 
-    private void downApk(String name,String filepath,String iconUrl,GamesEntity entity,int positoin){
+    private void downApk(String name, String filepath, String iconUrl,final GamesEntity entity, int positoin) {
 
 
-        if(filepath.contains("apk")){
+        if (filepath.contains("apk")) {
 
             String[] apk_path = filepath.split("/");
 
 
             String path = Environment.getExternalStorageDirectory()
-                    + "/DownLoad/apk/"+apk_path[apk_path.length-1];
+                    + "/DownLoad/apk/" + apk_path[apk_path.length - 1];
 
-            if(!entity.isDownGame() && !DownGame) {
+            if (!entity.isDownGame() && !DownGame) {
 
-            if (PackageUtil.isAppByLocal(filepath)) {
+                if (PackageUtil.isAppByLocal(filepath)) {
 
-                entity.setDownGame(false);
-                Intent installAppIntent = DownloadAPk.getInstallAppIntent(mContext, path);
-                startActivity(installAppIntent);
+                    entity.setDownGame(false);
+                    Intent installAppIntent = DownloadAPk.getInstallAppIntent(mContext, path);
+                    startActivity(installAppIntent);
 
+
+                } else {
+
+                    DownGame = true;
+                    mConnectTag = true;
+                    netConnectionReceiver = new NetConnectionReceiver(mDownloadMgr);
+                    RegisterReceiver(netConnectionReceiver);
+                    unregisterReceiver(itemNetConnectionReceiver);
+                    progressList.add(positoin);
+
+                    //显示activity时加入监听
+                    mDownloadTaskListener = new DownloadTaskListener() {
+                        @Override
+                        public void onStart(String taskId, long completeBytes, long totalBytes) {
+                            mDownloadTask = mDownloadMgr.getDownloadTask(taskId);
+
+                            saveDownName = entity.getName();
+
+
+                        }
+
+                        @Override
+                        public void onProgress(String taskId, long currentBytes, long totalBytes) {
+                            mDownloadTask = mDownloadMgr.getDownloadTask(taskId);
+
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+
+                                    for (int positoin : progressList) {
+                                        //ps:建议不要每次刷新 可以通过handler postDelay延时刷新 防止刷新频率过快
+                                        int progress = (int) (((float) currentBytes / totalBytes) * 100);
+                                        GamesEntity gamesEntity = adapter.getItem(positoin);
+                                        gamesEntity.setProgress(progress);
+                                        gamesEntity.setDownGame(true);
+                                        gamesEntity.setInstallGame(false);
+
+                                        gamesEntity.setLocal(false);
+                                        adapter.notifyItemChanged(positoin);
+                                    }
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onPause(String taskId, long currentBytes, long totalBytes) {
+                            mDownloadTask = mDownloadMgr.getDownloadTask(taskId);
+                        }
+
+                        @Override
+                        public void onFinish(String taskId, File file) {
+                            mDownloadTask = mDownloadMgr.getDownloadTask(taskId);
+                            DownGame = false;
+
+                            mDownloadMgr.removeListener(mDownloadTaskListener);
+                            if (progressList.size() != 0) {
+                                progressList.clear();
+                            }
+
+                            mConnectTag = false;
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+
+                                    UnregisterReceiver(netConnectionReceiver);
+                                    registerReceiver(itemNetConnectionReceiver, mFilter);
+                                    GamesEntity gamesEntity = adapter.getItem(positoin);
+                                    gamesEntity.setDownGame(false);
+                                    gamesEntity.setInstallGame(true);
+                                    Log.d("xx","xx"+refresh);
+                                    refresh = true;
+                                    gamesEntity.setLocal(true);
+                                    adapter.notifyItemChanged(positoin);
+                                    UserCenter.getInstance().save_gameId(mContext,entity.getGameId());
+                                    Intent installAppIntent = DownloadAPk.getInstallAppIntent(mContext, path);
+                                    startActivity(installAppIntent);
+
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onFailure(String taskId, String error_msg) {
+                            mDownloadTask = mDownloadMgr.getDownloadTask(taskId);
+                        }
+                    };
+
+                    mDownloadMgr.addListener(mDownloadTaskListener);
+
+
+                    DownloadMgr.Task task = new DownloadMgr.Task();
+                    task.setTaskId(mDownloadMgr.genTaskId() + entity.getName());       //生成一个taskId
+                    task.setUrl(entity.getP());   //下载地址
+                    task.setFilePath(path);    //下载后文件保存位置
+                    task.setDefaultStatus(DownloadMgr.DEFAULT_TASK_STATUS_START);       //任务添加后开始状态 如果不设置 默认任务添加后就自动开始
+
+                    mDownloadTask = mDownloadMgr.addTask(task);
+
+                }
 
             } else {
 
-                final NetConnectionReceiver[] netConnectionReceiver = new NetConnectionReceiver[1];
-
-                progressList.add(positoin);
-
-                //显示activity时加入监听
-                mDownloadTaskListener = new DownloadTaskListener() {
-                    @Override
-                    public void onStart(String taskId, long completeBytes, long totalBytes) {
-                        mDownloadTask = mDownloadMgr.getDownloadTask(taskId);
-                        DownGame = true;
-                        saveDownName = entity.getName();
-                        netConnectionReceiver[0] = new NetConnectionReceiver(mDownloadMgr);
-                        RegisterReceiver(netConnectionReceiver[0]);
-                    }
-
-                    @Override
-                    public void onProgress(String taskId, long currentBytes, long totalBytes) {
-                        mDownloadTask = mDownloadMgr.getDownloadTask(taskId);
-
-//                                  runOnUiThread(new Runnable() {
-//                                      @Override
-//                                      public void run() {
-
-                        for (int positoin : progressList) {
-                            //ps:建议不要每次刷新 可以通过handler postDelay延时刷新 防止刷新频率过快
-                            int progress = (int) (((float) currentBytes / totalBytes) * 100);
-                            GamesEntity gamesEntity = adapter.getItem(positoin);
-                             gamesEntity.setProgress(progress);
-                            gamesEntity.setDownGame(true);
-                            gamesEntity.setInstallGame(false);
-                            gamesEntity.setLocal(false);
-                            adapter.notifyItemChanged(positoin);
-                        }
-//                                      }
-//                                  });
-                    }
-
-                    @Override
-                    public void onPause(String taskId, long currentBytes, long totalBytes) {
-                        mDownloadTask = mDownloadMgr.getDownloadTask(taskId);
-                    }
-
-                    @Override
-                    public void onFinish(String taskId, File file) {
-                        mDownloadTask = mDownloadMgr.getDownloadTask(taskId);
-                        DownGame = false;
-                        mDownloadMgr.removeListener(mDownloadTaskListener);
-                        if (progressList.size() != 0) {
-                            progressList.clear();
-                        }
-
-
-//                                    runOnUiThread(new Runnable() {
-//                                        @Override
-//                                        public void run() {
-
-                        unregisterReceiver(netConnectionReceiver[0]);
-                        GamesEntity gamesEntity = adapter.getItem(positoin);
-                        gamesEntity.setDownGame(false);
-                        gamesEntity.setInstallGame(true);
-                        gamesEntity.setLocal(true);
-                        adapter.notifyItemChanged(positoin);
-
-                        Intent installAppIntent = DownloadAPk.getInstallAppIntent(mContext, path);
-                        startActivity(installAppIntent);
-
-//                                        }
-//                                    });
-                    }
-
-                    @Override
-                    public void onFailure(String taskId, String error_msg) {
-                        mDownloadTask = mDownloadMgr.getDownloadTask(taskId);
-                    }
-                };
-
-                mDownloadMgr.addListener(mDownloadTaskListener);
-
-
-                DownloadMgr.Task task = new DownloadMgr.Task();
-                task.setTaskId(mDownloadMgr.genTaskId()+entity.getName());       //生成一个taskId
-                task.setUrl(entity.getP());   //下载地址
-                task.setFilePath(path);    //下载后文件保存位置
-                task.setDefaultStatus(DownloadMgr.DEFAULT_TASK_STATUS_START);       //任务添加后开始状态 如果不设置 默认任务添加后就自动开始
-
-                mDownloadTask = mDownloadMgr.addTask(task);
-
-            }
-
-            }else{
-
-                Toast.makeText(mContext, entity.getName()+"游戏正在下载", Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, saveDownName + " 正在下载", Toast.LENGTH_SHORT).show();
 
 
             }
 
 
+        } else {
 
-        }else {
-
-            Toast.makeText(mContext,"游戏未上传,请跟客服人员联系",Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, "游戏未上传,请跟客服人员联系", Toast.LENGTH_SHORT).show();
 
 
         }
 
 
-
     }
 
 
-    @OnClick({R.id.into_game,R.id.login_out,R.id.movie_layout})
-    public void onViewClicked(View view){
+    @OnClick({R.id.into_game, R.id.login_out, R.id.movie_layout})
+    public void onViewClicked(View view) {
 
-        switch (view.getId()){
+        switch (view.getId()) {
 
             case R.id.into_game:
 
                 if (!DownGame) {
-                    if (LinPermission.checkPermission(MainActivity.this, new int[]{7,8})) {
-                        Intent intent = new Intent(MainActivity.this,GamesActivity.class);
+                    nowTime = false;
+                    if (LinPermission.checkPermission(MainActivity.this, new int[]{7, 8})) {
+                        Intent intent = new Intent(MainActivity.this, GamesActivity.class);
                         startActivity(intent);
                         finish();
                     }
@@ -951,8 +996,10 @@ public class MainActivity extends BaseActivity {
             case R.id.login_out:
 
                 if (!DownGame) {
-                    Intent intent = new Intent(MainActivity.this,LoginActivity.class);
+                    nowTime = false;
+                    Intent intent = new Intent(MainActivity.this, LoginActivity.class);
                     startActivity(intent);
+                    UserCenter.getInstance().delete_uuid();
                     finish();
 
                 } else {
@@ -961,27 +1008,26 @@ public class MainActivity extends BaseActivity {
                 }
 
 
-
                 break;
 
             case R.id.movie_layout:
-                if(!fristplay){
+                if (!fristplay) {
 
                     moviePlay.setVisibility(View.GONE);
                     firstImage.setVisibility(View.GONE);
                     videoDetails.start();
                     fristplay = true;
 
-                }else {
+                } else {
 
-                    if(!movie){
+                    if (!movie) {
 
                         moviePlay.setVisibility(View.VISIBLE);
                         videoDetails.pause();
                         movie = true;
 
 
-                    }else {
+                    } else {
 
                         moviePlay.setVisibility(View.GONE);
                         videoDetails.start();
@@ -991,55 +1037,42 @@ public class MainActivity extends BaseActivity {
                     }
 
 
-
                 }
 
                 break;
-
 
 
             default:
                 break;
 
 
-
-
-
         }
-
-
-
 
 
     }
 
 
     /**
-
      * 获取视频文件截图
-
      *
-
      * @param url 视频文件的路径
-
      * @return Bitmap 返回获取的Bitmap
-
      */
 
     public Bitmap getVideoThumb(String url) {
 
         MediaMetadataRetriever media = new MediaMetadataRetriever();
 
-        media.setDataSource(url,new HashMap<>());
+        media.setDataSource(url, new HashMap<>());
 
-        return  media.getFrameAtTime();
+        return media.getFrameAtTime();
 
     }
 
 
     //态注册广播
     private void RegisterReceiver(NetConnectionReceiver mReceiver) {
-        if (!mReceiverTag){     //在注册广播接受者的时候 判断是否已被注册,避免重复多次注册广播
+        if (!mReceiverTag) {     //在注册广播接受者的时候 判断是否已被注册,避免重复多次注册广播
             IntentFilter mFileter = new IntentFilter();
             mReceiverTag = true;    //标识值 赋值为 true 表示广播已被注册
             mFileter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
@@ -1048,10 +1081,10 @@ public class MainActivity extends BaseActivity {
     }
 
     //注销广播
-    private void unregisterReceiver(NetConnectionReceiver mReceiver) {
+    private void UnregisterReceiver(NetConnectionReceiver mReceiver) {
         if (mReceiverTag) {   //判断广播是否注册
             mReceiverTag = false;   //Tag值 赋值为false 表示该广播已被注销
-            this.unregisterReceiver(mReceiver);   //注销广播
+            unregisterReceiver(mReceiver);   //注销广播
         }
 
     }
@@ -1066,20 +1099,99 @@ public class MainActivity extends BaseActivity {
         public void run() {
             super.run();
 
-            do {
+            while (nowTime) {
                 try {
                     //每隔一秒 发送一次消息
-                    Thread.sleep(1000*60);
+                    Thread.sleep(100);
                     Message msg = handler.obtainMessage();
                     //发送
                     handler.sendMessage(msg);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-            } while (true);
+            }
+
         }
     }
 
 
+    public class ItemNetConnectionReceiver extends BroadcastReceiver {
 
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo mobNetInfo = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_ETHERNET);
+            NetworkInfo wifiNetInfo = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                NetworkInfo[] networkInfos = connectivityManager.getAllNetworkInfo();
+                Log.e("xxx", "xx" + networkInfos);
+            }
+
+
+            if (mobNetInfo != null && wifiNetInfo != null) {
+
+                if (!mobNetInfo.isConnected() && !wifiNetInfo.isConnected()) {
+                    //网络连接已断开
+//            for (DownloadTask downloadTask : downloadTasks) {
+//                downloadTask.pauseDownload();//暂停所有下载任务
+//            }
+                    Toast.makeText(context, "游戏大厅网络异常,请检查网络", Toast.LENGTH_SHORT).show();
+                    mConnectTag = true;
+//                    if(mDownloadMgr != null ){
+//
+//                        mDownloadMgr.pauseAllTask();//暂停所有下载任务
+//                    }
+
+                } else {
+
+                    //网络连接已连接
+                    if (mConnectTag) {
+                        mConnectTag = false;
+                        refresh = false;
+
+                        //需要网络的情况下先加载地址
+                        videoDetails.setVideoPath(Movieurl);
+                        //localMediaController.show();
+                        Bitmap bitmap = getVideoThumb(Movieurl);
+                        Log.e("xxxx", "xxx" + bitmap);
+                        firstImage.setImageBitmap(getVideoThumb(Movieurl));
+
+//                        Glide.with(mContext).load(userHead)
+//                                // .apply(RequestOptions.bitmapTransform(new CircleCrop()))
+//                                .into(userImage);
+
+                        if(HeadBitmap != null){
+
+                            String head = ImageUtils.bitmapToString(bitmap);
+                            Picasso.with(mContext).load(head)
+                                    .placeholder(R.drawable.logo)
+                                    .transform(new CircleTransform())
+                                    .into(userImage);
+
+                        }else {
+
+                            Picasso.with(mContext).load(userHead)
+                                    .placeholder(R.drawable.logo)
+                                    .transform(new CircleTransform())
+                                    .into(userImage);
+
+                        }
+
+
+                        loadData();
+
+                    }
+
+//                    if(mDownloadMgr != null ){
+//                        mDownloadMgr.startAllTask();//继续所有下载任务
+//                    }
+
+                }
+
+            }
+
+        }
+    }
 }

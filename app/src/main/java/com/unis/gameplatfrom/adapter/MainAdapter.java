@@ -10,7 +10,11 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.CircleCrop;
+import com.bumptech.glide.request.RequestOptions;
 import com.chad.library.adapter.base.BaseViewHolder;
+import com.squareup.picasso.Picasso;
 import com.unis.gameplatfrom.R;
 import com.unis.gameplatfrom.manager.GlideManager;
 import com.unis.gameplatfrom.model.GamesEntity;
@@ -22,9 +26,11 @@ public class MainAdapter extends BaseEmptyViewAdapter<GamesEntity>  {
 
     private int number = 1;
     private List<GamesEntity> list;
+    private Context mContext;
 
     public MainAdapter(Context mContext, List<GamesEntity> list) {
         super(mContext,true,R.layout.item_main, list);
+        this.mContext = mContext;
         this.list = list;
     }
 
@@ -35,8 +41,12 @@ public class MainAdapter extends BaseEmptyViewAdapter<GamesEntity>  {
 
         Log.e("xxxxx","xxxxxx"+payloads.size());
         if(payloads.isEmpty()){
-            super.onBindViewHolder(holder, position, payloads);
-            return;
+            super.onBindViewHolder(holder, position);
+
+        }else {
+
+
+
         }
 
 //        int number = (int) payloads.get(0);
@@ -96,7 +106,13 @@ public class MainAdapter extends BaseEmptyViewAdapter<GamesEntity>  {
 
         relativeLayout.getBackground().setAlpha(50);
 
-        GlideManager.loadImg(entity.getIcon(), holder.getView(R.id.item_games_icon));
+        ImageView imageView = holder.getView(R.id.item_games_icon);
+
+       // GlideManager.loadImg(entity.getIcon(), holder.getView(R.id.item_games_icon));
+        Picasso.with(mContext)
+                .load(entity.getIcon())
+                .placeholder(R.drawable.logo)
+                .into(imageView);
 
         holder.setText(R.id.item_games_name, "游戏名："+entity.getName());
 

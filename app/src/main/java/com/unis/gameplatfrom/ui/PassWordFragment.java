@@ -1,18 +1,10 @@
 package com.unis.gameplatfrom.ui;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.res.ColorStateList;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.text.Editable;
 import android.text.TextUtils;
-import android.text.TextWatcher;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -23,7 +15,7 @@ import android.widget.Toast;
 
 import com.blankj.utilcode.util.EmptyUtils;
 import com.blankj.utilcode.util.EncryptUtils;
-import com.trello.rxlifecycle2.android.ActivityEvent;
+import com.blankj.utilcode.util.NetworkUtils;
 import com.trello.rxlifecycle2.android.FragmentEvent;
 import com.unis.gameplatfrom.R;
 import com.unis.gameplatfrom.api.HUDLoadDataSubscriber;
@@ -87,6 +79,8 @@ public class PassWordFragment extends BaseFragment {
             mSaveBtn.setChecked(true);
 
         }
+
+
 
 
 //        mPassword.addTextChangedListener(new TextWatcher() {
@@ -214,9 +208,11 @@ public class PassWordFragment extends BaseFragment {
 
 
                     }else {
+
                         saveaccount = false;
                         mSaveBtn.setChecked(false);
                         mSaveText.setTextColor(ContextCompat.getColor(mContext,R.color.white));
+
                     }
 
                 break;
@@ -245,47 +241,60 @@ public class PassWordFragment extends BaseFragment {
             return;
         }
 
-        RetrofitWrapper.getInstance().create(PublicApiInterface.class)
-                .passwordLogin(mobile, password,"SerialNo",1, EncryptUtils.encryptMD5ToString(mobile+password+"UNIS").toLowerCase())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .compose(this.bindUntilEvent(FragmentEvent.DESTROY))
-                .subscribe(new HUDLoadDataSubscriber<LoginResult>(mContext) {
-                    @Override
-                    public void onNext(LoginResult result) {
 
-                        if(result.getErr() == 0){
+        if(NetworkUtils.isConnected()) {
+
+
+            RetrofitWrapper.getInstance().create(PublicApiInterface.class)
+                    .passwordLogin(mobile, password, "SerialNo", 1, EncryptUtils.encryptMD5ToString(mobile + password + "UNIS").toLowerCase())
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .compose(this.bindUntilEvent(FragmentEvent.DESTROY))
+                    .subscribe(new HUDLoadDataSubscriber<LoginResult>(mContext) {
+                        @Override
+                        public void onNext(LoginResult result) {
+
+                            if (result.getErr() == 0) {
 //                            Intent intent = new Intent();
 //                            intent.putExtra("account",mobile);
 //                            intent.putExtra("password",password);
 
-                            if(saveaccount){
+                                if (saveaccount) {
 
-                                UserCenter.getInstance().setAccount(mobile);
+                                    UserCenter.getInstance().setAccount(mobile);
+
+                                }
+
+
+                                UserCenter.getInstance().save_uuid(mContext, result.getUuid());
+
+                                UserCenter.getInstance().setUserName(result.getName());
+                                UserCenter.getInstance().setUserHead(result.getHead());
+
+                                Intent intent = new Intent(mContext, MainActivity.class);
+
+                                intent.putExtra("username", result.getName());
+                                intent.putExtra("userhead", result.getHead());
+                                startActivity(intent);
+                                UserCenter.getInstance().setToken(result.getUuid());
+
+                                mContext.finish();
+                            }
+                            if (result.getErr() == 1) {
+
+                                Toast.makeText(mContext, result.getMsg(), Toast.LENGTH_SHORT).show();
+
 
                             }
-
-
-                            UserCenter.getInstance().save_uuid(mContext,result.getUuid());
-
-                            UserCenter.getInstance().setUserName(result.getName());
-                            UserCenter.getInstance().setUserHead(result.getHead());
-
-                            Intent intent = new Intent(mContext,MainActivity.class);
-
-                            intent.putExtra("username",result.getName());
-                            intent.putExtra("userhead",result.getHead());
-                            startActivity(intent);
-                            UserCenter.getInstance().setToken(result.getUuid());
-
-                            mContext.finish();
-                        }if (result.getErr() == 1){
-
-                            Toast.makeText(mContext,result.getMsg(),Toast.LENGTH_SHORT).show();
-
                         }
-                    }
-                });
+                    });
+
+        }else {
+
+            Toast.makeText(mContext, "网络异常,请检查网络", Toast.LENGTH_SHORT).show();
+
+
+        }
     }
 
 

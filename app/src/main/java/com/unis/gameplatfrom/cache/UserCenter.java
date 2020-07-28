@@ -204,10 +204,6 @@ public class UserCenter {
 
         }
 
-
-
-
-
         try {
 
             File uidFiles = new File(filePath);
@@ -237,10 +233,127 @@ public class UserCenter {
             } catch (IOException e) {
             }
         }
+    }
+
+    public void save_gameId(Context context,int gameid){
 
 
+        String filePath = null;
+
+        FileOutputStream outStream = null;
+        boolean hasSDCard =Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
+
+        if (hasSDCard) {
+
+            filePath = Environment.getExternalStorageDirectory() + "/UNIS_GameData";
 
 
+        } else {
+
+            filePath = Environment.getDownloadCacheDirectory() + "/UNIS_GameData";
+
+        }
+
+        String uuid = getToken();
+        if(uuid.isEmpty()){
+            return;
+        }
+
+        StringBuilder builder = new StringBuilder();
+        builder.append("{");
+        builder.append("uuid="+uuid);
+        builder.append(",");
+        builder.append("gameid="+gameid);
+        builder.append("}");
+
+        try {
+
+            File uidFiles = new File(filePath);
+            if(!uidFiles.exists()){
+                uidFiles.mkdirs();
+            }
+
+            File uidFile = new File(filePath,"gameUid.txt");
+            if (!uidFile.exists()){
+                uidFile.createNewFile();//创建文件TXT
+            }
+
+            outStream = new FileOutputStream(uidFile);
+
+            outStream.write(builder.toString().getBytes());
+            outStream.flush();
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+        }finally {
+
+            try {
+                if (outStream != null)
+                    outStream.close();
+            } catch (IOException e) {
+            }
+        }
+
+    }
+
+    public void delete_uuid(){
+
+
+        String filePath = null;
+
+        boolean hasSDCard =Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
+
+        if (hasSDCard) {
+
+            filePath = Environment.getExternalStorageDirectory() + "/UNIS_GameData/gameUid.txt";
+
+
+        } else {
+
+            filePath = Environment.getDownloadCacheDirectory() + "/UNIS_GameData/gameUid.txt";
+
+        }
+
+
+        try {
+
+            File uidFiles = new File(filePath);
+            if(uidFiles.exists() && uidFiles.isFile()){
+                uidFiles.delete();
+            }
+
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+        }
+
+    }
+
+    public void deleteGameFile(String pageName){
+
+        String filePath = null;
+        boolean hasSDCard =Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
+
+        if (hasSDCard) {
+
+            filePath = Environment.getExternalStorageDirectory() + "/UNIS_GameData/"+pageName;
+
+
+        } else {
+
+            filePath = Environment.getDownloadCacheDirectory() + "/UNIS_GameData/"+pageName;
+
+        }
+
+
+        File uidFiles = new File(filePath);
+        if(uidFiles.exists()){
+            uidFiles.delete();
+        }
     }
 
 

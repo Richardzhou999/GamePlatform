@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -15,6 +16,7 @@ import com.chad.library.adapter.base.BaseViewHolder;
 
 import java.util.List;
 
+import com.squareup.picasso.Picasso;
 import com.unis.gameplatfrom.R;
 import com.unis.gameplatfrom.manager.GlideManager;
 import com.unis.gameplatfrom.model.GamesEntity;
@@ -32,74 +34,53 @@ public class GamesAdapter extends BaseEmptyViewAdapter<GamesEntity> {
     }
 
 
-    @Override
-    public void onBindViewHolder(@NonNull BaseViewHolder holder, int position, @NonNull List<Object> payloads) {
-
-
-        Log.e("xxxxx","xxxxxx"+payloads.size());
-        if(payloads.isEmpty()){
-            super.onBindViewHolder(holder, position, payloads);
-            return;
-        }
-
-//        int number = (int) payloads.get(0);
-//
-//            if(position == number){
+//    @Override
+//    public void onBindViewHolder(@NonNull BaseViewHolder holder, int position, @NonNull List<Object> payloads) {
 //
 //
-//
+//        Log.e("onBindViewHolder","下载进度列表"+payloads.size());
+//        if(payloads.isEmpty()){
+//            super.onBindViewHolder(holder, position, payloads);
+//            return;
 //        }
-
-//        GamesEntity gamesEntity = list.get(position);
 //
-//        ProgressBar progressBar = holder.getView(R.id.item_progress);
-//        progressBar.setProgress(gamesEntity.getProgress());
-
-        //TextView
-
-
-
-
-
-
-    }
+//        int number = (int) payloads.get(0);
+//        Log.e("onBindViewHolder","下载进度："+number);
+////
+////            if(position == number){
+////
+////
+////
+////        }
+//
+////        GamesEntity gamesEntity = list.get(position);
+////
+//
+//
+////        ProgressBar progressBar = holder.itemView.findViewById(R.id.item_progress);
+////        progressBar.setProgress(number);
+//
+//        //TextView
+//
+//
+//
+//
+//
+//
+//    }
 
     @Override
     protected void convert(BaseViewHolder holder, GamesEntity entity) {
-
-//        GlideManager.loadImg(entity.getIcon(), holder.getView(R.id.item_games_icon));
-//        StringBuilder builder = new StringBuilder();
-//        builder.append(entity.getName());
-//        holder.setText(R.id.item_games_name, builder.reverse().toString()+"：名戏游");
-//
-//
-//        //holder.setText(R.id.item_games_version, "版本："+entity.getV());
-//
-//
-//
-//        if(entity.isNewGame()){
-//            holder.setText(R.id.item_games_version, (entity.getV()-1)+":本版");
-//            holder.setVisible(R.id.item_games_new_version,true);
-//            holder.setText(R.id.item_games_new_version, entity.getV()+":本版新现发");
-//
-//        }else {
-//            holder.setText(R.id.item_games_version, entity.getV()+":本版");
-//            holder.setVisible(R.id.item_games_new_version,false);
-//        }
-//
-//
-//        if(entity.isGame()){
-//            holder.setVisible(R.id.item_games_down,true);
-//        }else {
-//            holder.setVisible(R.id.item_games_down,false);
-//        }
 
 
         RelativeLayout relativeLayout = holder.getView(R.id.game_item_layout);
 
         relativeLayout.getBackground().setAlpha(50);
 
-        GlideManager.loadImg(entity.getIcon(), holder.getView(R.id.item_games_icon));
+        ImageView imageView = holder.getView(R.id.item_games_icon);
+        //GlideManager.loadImg(entity.getIcon(), holder.getView(R.id.item_games_icon));
+        Picasso.with(mContext).load(entity.getIcon()).placeholder(R.drawable.logo).into(imageView);
+
 
         holder.setText(R.id.item_games_name, "游戏名："+entity.getName());
 
@@ -110,8 +91,8 @@ public class GamesAdapter extends BaseEmptyViewAdapter<GamesEntity> {
         TextView install = holder.getView(R.id.item_games_install);
         TextView newVersion = holder.getView(R.id.item_games_new_version);
 
-        holder.setText(R.id.game_number,String.valueOf(holder.getAdapterPosition()+1));
 
+        holder.setText(R.id.game_number,""+String.valueOf(holder.getAdapterPosition()+1));
 
         if(entity.isNewGame()){
             holder.setText(R.id.item_games_version, "版本："+(entity.getV()-1));
@@ -137,6 +118,11 @@ public class GamesAdapter extends BaseEmptyViewAdapter<GamesEntity> {
 
 
         holder.setText(R.id.item_progress_number,String.valueOf(entity.getProgress())+"%");
+
+
+        //holder.setText(R.id.item_progress_kb,
+        // speed <= 0 ? "" : String.format("%s/s", CommonUtil.formatFileSize(speed)))
+
 
         ProgressBar progressBar = holder.getView(R.id.item_progress);
         progressBar.setProgress(entity.getProgress());

@@ -3,10 +3,12 @@ package com.unis.gameplatfrom.ui;
 import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -24,9 +26,7 @@ import com.scwang.smartrefresh.layout.SmartRefreshLayout;
 import com.scwang.smartrefresh.layout.api.RefreshLayout;
 import com.scwang.smartrefresh.layout.listener.OnRefreshLoadmoreListener;
 import com.trello.rxlifecycle2.android.ActivityEvent;
-import com.tsy.sdk.myokhttp.MyOkHttp;
-import com.tsy.sdk.myokhttp.download_mgr.DownloadTask;
-import com.tsy.sdk.myokhttp.download_mgr.DownloadTaskListener;
+
 import com.unis.gameplatfrom.R;
 import com.unis.gameplatfrom.adapter.GamesAdapter;
 import com.unis.gameplatfrom.adapter.GamesRightAdapter;
@@ -35,11 +35,15 @@ import com.unis.gameplatfrom.api.PublicApiInterface;
 import com.unis.gameplatfrom.api.RetrofitWrapper;
 import com.unis.gameplatfrom.api.result.BaseCustomListResult;
 import com.unis.gameplatfrom.base.BaseActivity;
+import com.unis.gameplatfrom.cache.NetConnectionReceiver;
 import com.unis.gameplatfrom.cache.UserCenter;
 import com.unis.gameplatfrom.model.GamesEntity;
 import com.unis.gameplatfrom.utils.DialogHelper;
 import com.unis.gameplatfrom.utils.DownloadMgr;
 import com.unis.gameplatfrom.utils.PackageUtil;
+import com.unis.gameplatfrom.utils.download_mgr.DownloadTask;
+import com.unis.gameplatfrom.utils.download_mgr.DownloadTaskListener;
+import com.unis.gameplatfrom.utils.download_mgr.MyOkHttp;
 import com.unis.gameplatfrom.utils.udateapk.DownLoadApkService;
 import com.unis.gameplatfrom.utils.udateapk.DownloadAPk;
 import com.unis.gameplatfrom.utils.udateapk.LinNotify;
@@ -77,8 +81,8 @@ public class Games2Activity extends BaseActivity {
     @BindView(R.id.rv_games)
     RecyclerView gamesRv;
 
-    @BindView(R.id.refresh_layout)
-    SmartRefreshLayout mRefreshLayout;
+//    @BindView(R.id.refresh_layout)
+//    SmartRefreshLayout mRefreshLayout;
 
 
     public static int mProgress;
@@ -134,6 +138,10 @@ public class Games2Activity extends BaseActivity {
     private DownloadTask mDownloadTask;
     private DownloadTaskListener mDownloadTaskListener;
 
+
+    private NetConnectionReceiver netConnectionReceiver;
+
+
     @Override
     protected int getLayout() {
         return R.layout.activity_games;
@@ -157,187 +165,14 @@ public class Games2Activity extends BaseActivity {
 
         gamesRv.setAdapter(adapter);
 
-//        adapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
-//                LitePal.getDatabase(); //创建数据表
-//
-//
-//                GamesEntity entity = (GamesEntity) adapter.getItem(position);
-//
-//                if (entity.getV() != 0) {
-//
-//                        if (LinPermission.checkPermission(GamesActivity.this, new int[]{7,8})) {
-//
-////                            if (mDownloadBinder != null) {
-////                                long downloadId = mDownloadBinder.startDownload(APK_URL);
-////                                startCheckProgress(downloadId);
-////                            }
-//
-//
-//                            /**
-//                             * 情况1：记录不在，游戏在
-//                             * 情况2：记录不在，游戏不在
-//                             * 情况3：两者都在
-//                             */
-//                            GamesEntity entity1 = LitePal.where("id="+entity.getId()).findFirst(GamesEntity.class);
-//                            if(entity1 != null){
-//
-//                                //若游戏被删除，需清除游戏记录防止数据出错
-//                                if (isAppByPackageID(entity.getPackname())) {
-//
-//
-//                                    System.out.print(entity.getV()+"");
-//                                    int number = entity.getV();
-//
-//
-//                                    if(number > entity1.getV()){
-//                                        //String content = String.format("发现新版本:V%s\n%s", entity., result.getData().getUpdateContent());
-//
-//
-//
-////                                        DialogHelper.showAlertDialog(mContext, "发现新版本", "立即更新", "暂不更新", new DialogInterface.OnClickListener() {
-////                                            @Override
-////                                            public void onClick(DialogInterface dialogInterface, int i) {
-////                                                dialogInterface.dismiss();
-////                                                entity1.setV(entity.getV());
-////                                                entity1.save();
-////                                                downApk(entity.getP(),entity.getIcon());
-////
-////                                            }
-////                                        }, new DialogInterface.OnClickListener() {
-////                                            @Override
-////                                            public void onClick(DialogInterface dialogInterface, int i) {
-////                                                dialogInterface.dismiss();
-////                                                startAppByPackageID(entity.getPackname());
-////                                            }
-////                                        });
-//
-//
-//
-//                                        entity1.setV(entity.getV());
-//
-//                                        entity1.save();
-//                                        downApk(entity.getName(),entity.getP(),entity.getIcon(),
-//                                                entity,position);
-//
-//
-//                                    }else {
-//
-//                                        entity.setDownGame(false);
-//                                        startAppByPackageID(entity.getPackname());
-//
-//                                    }
-//
-//
-//
-//                                }else {
-//
-//                                        entity1.setV(entity.getV());
-//                                        entity1.setId(entity.getId());
-//                                        entity1.setName(entity.getName());
-//                                        entity1.setP(entity.getP());
-//                                        entity1.setPackname(entity.getPackname());
-//                                        entity1.setIcon(entity.getIcon());
-//                                        entity1.save();
-//                                        //entity.setDownGame(true);
-//                                        downApk(entity.getName(), entity.getP(), entity.getIcon(),
-//                                                entity,position);
-//
-//
-////                                    DialogHelper.showAlertDialog(mContext,"确定要下载吗", "确定", "取消", new DialogInterface.OnClickListener() {
-////                                        @Override
-////                                        public void onClick(DialogInterface dialogInterface, int i) {
-////                                            dialogInterface.dismiss();
-////
-////                                            entity.setV(entity.getV());
-////                                            entity.save();
-////                                            downApk(entity.getP(),entity.getIcon());
-////
-////                                        }
-////                                    }, new DialogInterface.OnClickListener() {
-////                                        @Override
-////                                        public void onClick(DialogInterface dialogInterface, int i) {
-////                                            dialogInterface.dismiss();
-////                                        }
-////                                    });
-//
-//
-//                                }
-//
-//
-//                            }else {
-//
-//
-//                                if(isAppByPackageID(entity.getPackname())){
-//
-//                                    entity.setAccount(game_account);
-//                                    entity.save();
-//                                    entity.setDownGame(false);
-//                                    startAppByPackageID(entity.getPackname());
-//
-//                                }else {
-//
-//                                    //第一次下载
-//
-//                                    entity.setAccount(game_account);
-//                                    entity.save();
-//                                    //entity.setDownGame(true);
-//                                    downApk(entity.getName(),entity.getP(),entity.getIcon(),entity,position);
-//
-//
-//                                }
-//
-//
-//
-////                                    DialogHelper.showAlertDialog(mContext,"确定要下载吗", "确定", "取消", new DialogInterface.OnClickListener() {
-////                                        @Override
-////                                        public void onClick(DialogInterface dialogInterface, int i) {
-////                                            dialogInterface.dismiss();
-////                                            entity.save();
-////                                            downApk(entity.getP(),entity.getIcon());
-////
-////                                        }
-////                                    }, new DialogInterface.OnClickListener() {
-////                                        @Override
-////                                        public void onClick(DialogInterface dialogInterface, int i) {
-////                                            dialogInterface.dismiss();
-////                                        }
-////                                    });
-//                            }
-//
-//
-//                        }else {
-//                            //申请存储权限
-//                            LinPermission.requestPermission(GamesActivity.this, 7);
-//                            DialogHelper.showAlertDialog(mContext,"确定要下载吗", "确定", "取消", new DialogInterface.OnClickListener() {
-//                                @Override
-//                                public void onClick(DialogInterface dialogInterface, int i) {
-//                                    dialogInterface.dismiss();
-//                                    ///downApk(entity.getName(),entity.getP(),entity.getIcon());
-//                                }
-//                            }, new DialogInterface.OnClickListener() {
-//                                @Override
-//                                public void onClick(DialogInterface dialogInterface, int i) {
-//                                    dialogInterface.dismiss();
-//                                }
-//                            });
-//                        }
-//                }
-//            }
-//        });
-
-
-        adapter.setOnItemChildClickListener(new BaseQuickAdapter.OnItemChildClickListener() {
+        adapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
             @Override
-            public void onItemChildClick(BaseQuickAdapter adapter, View view, int position) {
+            public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
+                LitePal.getDatabase(); //创建数据表
 
-                switch (view.getId()){
-                    //下载游戏
-                    case R.id.item_game_down:
 
-                        GamesEntity entity = (GamesEntity) adapter.getItem(position);
-//
+                GamesEntity entity = (GamesEntity) adapter.getItem(position);
+
                 if (entity.getV() != 0) {
 
                         if (LinPermission.checkPermission(Games2Activity.this, new int[]{7,8})) {
@@ -482,39 +317,202 @@ public class Games2Activity extends BaseActivity {
 
                         }else {
                             //申请存储权限
-                            LinPermission.requestPermission(Games2Activity.this, 7);
-                            DialogHelper.showAlertDialog(mContext,"确定要下载吗", "确定", "取消", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    dialogInterface.dismiss();
-                                    ///downApk(entity.getName(),entity.getP(),entity.getIcon());
-                                }
-                            }, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    dialogInterface.dismiss();
-                                }
-                            });
+
                         }
                 }
-
-
-                        break;
-
-                    //取消游戏：
-                    case R.id.item_game_cancel:
-
-                        mDownloadMgr.deleteTask(mDownloadTask.getTaskId());
-
-                        break;
-
-
-                }
-
-
-
             }
         });
+
+
+//        adapter.setOnItemChildClickListener(new BaseQuickAdapter.OnItemChildClickListener() {
+//            @Override
+//            public void onItemChildClick(BaseQuickAdapter adapter, View view, int position) {
+//
+//                switch (view.getId()){
+//                    //下载游戏
+//                    case R.id.item_game_down:
+//
+//                        GamesEntity entity = (GamesEntity) adapter.getItem(position);
+////
+//                if (entity.getV() != 0) {
+//
+//                        if (LinPermission.checkPermission(Games2Activity.this, new int[]{7,8})) {
+//
+////                            if (mDownloadBinder != null) {
+////                                long downloadId = mDownloadBinder.startDownload(APK_URL);
+////                                startCheckProgress(downloadId);
+////                            }
+//
+//
+//                            /**
+//                             * 情况1：记录不在，游戏在
+//                             * 情况2：记录不在，游戏不在
+//                             * 情况3：两者都在
+//                             */
+//                            GamesEntity entity1 = LitePal.where("id="+entity.getId()).findFirst(GamesEntity.class);
+//                            if(entity1 != null){
+//
+//                                //若游戏被删除，需清除游戏记录防止数据出错
+//                                if (isAppByPackageID(entity.getPackname())) {
+//
+//
+//                                    System.out.print(entity.getV()+"");
+//                                    int number = entity.getV();
+//
+//
+//                                    if(number > entity1.getV()){
+//                                        //String content = String.format("发现新版本:V%s\n%s", entity., result.getData().getUpdateContent());
+//
+//
+//
+////                                        DialogHelper.showAlertDialog(mContext, "发现新版本", "立即更新", "暂不更新", new DialogInterface.OnClickListener() {
+////                                            @Override
+////                                            public void onClick(DialogInterface dialogInterface, int i) {
+////                                                dialogInterface.dismiss();
+////                                                entity1.setV(entity.getV());
+////                                                entity1.save();
+////                                                downApk(entity.getP(),entity.getIcon());
+////
+////                                            }
+////                                        }, new DialogInterface.OnClickListener() {
+////                                            @Override
+////                                            public void onClick(DialogInterface dialogInterface, int i) {
+////                                                dialogInterface.dismiss();
+////                                                startAppByPackageID(entity.getPackname());
+////                                            }
+////                                        });
+//
+//
+//
+//                                        entity1.setV(entity.getV());
+//
+//                                        entity1.save();
+//                                        downApk(entity.getName(),entity.getP(),entity.getIcon(),
+//                                                entity,position);
+//
+//
+//                                    }else {
+//
+//                                        entity.setDownGame(false);
+//                                        startAppByPackageID(entity.getPackname());
+//
+//                                    }
+//
+//
+//
+//                                }else {
+//
+//                                        entity1.setV(entity.getV());
+//                                        entity1.setId(entity.getId());
+//                                        entity1.setName(entity.getName());
+//                                        entity1.setP(entity.getP());
+//                                        entity1.setPackname(entity.getPackname());
+//                                        entity1.setIcon(entity.getIcon());
+//                                        entity1.save();
+//                                        //entity.setDownGame(true);
+//                                        downApk(entity.getName(), entity.getP(), entity.getIcon(),
+//                                                entity,position);
+//
+//
+////                                    DialogHelper.showAlertDialog(mContext,"确定要下载吗", "确定", "取消", new DialogInterface.OnClickListener() {
+////                                        @Override
+////                                        public void onClick(DialogInterface dialogInterface, int i) {
+////                                            dialogInterface.dismiss();
+////
+////                                            entity.setV(entity.getV());
+////                                            entity.save();
+////                                            downApk(entity.getP(),entity.getIcon());
+////
+////                                        }
+////                                    }, new DialogInterface.OnClickListener() {
+////                                        @Override
+////                                        public void onClick(DialogInterface dialogInterface, int i) {
+////                                            dialogInterface.dismiss();
+////                                        }
+////                                    });
+//
+//
+//                                }
+//
+//
+//                            }else {
+//
+//
+//                                if(isAppByPackageID(entity.getPackname())){
+//
+//                                    entity.setAccount(game_account);
+//                                    entity.save();
+//                                    entity.setDownGame(false);
+//                                    startAppByPackageID(entity.getPackname());
+//
+//                                }else {
+//
+//                                    //第一次下载
+//
+//                                    entity.setAccount(game_account);
+//                                    entity.save();
+//                                    //entity.setDownGame(true);
+//                                    downApk(entity.getName(),entity.getP(),entity.getIcon(),entity,position);
+//
+//
+//                                }
+//
+//
+//
+////                                    DialogHelper.showAlertDialog(mContext,"确定要下载吗", "确定", "取消", new DialogInterface.OnClickListener() {
+////                                        @Override
+////                                        public void onClick(DialogInterface dialogInterface, int i) {
+////                                            dialogInterface.dismiss();
+////                                            entity.save();
+////                                            downApk(entity.getP(),entity.getIcon());
+////
+////                                        }
+////                                    }, new DialogInterface.OnClickListener() {
+////                                        @Override
+////                                        public void onClick(DialogInterface dialogInterface, int i) {
+////                                            dialogInterface.dismiss();
+////                                        }
+////                                    });
+//                            }
+//
+//
+//                        }else {
+//                            //申请存储权限
+//                            LinPermission.requestPermission(Games2Activity.this, 7);
+//                            DialogHelper.showAlertDialog(mContext,"确定要下载吗", "确定", "取消", new DialogInterface.OnClickListener() {
+//                                @Override
+//                                public void onClick(DialogInterface dialogInterface, int i) {
+//                                    dialogInterface.dismiss();
+//                                    ///downApk(entity.getName(),entity.getP(),entity.getIcon());
+//                                }
+//                            }, new DialogInterface.OnClickListener() {
+//                                @Override
+//                                public void onClick(DialogInterface dialogInterface, int i) {
+//                                    dialogInterface.dismiss();
+//                                }
+//                            });
+//                        }
+//                }
+//
+//
+//                        break;
+//
+//                    //取消游戏：
+//                    case R.id.item_game_cancel:
+//
+//                        mDownloadMgr.deleteTask(mDownloadTask.getTaskId());
+//
+//                        //mDownloadTask.doPause();
+//
+//                        break;
+//
+//
+//                }
+//
+//
+//
+//            }
+//        });
 
 
         myOkHttp = new MyOkHttp();
@@ -530,22 +528,7 @@ public class Games2Activity extends BaseActivity {
 
 
 
-        mRefreshLayout.setOnRefreshLoadmoreListener(new OnRefreshLoadmoreListener() {
-            @Override
-            public void onLoadmore(RefreshLayout refreshlayout) {
 
-                loadData();
-
-            }
-
-            @Override
-            public void onRefresh(RefreshLayout refreshlayout) {
-               // refreshlayout.setRefreshFooter()
-                FooterView.setVisibility(View.VISIBLE);
-                loadData();
-
-            }
-        });
 
 
 
@@ -561,6 +544,7 @@ public class Games2Activity extends BaseActivity {
         switch (view.getId()){
 
             case R.id.back:
+
                 startActivity(new Intent(Games2Activity.this,MainActivity.class));
                 finish();
 
@@ -739,13 +723,13 @@ public class Games2Activity extends BaseActivity {
 
                                 adapter.setNewData(getGames);
 
-                                if(mRefreshLayout.isRefreshing()){
-                                    mRefreshLayout.finishRefresh();
-                                }
-                                if(mRefreshLayout.isLoading()){
-                                    mRefreshLayout.finishLoadmore();
-                                    FooterView.setVisibility(View.GONE);
-                                }
+//                                if(mRefreshLayout.isRefreshing()){
+//                                    mRefreshLayout.finishRefresh();
+//                                }
+//                                if(mRefreshLayout.isLoading()){
+//                                    mRefreshLayout.finishLoadmore();
+//                                    FooterView.setVisibility(View.GONE);
+//                                }
 
 
 
@@ -764,12 +748,12 @@ public class Games2Activity extends BaseActivity {
                         }else {
 
                             Toast.makeText(mContext,result.getMsg(),Toast.LENGTH_SHORT).show();
-                            if(mRefreshLayout.isRefreshing()){
-                                mRefreshLayout.finishRefresh();
-                            }
-                            if(mRefreshLayout.isLoading()){
-                                mRefreshLayout.finishLoadmore();
-                            }
+//                            if(mRefreshLayout.isRefreshing()){
+//                                mRefreshLayout.finishRefresh();
+//                            }
+//                            if(mRefreshLayout.isLoading()){
+//                                mRefreshLayout.finishLoadmore();
+//                            }
                         }
                     }
                 });
@@ -837,6 +821,8 @@ public class Games2Activity extends BaseActivity {
     private void downApk(String name,String filepath,String iconUrl,GamesEntity entity,int positoin){
 
 
+
+
         if(filepath.contains("apk")){
 
             String[] apk_path = filepath.split("/");
@@ -857,68 +843,19 @@ public class Games2Activity extends BaseActivity {
                 } else {
 
 
-                    progressList.add(positoin);
+//                    IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+//                    netConnectionReceiver = new NetConnectionReceiver(mDownloadMgr);
+//                    registerReceiver(netConnectionReceiver, filter);
 
-//                    DownloadAPk.downApk(GamesActivity.this, filepath, path, iconUrl,
-//                            new DownloadAPk.GameProgressListener() {
-//                                @Override
-//                                public void getProgress(int progress) {
-//
-//                                    DownGame = true;
-//                                    runOnUiThread(new Runnable() {
-//                                        @Override
-//                                        public void run() {
-//
-//                                            for (int positoin : progressList) {
-//
-//                                                GamesEntity gamesEntity = adapter.getItem(positoin);
-//                                                gamesEntity.setProgress(progress);
-//                                                gamesEntity.setDownGame(true);
-//
-//                                                //adapter.notifyItemChanged(positoin,positoin);
-//                                                adapter.notifyItemChanged(positoin);
-//
-//                                            }
-//
-//
-//                                        }
-//                                    });
-//
-//
-//                                }
-//
-//                                @Override
-//                                public void endDown() {
-//
-//                                    DownGame = false;
-//                                    if (progressList.size() != 0) {
-//                                        progressList.clear();
-//                                    }
-//
-//                                    runOnUiThread(new Runnable() {
-//                                        @Override
-//                                        public void run() {
-//
-//                                            GamesEntity gamesEntity = adapter.getItem(positoin);
-//                                            gamesEntity.setDownGame(false);
-//                                            adapter.notifyItemChanged(positoin);
-//
-//                                            Intent installAppIntent = DownloadAPk.getInstallAppIntent(mContext, path);
-//                                            startActivity(installAppIntent);
-//
-//                                        }
-//                                    });
-//
-//
-//                                }
-//                            });
+
+
+                    progressList.add(positoin);
 
                     //显示activity时加入监听
                     mDownloadTaskListener = new DownloadTaskListener() {
                         @Override
                         public void onStart(String taskId, long completeBytes, long totalBytes) {
                             mDownloadTask = mDownloadMgr.getDownloadTask(taskId);
-
 
                         }
 
@@ -935,7 +872,7 @@ public class Games2Activity extends BaseActivity {
                                     gamesEntity.setProgress(progress);
                                     gamesEntity.setDownGame(true);
 
-                                    adapter.notifyItemChanged(positoin,positoin);
+                                    adapter.notifyItemChanged(positoin,progress);
                                     //adapter.notifyItemChanged(positoin);
 
 
@@ -958,8 +895,6 @@ public class Games2Activity extends BaseActivity {
                         @Override
                         public void onFailure(String taskId, String error_msg) {
                             mDownloadTask = mDownloadMgr.getDownloadTask(taskId);
-
-
                         }
                     };
 
@@ -969,8 +904,7 @@ public class Games2Activity extends BaseActivity {
                     DownloadMgr.Task task = new DownloadMgr.Task();
                     task.setTaskId(mDownloadMgr.genTaskId()+entity.getName());       //生成一个taskId
                     task.setUrl(entity.getP());   //下载地址
-                    task.setFilePath(Environment
-                            .getExternalStorageDirectory() + "/DownLoad/apk");    //下载后文件保存位置
+                    task.setFilePath(path);    //下载后文件保存位置
                     task.setDefaultStatus(DownloadMgr.DEFAULT_TASK_STATUS_START);       //任务添加后开始状态 如果不设置 默认任务添加后就自动开始
 
                     mDownloadTask = mDownloadMgr.addTask(task);
