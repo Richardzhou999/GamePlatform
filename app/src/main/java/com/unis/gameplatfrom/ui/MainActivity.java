@@ -574,7 +574,6 @@ public class MainActivity extends BaseActivity {
 
             Toast.makeText(mContext, "当前网络异常,请检查网络.网络无异常将自动刷新列表", Toast.LENGTH_LONG).show();
             mConnectTag = true;
-
         }
     }
 
@@ -585,6 +584,8 @@ public class MainActivity extends BaseActivity {
 
         unregisterReceiver(innerReceiver);
         unregisterReceiver(itemNetConnectionReceiver);
+
+        UserCenter.getInstance().delete_uuid();
 
 
 

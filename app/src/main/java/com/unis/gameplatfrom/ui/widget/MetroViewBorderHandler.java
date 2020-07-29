@@ -300,11 +300,11 @@ public class MetroViewBorderHandler implements IMetroViewBorder {
                 oldWidth = newWidth;
             }
 
-            PropertyValuesHolder valuesWithdHolder = PropertyValuesHolder.ofInt("width", oldWidth, newWidth);
+            PropertyValuesHolder valuesWidthHolder = PropertyValuesHolder.ofInt("width", oldWidth, newWidth);
             PropertyValuesHolder valuesHeightHolder = PropertyValuesHolder.ofInt("height", oldHeight, newHeight);
             PropertyValuesHolder valuesXHolder = PropertyValuesHolder.ofFloat("translationX", oldXY[0], newXY[0]);
             PropertyValuesHolder valuesYHolder = PropertyValuesHolder.ofFloat("translationY", oldXY[1], newXY[1]);
-            final ObjectAnimator scaleAnimator = ObjectAnimator.ofPropertyValuesHolder(mTarget, valuesWithdHolder, valuesHeightHolder, valuesYHolder, valuesXHolder);
+            final ObjectAnimator scaleAnimator = ObjectAnimator.ofPropertyValuesHolder(mTarget, valuesWidthHolder, valuesHeightHolder, valuesYHolder, valuesXHolder);
 
             scaleAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                 @Override
