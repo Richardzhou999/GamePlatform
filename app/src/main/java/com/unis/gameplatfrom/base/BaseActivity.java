@@ -83,6 +83,8 @@ public abstract class BaseActivity extends RxAppCompatActivity{
 
 
 
+
+
     }
 
     @Override

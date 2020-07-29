@@ -236,13 +236,9 @@ public class UserIDFragment extends BaseFragment {
         String password = mPassword.getText().toString().trim();
 
         if (EmptyUtils.isEmpty(mobile)) {
-            showMessageDialog("请输入手机号");
+            showMessageDialog("请输入用户ID");
             return;
         }
-//        else if (!RegexUtils.isMobileSimple(mobile)) {
-//            showMessageDialog("请输入正确的手机号");
-//            return;
-//        }
 
         if (EmptyUtils.isEmpty(password)) {
             showMessageDialog("请输入密码");

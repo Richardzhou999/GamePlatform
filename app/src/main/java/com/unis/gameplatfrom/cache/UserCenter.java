@@ -7,9 +7,11 @@ import android.widget.Toast;
 import com.blankj.utilcode.util.EmptyUtils;
 import com.blankj.utilcode.util.SPUtils;
 import com.umeng.analytics.MobclickAgent;
+import com.unis.gameplatfrom.utils.JSONUtils;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -261,10 +263,12 @@ public class UserCenter {
 
         StringBuilder builder = new StringBuilder();
         builder.append("{");
-        builder.append("uuid="+uuid);
+        builder.append("\"uuid\""+":"+"\""+uuid+"\"");
         builder.append(",");
-        builder.append("gameid="+gameid);
+        builder.append("\"gameid\""+":"+"\""+gameid+"\"");
         builder.append("}");
+
+
 
         try {
 
@@ -351,10 +355,61 @@ public class UserCenter {
 
 
         File uidFiles = new File(filePath);
-        if(uidFiles.exists()){
-            uidFiles.delete();
+        if(uidFiles.exists()) {
+            deleteDir(uidFiles);
         }
     }
+
+    public void deleteDownFile(){
+
+        String filePath = null;
+        FileOutputStream outStream = null;
+        boolean hasSDCard =Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
+
+        if (hasSDCard) {
+
+            filePath = Environment.getExternalStorageDirectory() + "/Download/apk";
+
+
+        } else {
+
+            filePath = Environment.getDownloadCacheDirectory() + "/Download/apk";
+
+        }
+
+
+        File uidFiles = new File(filePath);
+        if(uidFiles.exists()) {
+            deleteDir(uidFiles);
+        }
+
+
+    }
+
+    /**
+     * 递归删除目录下的所有文件及子目录下所有文件
+     * @param dir 将要删除的文件目录
+     * @return boolean Returns "true" if all deletions were successful.
+     *                 If a deletion fails, the method stops attempting to
+     *                 delete and returns "false".
+     */
+    private  boolean deleteDir(File dir) {
+        if (dir.isDirectory()) {
+            String[] children = dir.list();
+            //递归删除目录中的子目录下
+            for (int i=0; i<children.length; i++) {
+                boolean success = deleteDir(new File(dir, children[i]));
+                if (!success) {
+                    return false;
+                }
+            }
+        }
+        // 目录此时为空，可以删除
+        return dir.delete();
+    }
+
+
+
 
 
    /**

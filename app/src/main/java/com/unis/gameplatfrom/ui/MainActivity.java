@@ -212,7 +212,9 @@ public class MainActivity extends BaseActivity {
             SimpleDateFormat TimeFormat = new SimpleDateFormat("HH:mm");// HH:mm:ss
             //获取当前时间
             Date date1 = new Date(System.currentTimeMillis());
-            nowTimeText.setText(TimeFormat.format(date1));
+            if(nowTimeText !=null) {
+                nowTimeText.setText(TimeFormat.format(date1));
+            }
 
         }
     };
@@ -247,7 +249,7 @@ public class MainActivity extends BaseActivity {
         mDownloadMgr = (DownloadMgr) new DownloadMgr.Builder()
                 .myOkHttp(myOkHttp)
                 .maxDownloadIngNum(5)       //设置最大同时下载数量（不设置默认5）
-                .saveProgressBytes(20 * 1024)  //设置每20kb触发一次saveProgress保存进度 （不能在onProgress每次都保存 过于频繁） 不设置默认50kb
+                .saveProgressBytes(50 * 1024)  //设置每20kb触发一次saveProgress保存进度 （不能在onProgress每次都保存 过于频繁） 不设置默认50kb
                 .build();
 
 
@@ -293,7 +295,7 @@ public class MainActivity extends BaseActivity {
 
 
                                 if (number > entity1.getV()) {
-                                    
+
                                     //String content = String.format("发现新版本:V%s\n%s", entity., result.getData().getUpdateContent());
 
 
@@ -585,6 +587,9 @@ public class MainActivity extends BaseActivity {
         unregisterReceiver(itemNetConnectionReceiver);
 
 
+
+
+
     }
 
     private void loadData() {
@@ -818,10 +823,10 @@ public class MainActivity extends BaseActivity {
 
                         } else {
 
-                            Toast.makeText(mContext, result.getMsg(), Toast.LENGTH_LONG).show();
+                            //Toast.makeText(mContext, result.getMsg(), Toast.LENGTH_LONG).show();
 
                             //finish();
-                            startActivity(new Intent(mContext, LoginActivity.class));
+                            //startActivity(new Intent(mContext, LoginActivity.class));
 
                         }
                     }
@@ -935,6 +940,7 @@ public class MainActivity extends BaseActivity {
                         @Override
                         public void onFailure(String taskId, String error_msg) {
                             mDownloadTask = mDownloadMgr.getDownloadTask(taskId);
+
                         }
                     };
 
@@ -982,7 +988,6 @@ public class MainActivity extends BaseActivity {
                     if (LinPermission.checkPermission(MainActivity.this, new int[]{7, 8})) {
                         Intent intent = new Intent(MainActivity.this, GamesActivity.class);
                         startActivity(intent);
-                        finish();
                     }
 
                 } else {

@@ -86,6 +86,8 @@ public class LoginActivity extends BaseActivity {
 
 
 
+
+
         passWordFragment = (PassWordFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_password_login);
         userIDFragment = (UserIDFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_sms_login);
 
@@ -93,6 +95,9 @@ public class LoginActivity extends BaseActivity {
 
         transaction.show(userIDFragment).hide(passWordFragment).commit();
 
+
+        //每次登陆前先清缓存
+        UserCenter.getInstance().deleteDownFile();
 
 
     }
