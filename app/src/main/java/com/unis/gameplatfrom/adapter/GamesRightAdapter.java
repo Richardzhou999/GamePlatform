@@ -1,14 +1,13 @@
 package com.unis.gameplatfrom.adapter;
 
 import android.content.Context;
-import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
 
 import com.chad.library.adapter.base.BaseViewHolder;
 import com.unis.gameplatfrom.R;
 import com.unis.gameplatfrom.manager.GlideManager;
-import com.unis.gameplatfrom.model.GamesEntity;
+import com.unis.gameplatfrom.entity.GamesEntity;
 
 import java.util.List;
 

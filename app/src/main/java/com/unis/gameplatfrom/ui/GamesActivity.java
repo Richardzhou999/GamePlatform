@@ -53,7 +53,9 @@ import com.unis.gameplatfrom.cache.InnerReceiver;
 
 import com.unis.gameplatfrom.cache.NetConnectionReceiver;
 import com.unis.gameplatfrom.cache.UserCenter;
-import com.unis.gameplatfrom.model.GamesEntity;
+import com.unis.gameplatfrom.constant.GameConstant;
+import com.unis.gameplatfrom.entity.GamesEntity;
+import com.unis.gameplatfrom.presenter.GamePresenter;
 import com.unis.gameplatfrom.ui.widget.MetroViewBorderImpl;
 import com.unis.gameplatfrom.utils.DialogHelper;
 import com.unis.gameplatfrom.utils.DownloadMgr;
@@ -70,7 +72,6 @@ import com.unis.gameplatfrom.utils.udateapk.LinPermission;
 import butterknife.BindView;
 import butterknife.OnClick;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 
@@ -80,7 +81,7 @@ import io.reactivex.schedulers.Schedulers;
  */
 
 
-public class GamesActivity extends BaseActivity {
+public class GamesActivity extends BaseActivity<GamePresenter> implements GameConstant.View{
 
     @BindView(R.id.layout_game)
     LinearLayout gameLayout;
@@ -154,6 +155,8 @@ public class GamesActivity extends BaseActivity {
     private ItemNetConnectionReceiver itemNetConnectionReceiver;
     private NetConnectionReceiver netConnectionReceiver;
     private  IntentFilter mFilter;
+
+    private GamePresenter gamePresenter;
 
 
     @Override
@@ -383,6 +386,12 @@ public class GamesActivity extends BaseActivity {
 
     }
 
+    @Override
+    protected void initPresenter() {
+        gamePresenter = new GamePresenter(mContext);
+        gamePresenter.attachView(this);
+    }
+
 
     @OnClick({R.id.back})
     public void onClick(View view){
@@ -509,149 +518,13 @@ public class GamesActivity extends BaseActivity {
 
     private void loadData() {
 
-        if(getGames.size() != 0 ){
+        if (getGames.size() != 0) {
             getGames.clear();
         }
 
-        if(NetworkUtils.isConnected()) {
-            RetrofitWrapper.getInstance().create(PublicApiInterface.class)
-                    .getGameList(UserCenter.getInstance().getToken())
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .compose(this.bindUntilEvent(ActivityEvent.DESTROY))
-                    .subscribe(new HUDLoadDataSubscriber<BaseCustomListResult<GamesEntity>>(mContext) {
-                        @Override
-                        public void onNext(BaseCustomListResult<GamesEntity> result) {
-                            mGameBack.setFocusable(true);
-                            mGameBack.setFocusableInTouchMode(true);
-
-                            if (result.getErr() == 0) {
-
-                                if (LinPermission.checkPermission(GamesActivity.this, new int[]{7, 8})) {
-
-
-                                    for (GamesEntity entity : result.getData()) {
-
-
-                                        GamesEntity entity1 = LitePal.where("id=" + entity.getId()).findFirst(GamesEntity.class);
-                                        if (entity1 != null) {
-                                            // entity.setV(entity.getV()+1);
-
-                                            if (PackageUtil.isAppByPackageID(mContext, entity.getPackname())) {
-
-
-                                                if (entity.getV() > entity1.getV()) {
-
-                                                    entity.setNewGame(true);
-                                                    entity.setInstallGame(true);
-                                                    entity.setLocal(true);
-                                                    getGames.add(entity);
-
-                                                } else {
-
-                                                    entity.setLocal(true);
-                                                    entity.setInstallGame(true);
-                                                    getGames.add(entity);
-
-                                                }
-
-
-                                            } else {
-
-                                                entity1.save();
-                                                entity1.delete();
-
-                                                if (PackageUtil.isAppByLocal(entity.getP())) {
-
-                                                    entity.setNewGame(false);
-                                                    entity.setInstallGame(false);
-                                                    entity.setLocal(true);
-                                                    getGames.add(entity);
-
-                                                } else {
-
-                                                    entity.setNewGame(false);
-                                                    entity.setInstallGame(false);
-                                                    entity.setLocal(false);
-                                                    getGames.add(entity);
-
-                                                }
-                                            }
-
-                                        } else {
-
-                                            boolean appby = PackageUtil.isAppByPackageID(mContext, entity.getPackname());
-
-                                            if (appby) {
-
-                                                entity.setLocal(true);
-                                                entity.setNewGame(false);
-                                                entity.setInstallGame(true);
-                                                getGames.add(entity);
-
-                                            } else {
-
-
-                                                if (PackageUtil.isAppByLocal(entity.getP())) {
-
-                                                    entity.setNewGame(false);
-                                                    entity.setInstallGame(false);
-                                                    entity.setLocal(true);
-                                                    getGames.add(entity);
-
-                                                } else {
-
-                                                    entity.setNewGame(false);
-                                                    entity.setInstallGame(false);
-                                                    entity.setLocal(false);
-                                                    getGames.add(entity);
-
-                                                }
-
-
-                                            }
-
-                                        }
-
-
-                                    }
-
-                                    if (!refresh) {
-
-                                        refresh = true;
-                                        adapter.setNewData(getGames);
-                                    } else {
-
-                                        if (mDownloadMgr != null) {
-                                            mDownloadMgr.startAllTask();//开始所有下载任务
-                                        }
-
-                                    }
-
-                                    FooterView.setVisibility(View.GONE);
-
-
-                                } else {
-
-//                            adapter.setNewData(result.getData());
-//                            rightAdapter.setNewData(result.getData());
-//                            mRefreshLayout.finishRefresh();
-
-                                    //finish();
-//                        adapter.addData(result.getData());
-
-                                }
-
-                            } else {
-
-                                Toast.makeText(mContext, result.getMsg(), Toast.LENGTH_SHORT).show();
-                                startActivity(new Intent(mContext, LoginActivity.class));
-                                finish();
-                            }
-                        }
-                    });
+        if (NetworkUtils.isConnected()) {
+            gamePresenter.getGameList(UserCenter.getInstance().getToken());
         }
-
     }
 
     /**
@@ -675,7 +548,7 @@ public class GamesActivity extends BaseActivity {
         resolveIntent.setPackage(packageInfo.packageName);
         List<ResolveInfo> apps = packageManager.queryIntentActivities(resolveIntent, 0);
         ResolveInfo ri = apps.iterator().next();
-        UserCenter.getInstance().save_gameId(mContext,gameid);
+        UserCenter.getInstance().save_gameId(gameid);
         if (ri != null && mDownloadMgr != null) {
             mDownloadMgr.pauseAllTask();//暂停所有下载任务
             String className = ri.activityInfo.name;
@@ -732,7 +605,7 @@ public class GamesActivity extends BaseActivity {
                     if(mDownloadMgr !=  null){
                         mDownloadMgr.pauseAllTask();//暂停所有下载任务
                         entity.setDownGame(false);
-                        UserCenter.getInstance().save_gameId(mContext,entity.getGameId());
+                        UserCenter.getInstance().save_gameId(entity.getGameId());
                         Intent installAppIntent = DownloadAPk.getInstallAppIntent(mContext, path);
                         startActivity(installAppIntent);
 
@@ -818,7 +691,7 @@ public class GamesActivity extends BaseActivity {
                                         gamesEntity.setInstallGame(true);
                                         gamesEntity.setLocal(true);
                                         adapter.notifyItemChanged(positoin);
-                                        UserCenter.getInstance().save_gameId(mContext,entity.getGameId());
+                                        UserCenter.getInstance().save_gameId(entity.getGameId());
                                         Intent installAppIntent = DownloadAPk.getInstallAppIntent(mContext, path);
                                         startActivity(installAppIntent);
 
@@ -847,63 +720,6 @@ public class GamesActivity extends BaseActivity {
                         ToastUtils.showShort("当前网络异常,无法下载");
 
                     }
-
-
-
-//                    DownloadAPk.downApk(GamesActivity.this, filepath, path, iconUrl,
-//                            new DownloadAPk.GameProgressListener() {
-//                                @Override
-//                                public void getProgress(int progress) {
-//
-//                                    DownGame = true;
-//                                    saveDownName = entity.getName();
-//                                    runOnUiThread(new Runnable() {
-//                                        @Override
-//                                        public void run() {
-//
-//                                            for (int positoin : progressList) {
-//
-//                                                GamesEntity gamesEntity = adapter.getItem(positoin);
-//                                                gamesEntity.setProgress(progress);
-//                                                gamesEntity.setDownGame(true);
-//
-//                                                //adapter.notifyItemChanged(positoin,positoin);
-//                                                adapter.notifyItemChanged(positoin);
-//
-//                                            }
-//
-//
-//                                        }
-//                                    });
-//
-//
-//                                }
-//
-//                                @Override
-//                                public void endDown() {
-//
-//                                    DownGame = false;
-//                                    if (progressList.size() != 0) {
-//                                        progressList.clear();
-//                                    }
-//
-//                                    runOnUiThread(new Runnable() {
-//                                        @Override
-//                                        public void run() {
-//
-//                                            GamesEntity gamesEntity = adapter.getItem(positoin);
-//                                            gamesEntity.setDownGame(false);
-//                                            adapter.notifyItemChanged(positoin);
-//
-//                                            Intent installAppIntent = DownloadAPk.getInstallAppIntent(mContext, path);
-//                                            startActivity(installAppIntent);
-//
-//                                        }
-//                                    });
-//
-//
-//                                }
-//                            });
 
                 }
 
@@ -944,6 +760,151 @@ public class GamesActivity extends BaseActivity {
 
     }
 
+    @Override
+    public void showLoading() {
+
+    }
+
+    @Override
+    public void hideLoading() {
+
+    }
+
+    @Override
+    public void onError(Throwable throwable) {
+
+    }
+
+    @Override
+    public void onSuccess(BaseCustomListResult<GamesEntity> result) {
+
+        mGameBack.setFocusable(true);
+        mGameBack.setFocusableInTouchMode(true);
+
+        if (result.getErr() == 0) {
+
+            if (LinPermission.checkPermission(GamesActivity.this, new int[]{7, 8})) {
+
+
+                for (GamesEntity entity : result.getData()) {
+
+
+                    GamesEntity entity1 = LitePal.where("id=" + entity.getId()).findFirst(GamesEntity.class);
+                    if (entity1 != null) {
+                        // entity.setV(entity.getV()+1);
+
+                        if (PackageUtil.isAppByPackageID(mContext, entity.getPackname())) {
+
+
+                            if (entity.getV() > entity1.getV()) {
+
+                                entity.setNewGame(true);
+                                entity.setInstallGame(true);
+                                entity.setLocal(true);
+                                getGames.add(entity);
+
+                            } else {
+
+                                entity.setLocal(true);
+                                entity.setInstallGame(true);
+                                getGames.add(entity);
+
+                            }
+
+
+                        } else {
+
+                            entity1.save();
+                            entity1.delete();
+
+                            if (PackageUtil.isAppByLocal(entity.getP())) {
+
+                                entity.setNewGame(false);
+                                entity.setInstallGame(false);
+                                entity.setLocal(true);
+                                getGames.add(entity);
+
+                            } else {
+
+                                entity.setNewGame(false);
+                                entity.setInstallGame(false);
+                                entity.setLocal(false);
+                                getGames.add(entity);
+
+                            }
+                        }
+
+                    } else {
+
+                        boolean appby = PackageUtil.isAppByPackageID(mContext, entity.getPackname());
+
+                        if (appby) {
+
+                            entity.setLocal(true);
+                            entity.setNewGame(false);
+                            entity.setInstallGame(true);
+                            getGames.add(entity);
+
+                        } else {
+
+
+                            if (PackageUtil.isAppByLocal(entity.getP())) {
+
+                                entity.setNewGame(false);
+                                entity.setInstallGame(false);
+                                entity.setLocal(true);
+                                getGames.add(entity);
+
+                            } else {
+
+                                entity.setNewGame(false);
+                                entity.setInstallGame(false);
+                                entity.setLocal(false);
+                                getGames.add(entity);
+
+                            }
+
+
+                        }
+
+                    }
+
+
+                }
+
+                if (!refresh) {
+
+                    refresh = true;
+                    adapter.setNewData(getGames);
+                } else {
+
+                    if (mDownloadMgr != null) {
+                        mDownloadMgr.startAllTask();//开始所有下载任务
+                    }
+
+                }
+
+                FooterView.setVisibility(View.GONE);
+
+
+            } else {
+
+//                            adapter.setNewData(result.getData());
+//                            rightAdapter.setNewData(result.getData());
+//                            mRefreshLayout.finishRefresh();
+
+                //finish();
+//                        adapter.addData(result.getData());
+
+            }
+
+        } else {
+
+            Toast.makeText(mContext, result.getMsg(), Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(mContext, LoginActivity.class));
+            finish();
+        }
+    }
 
     public class ItemNetConnectionReceiver extends BroadcastReceiver {
 

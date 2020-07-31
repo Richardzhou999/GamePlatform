@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.CallSuper;
 import android.support.annotation.LayoutRes;
+import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -24,6 +25,8 @@ import butterknife.Unbinder;
 import com.unis.gameplatfrom.AppManager;
 import com.unis.gameplatfrom.R;
 import com.unis.gameplatfrom.cache.InnerReceiver;
+import com.unis.gameplatfrom.presenter.BasePresenter;
+import com.unis.gameplatfrom.ui.view.BaseView;
 import com.unis.gameplatfrom.utils.StatusBarUtil;
 
 
@@ -32,9 +35,11 @@ import com.unis.gameplatfrom.utils.StatusBarUtil;
  */
 
 @SuppressWarnings("DefaultFileTemplate")
-public abstract class BaseActivity extends RxAppCompatActivity{
+public abstract class BaseActivity<P extends BasePresenter> extends AppCompatActivity implements BaseView {
     protected Activity mContext;
     private Unbinder mUnbinder;
+
+    protected P mPresenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +66,14 @@ public abstract class BaseActivity extends RxAppCompatActivity{
         }
         this.mUnbinder = ButterKnife.bind(this);
         Router.inject(this);
+
+        //初始化mPresenter
+        initPresenter();
+        //绑定view
+        if(mPresenter != null){
+            mPresenter.attachView(this);
+        }
+
         initView(savedInstanceState);
         initData();
     }
@@ -79,11 +92,6 @@ public abstract class BaseActivity extends RxAppCompatActivity{
 //        友盟
         MobclickAgent.onPageStart(this.getClass().getName());
         MobclickAgent.onResume(this);
-
-
-
-
-
 
     }
 
@@ -106,6 +114,10 @@ public abstract class BaseActivity extends RxAppCompatActivity{
     protected void onDestroy() {
         unRegistEventBus();
         mUnbinder.unbind();
+        if(mPresenter != null){
+            mPresenter.detachView();
+            mPresenter = null;
+        }
         AppManager.getAppManager().finishActivity(this);
         super.onDestroy();
     }
@@ -114,6 +126,11 @@ public abstract class BaseActivity extends RxAppCompatActivity{
     protected abstract int getLayout();
 
     protected abstract void initData();
+
+    /**
+     * 初始化mPresenter
+     */
+    protected abstract void initPresenter();
 
     protected abstract void initView(Bundle savedInstanceState);
 

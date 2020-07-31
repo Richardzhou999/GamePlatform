@@ -1,18 +1,10 @@
 package com.unis.gameplatfrom.ui;
 
-import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.text.Editable;
 import android.text.TextUtils;
-import android.text.TextWatcher;
-import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -31,7 +23,10 @@ import com.unis.gameplatfrom.api.PublicApiInterface;
 import com.unis.gameplatfrom.api.RetrofitWrapper;
 import com.unis.gameplatfrom.base.BaseFragment;
 import com.unis.gameplatfrom.cache.UserCenter;
-import com.unis.gameplatfrom.model.LoginResult;
+import com.unis.gameplatfrom.constant.LoginConstant;
+import com.unis.gameplatfrom.entity.LoginEntity;
+import com.unis.gameplatfrom.presenter.LoginPresenter;
+import com.unis.gameplatfrom.ui.view.BaseView;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -42,7 +37,7 @@ import io.reactivex.schedulers.Schedulers;
  * 用户登陆
  *
  */
-public class UserIDFragment extends BaseFragment {
+public class UserIDFragment extends BaseFragment<LoginPresenter> implements LoginConstant.View {
 
 
 
@@ -70,9 +65,17 @@ public class UserIDFragment extends BaseFragment {
     TextView mLoginPassword;
 
 
+    private LoginPresenter loginPresenter;
+
     @Override
     protected int getLayout() {
         return R.layout.fragment_user_id;
+    }
+
+    @Override
+    protected void initPresenter() {
+            loginPresenter = new LoginPresenter(mContext);
+            loginPresenter.attachView(this);
     }
 
     @Override
@@ -87,6 +90,13 @@ public class UserIDFragment extends BaseFragment {
             mAccount.setText(userID);
             mAccount.setSelection(userID.length());
             mSaveBtn.setChecked(true);
+            saveaccount = true;
+
+        }else {
+
+           // mAccount.setText("");
+            mSaveBtn.setChecked(false);
+            saveaccount = false;
 
         }
 
@@ -198,6 +208,8 @@ public class UserIDFragment extends BaseFragment {
     }
 
 
+
+
     @OnClick({R.id.btn_login_userId,R.id.login_password,R.id.click_layout})
     public void onViewClicked(View view) {
         switch (view.getId()) {
@@ -218,9 +230,11 @@ public class UserIDFragment extends BaseFragment {
 
 
                 }else {
+
                     saveaccount = false;
                     mSaveBtn.setChecked(false);
                     mSaveText.setTextColor(ContextCompat.getColor(mContext,R.color.white));
+                    UserCenter.getInstance().delectUserid();
                 }
 
                 break;
@@ -247,55 +261,42 @@ public class UserIDFragment extends BaseFragment {
 
         if(NetworkUtils.isConnected()) {
 
-            RetrofitWrapper.getInstance().create(PublicApiInterface.class)
-                    .passwordLogin(mobile, password, "123", 2, EncryptUtils.encryptMD5ToString(mobile + password + "UNIS").toLowerCase())
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
+          loginPresenter.login(mobile, password, "123", 2,
+                            EncryptUtils.encryptMD5ToString(mobile + password + "UNIS").toLowerCase());
 
-                    .compose(this.bindUntilEvent(FragmentEvent.DESTROY))
-                    .subscribe(new HUDLoadDataSubscriber<LoginResult>(mContext) {
-                        @Override
-                        public void onNext(LoginResult result) {
-
-                            if (result.getErr() == 0) {
-//                            Intent intent = new Intent();
-//                            intent.putExtra("account",mobile);
-//                            intent.putExtra("password",password);
-
-                                if (saveaccount) {
-
-                                    UserCenter.getInstance().setUserid(mobile);
-
-                                }
-
-                                UserCenter.getInstance().save_uuid(mContext, result.getUuid());
-
-                                UserCenter.getInstance().setUserName(result.getName());
-                                UserCenter.getInstance().setUserHead(result.getHead());
-
-                                //UserCenter.getInstance().setGameAccount(mobile);
-
-                                Intent intent = new Intent(mContext, MainActivity.class);
-                                intent.putExtra("username", result.getName());
-                                intent.putExtra("userhead", result.getHead());
-                                startActivity(intent);
-                                UserCenter.getInstance().setToken(result.getUuid());
-
-                                mContext.finish();
-
-                            }
-                            if (result.getErr() == 1) {
-
-                                Toast.makeText(mContext, result.getMsg(), Toast.LENGTH_SHORT).show();
-
-                            }
-
-                        }
-                    });
 
         }else {
             Toast.makeText(mContext, "网络异常,请检查网络", Toast.LENGTH_SHORT).show();
         }
     }
 
+    @Override
+    public void onSuccess(LoginEntity result) {
+
+        if (saveaccount) {
+            UserCenter.getInstance().setUserid(mAccount.getText().toString().trim());
+        }
+
+        Intent intent = new Intent(mContext, MainActivity.class);
+        intent.putExtra("username", result.getName());
+        intent.putExtra("userhead", result.getHead());
+        startActivity(intent);
+        mContext.finish();
+
+    }
+
+    @Override
+    public void showLoading() {
+
+    }
+
+    @Override
+    public void hideLoading() {
+
+    }
+
+    @Override
+    public void onError(Throwable throwable) {
+
+    }
 }

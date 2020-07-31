@@ -45,7 +45,7 @@ public class PackageUtil {
 
         if (ri != null && mDownloadMgr != null) {
             mDownloadMgr.pauseAllTask();//暂停所有下载任务
-            UserCenter.getInstance().save_gameId(context,gameid);
+            UserCenter.getInstance().save_gameId(gameid);
             String className = ri.activityInfo.name;
             Intent intent = new Intent(Intent.ACTION_MAIN);
             intent.addCategory(Intent.CATEGORY_LAUNCHER);

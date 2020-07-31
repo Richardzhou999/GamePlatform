@@ -1,14 +1,12 @@
 package com.unis.gameplatfrom.ui;
 
 import android.content.ComponentName;
-import android.content.DialogInterface;
+import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -22,9 +20,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
-import com.scwang.smartrefresh.layout.SmartRefreshLayout;
-import com.scwang.smartrefresh.layout.api.RefreshLayout;
-import com.scwang.smartrefresh.layout.listener.OnRefreshLoadmoreListener;
 import com.trello.rxlifecycle2.android.ActivityEvent;
 
 import com.unis.gameplatfrom.R;
@@ -37,7 +32,7 @@ import com.unis.gameplatfrom.api.result.BaseCustomListResult;
 import com.unis.gameplatfrom.base.BaseActivity;
 import com.unis.gameplatfrom.cache.NetConnectionReceiver;
 import com.unis.gameplatfrom.cache.UserCenter;
-import com.unis.gameplatfrom.model.GamesEntity;
+import com.unis.gameplatfrom.entity.GamesEntity;
 import com.unis.gameplatfrom.utils.DialogHelper;
 import com.unis.gameplatfrom.utils.DownloadMgr;
 import com.unis.gameplatfrom.utils.PackageUtil;
@@ -535,7 +530,10 @@ public class Games2Activity extends BaseActivity {
 
     }
 
+    @Override
+    protected void initPresenter() {
 
+    }
 
 
     @OnClick({R.id.back})
@@ -622,7 +620,7 @@ public class Games2Activity extends BaseActivity {
                 .getGameList(UserCenter.getInstance().getToken())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .compose(this.bindUntilEvent(ActivityEvent.DESTROY))
+               // .compose(this.bindUntilEvent(ActivityEvent.DESTROY))
                 .subscribe(new HUDLoadDataSubscriber<BaseCustomListResult<GamesEntity>>(mContext) {
                     @Override
                     public void onNext(BaseCustomListResult<GamesEntity> result) {
@@ -933,6 +931,20 @@ public class Games2Activity extends BaseActivity {
     }
 
 
+    @Override
+    public void showLoading() {
+
+    }
+
+    @Override
+    public void hideLoading() {
+
+    }
+
+    @Override
+    public void onError(Throwable throwable) {
+
+    }
 
 
 }

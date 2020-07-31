@@ -1,22 +1,13 @@
 package com.unis.gameplatfrom.ui;
 
-import android.content.ComponentName;
-import android.content.DialogInterface;
+import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,20 +18,17 @@ import com.scwang.smartrefresh.layout.listener.OnRefreshLoadmoreListener;
 import com.trello.rxlifecycle2.android.ActivityEvent;
 import com.unis.gameplatfrom.R;
 import com.unis.gameplatfrom.adapter.GameListAdapter;
-import com.unis.gameplatfrom.adapter.GamesAdapter;
-import com.unis.gameplatfrom.adapter.GamesRightAdapter;
 import com.unis.gameplatfrom.api.HUDLoadDataSubscriber;
 import com.unis.gameplatfrom.api.PublicApiInterface;
 import com.unis.gameplatfrom.api.RetrofitWrapper;
 import com.unis.gameplatfrom.api.result.BaseCustomListResult;
 import com.unis.gameplatfrom.base.BaseActivity;
 import com.unis.gameplatfrom.cache.UserCenter;
-import com.unis.gameplatfrom.model.GamesEntity;
-import com.unis.gameplatfrom.model.GamesListEntity;
+import com.unis.gameplatfrom.entity.GamesEntity;
+import com.unis.gameplatfrom.entity.GamesListEntity;
 import com.unis.gameplatfrom.utils.DialogHelper;
 import com.unis.gameplatfrom.utils.PackageUtil;
 import com.unis.gameplatfrom.utils.udateapk.DownLoadApkService;
-import com.unis.gameplatfrom.utils.udateapk.DownloadAPk;
 import com.unis.gameplatfrom.utils.udateapk.LinNotify;
 import com.unis.gameplatfrom.utils.udateapk.LinPermission;
 
@@ -48,15 +36,10 @@ import org.litepal.LitePal;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import butterknife.OnClick;
-import io.reactivex.Observable;
-import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 
@@ -178,7 +161,10 @@ public class GamesListActivity extends BaseActivity {
 
     }
 
+    @Override
+    protected void initPresenter() {
 
+    }
 
 
     @OnClick({R.id.back})
@@ -311,7 +297,7 @@ public class GamesListActivity extends BaseActivity {
                 .getGameList1(UserCenter.getInstance().getToken())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .compose(this.bindUntilEvent(ActivityEvent.DESTROY))
+                //.compose(this.bindUntilEvent(ActivityEvent.DESTROY))
                 .subscribe(new HUDLoadDataSubscriber<BaseCustomListResult<GamesListEntity>>(mContext) {
                     @Override
                     public void onNext(BaseCustomListResult<GamesListEntity> result) {
@@ -450,6 +436,22 @@ public class GamesListActivity extends BaseActivity {
                 });
 
     }
+
+    @Override
+    public void showLoading() {
+
+    }
+
+    @Override
+    public void hideLoading() {
+
+    }
+
+    @Override
+    public void onError(Throwable throwable) {
+
+    }
+
 
 
 

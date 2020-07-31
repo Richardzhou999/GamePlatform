@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -16,14 +17,18 @@ import android.widget.Toast;
 import com.blankj.utilcode.util.EmptyUtils;
 import com.blankj.utilcode.util.EncryptUtils;
 import com.blankj.utilcode.util.NetworkUtils;
+import com.blankj.utilcode.util.RegexUtils;
 import com.trello.rxlifecycle2.android.FragmentEvent;
 import com.unis.gameplatfrom.R;
 import com.unis.gameplatfrom.api.HUDLoadDataSubscriber;
 import com.unis.gameplatfrom.api.PublicApiInterface;
 import com.unis.gameplatfrom.api.RetrofitWrapper;
+import com.unis.gameplatfrom.api.result.BaseObjectResult;
 import com.unis.gameplatfrom.base.BaseFragment;
 import com.unis.gameplatfrom.cache.UserCenter;
-import com.unis.gameplatfrom.model.LoginResult;
+import com.unis.gameplatfrom.constant.LoginConstant;
+import com.unis.gameplatfrom.entity.LoginEntity;
+import com.unis.gameplatfrom.presenter.LoginPresenter;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -33,7 +38,7 @@ import io.reactivex.schedulers.Schedulers;
 /**
  * 账号密码登陆
  */
-public class PassWordFragment extends BaseFragment {
+public class PassWordFragment extends BaseFragment<LoginPresenter> implements LoginConstant.View {
 
 
     @BindView(R.id.txt_account)
@@ -60,6 +65,9 @@ public class PassWordFragment extends BaseFragment {
     TextView mLoginID;
 
 
+    private LoginPresenter loginPresenter;
+
+
     @Override
     protected int getLayout() {
         return R.layout.fragment_pass_word;
@@ -71,6 +79,7 @@ public class PassWordFragment extends BaseFragment {
 
         String account = UserCenter.getInstance().getAccount();
 
+        loginPresenter.attachView(this);
 
         if(!TextUtils.isEmpty(account)){
 
@@ -79,45 +88,6 @@ public class PassWordFragment extends BaseFragment {
             mSaveBtn.setChecked(true);
 
         }
-
-
-
-
-//        mPassword.addTextChangedListener(new TextWatcher() {
-//            @Override
-//            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-//            }
-//
-//            @Override
-//            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-//
-//                if(mAccount.getText().toString().length() != 0){
-//
-//                    if(charSequence.length() != 0){
-//
-//                        mLoginBtn.setEnabled(true);
-//                        mLoginBtn.setBackgroundResource(R.drawable.button_round_bule_normal);
-//
-//                    }else {
-//
-//                        mLoginBtn.setEnabled(false);
-//                        mLoginBtn.setBackgroundResource(R.drawable.button_round_bule_down);
-//
-//                    }
-//
-//                }else {
-//
-//                    mLoginBtn.setEnabled(false);
-//                    mLoginBtn.setBackgroundResource(R.drawable.button_round_bule_down);
-//
-//                }
-//            }
-//
-//            @Override
-//            public void afterTextChanged(Editable editable) {
-//
-//            }
-//        });
 
         mAccount.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -179,12 +149,18 @@ public class PassWordFragment extends BaseFragment {
             }
         });
 
-
     }
 
     @Override
     protected void initData() {
 
+    }
+
+    @Override
+    protected void initPresenter() {
+        loginPresenter = new LoginPresenter(mContext);
+        loginPresenter.attachView(this);
+        Log.e("xx",""+loginPresenter);
     }
 
 
@@ -212,6 +188,7 @@ public class PassWordFragment extends BaseFragment {
                         saveaccount = false;
                         mSaveBtn.setChecked(false);
                         mSaveText.setTextColor(ContextCompat.getColor(mContext,R.color.white));
+                        UserCenter.getInstance().delectUserid();
 
                     }
 
@@ -231,63 +208,20 @@ public class PassWordFragment extends BaseFragment {
             showMessageDialog("请输入手机号");
             return;
         }
-//        else if (!RegexUtils.isMobileSimple(mobile)) {
-//            showMessageDialog("请输入正确的手机号");
-//            return;
-//        }
+        else if (!RegexUtils.isMobileExact(mobile)) {
+            showMessageDialog("请输入正确的手机号");
+            return;
+        }
 
         if (EmptyUtils.isEmpty(password)) {
             showMessageDialog("请输入密码");
             return;
         }
 
-
         if(NetworkUtils.isConnected()) {
 
-
-            RetrofitWrapper.getInstance().create(PublicApiInterface.class)
-                    .passwordLogin(mobile, password, "SerialNo", 1, EncryptUtils.encryptMD5ToString(mobile + password + "UNIS").toLowerCase())
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .compose(this.bindUntilEvent(FragmentEvent.DESTROY))
-                    .subscribe(new HUDLoadDataSubscriber<LoginResult>(mContext) {
-                        @Override
-                        public void onNext(LoginResult result) {
-
-                            if (result.getErr() == 0) {
-//                            Intent intent = new Intent();
-//                            intent.putExtra("account",mobile);
-//                            intent.putExtra("password",password);
-
-                                if (saveaccount) {
-
-                                    UserCenter.getInstance().setAccount(mobile);
-
-                                }
-
-
-                                UserCenter.getInstance().save_uuid(mContext, result.getUuid());
-
-                                UserCenter.getInstance().setUserName(result.getName());
-                                UserCenter.getInstance().setUserHead(result.getHead());
-
-                                Intent intent = new Intent(mContext, MainActivity.class);
-
-                                intent.putExtra("username", result.getName());
-                                intent.putExtra("userhead", result.getHead());
-                                startActivity(intent);
-                                UserCenter.getInstance().setToken(result.getUuid());
-
-                                mContext.finish();
-                            }
-                            if (result.getErr() == 1) {
-
-                                Toast.makeText(mContext, result.getMsg(), Toast.LENGTH_SHORT).show();
-
-
-                            }
-                        }
-                    });
+            loginPresenter.login(mobile, password, "SerialNo", 1,
+                    EncryptUtils.encryptMD5ToString(mobile + password + "UNIS").toLowerCase());
 
         }else {
 
@@ -297,6 +231,39 @@ public class PassWordFragment extends BaseFragment {
         }
     }
 
+
+    @Override
+    public void onSuccess(LoginEntity result) {
+
+        if (saveaccount) {
+            UserCenter.getInstance().setUserid(mAccount.getText().toString().trim());
+        }
+
+        Intent intent = new Intent(mContext, MainActivity.class);
+
+        intent.putExtra("username", result.getName());
+        intent.putExtra("userhead", result.getHead());
+        startActivity(intent);
+
+        mContext.finish();
+
+
+    }
+
+    @Override
+    public void showLoading() {
+
+    }
+
+    @Override
+    public void hideLoading() {
+
+    }
+
+    @Override
+    public void onError(Throwable throwable) {
+
+    }
 
 
 }

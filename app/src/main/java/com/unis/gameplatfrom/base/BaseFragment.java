@@ -12,6 +12,8 @@ import android.widget.Toast;
 
 import com.thejoyrun.router.Router;
 import com.trello.rxlifecycle2.components.support.RxFragment;
+import com.unis.gameplatfrom.presenter.BasePresenter;
+import com.unis.gameplatfrom.ui.view.BaseView;
 
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
@@ -22,15 +24,23 @@ import butterknife.Unbinder;
  */
 
 @SuppressWarnings("DefaultFileTemplate")
-public abstract class BaseFragment extends RxFragment {
+public abstract class BaseFragment<P extends BasePresenter> extends RxFragment implements BaseView{
     protected Activity mContext;
     private Unbinder mUnbinder;
+
+    protected P mPresenter;
 
     protected abstract int getLayout();
 
     protected abstract void initView(View var1, Bundle var2);
 
     protected abstract void initData();
+
+    /**
+     * 初始化mPresenter
+     */
+    protected abstract void initPresenter();
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -42,7 +52,14 @@ public abstract class BaseFragment extends RxFragment {
         View view = inflater.inflate(this.getLayout(), container, false);
         mContext.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         this.mUnbinder = ButterKnife.bind(this, view);
-        this.initView(view, savedInstanceState);
+        //初始化mPresenter
+        initPresenter();
+        //绑定view
+        if(mPresenter != null){
+            mPresenter.attachView(this);
+        }
+
+
         Router.inject(mContext);
         return view;
     }
@@ -50,6 +67,7 @@ public abstract class BaseFragment extends RxFragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        initView(view, savedInstanceState);
         initData();
     }
 
@@ -89,6 +107,10 @@ public abstract class BaseFragment extends RxFragment {
     public void onDestroyView() {
         super.onDestroyView();
         mUnbinder.unbind();
+        if(mPresenter != null){
+            mPresenter.detachView();
+            mPresenter = null;
+        }
     }
 
     @Override

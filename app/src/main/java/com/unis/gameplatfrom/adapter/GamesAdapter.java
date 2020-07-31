@@ -1,16 +1,12 @@
 package com.unis.gameplatfrom.adapter;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
 
 
@@ -19,8 +15,7 @@ import java.util.List;
 import com.squareup.picasso.Picasso;
 import com.unis.gameplatfrom.R;
 import com.unis.gameplatfrom.manager.GlideManager;
-import com.unis.gameplatfrom.model.GamesEntity;
-import com.unis.gameplatfrom.ui.GamesActivity;
+import com.unis.gameplatfrom.entity.GamesEntity;
 
 
 public class GamesAdapter extends BaseEmptyViewAdapter<GamesEntity> {

@@ -26,8 +26,10 @@
         android:layout_height="wrap_content"
         android:textColor="@color/white"
         android:theme="@style/MyEditText"
+        android:text="200016"
         android:hint="请输入用户ID"
         android:paddingLeft="20dp"
+
         android:textColorHint="@color/out_login_txt"
         android:background="@drawable/edit_select"
         android:focusable="true"
@@ -46,6 +48,7 @@
         android:textColorHint="@color/out_login_txt"
         android:background="@drawable/edit_select"
         android:paddingLeft="20dp"
+        android:text="123"
         android:focusable="true"
         android:focusableInTouchMode="true"
         android:hint="请输入密码"

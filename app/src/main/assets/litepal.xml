@@ -32,7 +32,7 @@
         </list>
     -->
     <list>
-        <mapping class="com.unis.gameplatfrom.model.GamesEntity"></mapping>
+        <mapping class="com.unis.gameplatfrom.entity.GamesEntity"></mapping>
     </list>
 
     <!--

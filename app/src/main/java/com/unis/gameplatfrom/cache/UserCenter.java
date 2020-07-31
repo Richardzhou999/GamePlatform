@@ -121,12 +121,16 @@ public class UserCenter {
     }
 
     public String getUserid() {
-        return userid;
+        return  SPUtils.getInstance(SP_NAME).getString(SP_USERID);
     }
 
     public void setUserid(String userid) {
-        this.userid = userid;
+
         SPUtils.getInstance(SP_NAME).put(SP_USERID, userid);
+    }
+
+    public void delectUserid(){
+        SPUtils.getInstance(SP_NAME).remove(SP_USERID);
     }
 
     public String getGame_account(){
@@ -237,7 +241,7 @@ public class UserCenter {
         }
     }
 
-    public void save_gameId(Context context,int gameid){
+    public void save_gameId(int gameId){
 
 
         String filePath = null;
@@ -265,7 +269,7 @@ public class UserCenter {
         builder.append("{");
         builder.append("\"uuid\""+":"+"\""+uuid+"\"");
         builder.append(",");
-        builder.append("\"gameid\""+":"+"\""+gameid+"\"");
+        builder.append("\"gameid\""+":"+"\""+gameId+"\"");
         builder.append("}");
 
 

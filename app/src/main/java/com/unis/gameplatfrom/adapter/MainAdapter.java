@@ -2,7 +2,6 @@ package com.unis.gameplatfrom.adapter;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -10,14 +9,11 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.bitmap.CircleCrop;
-import com.bumptech.glide.request.RequestOptions;
 import com.chad.library.adapter.base.BaseViewHolder;
 import com.squareup.picasso.Picasso;
 import com.unis.gameplatfrom.R;
 import com.unis.gameplatfrom.manager.GlideManager;
-import com.unis.gameplatfrom.model.GamesEntity;
+import com.unis.gameplatfrom.entity.GamesEntity;
 
 import java.util.List;
 
