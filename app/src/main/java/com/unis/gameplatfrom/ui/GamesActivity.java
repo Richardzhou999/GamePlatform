@@ -111,24 +111,8 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
 
     private List<GamesEntity> getGames = new ArrayList<>();
 
-
-    private List<GamesEntity> gamesPage = new ArrayList<>();
-
-    private static final String APK_URL = "http://101.28.249.94/apk.r1.market.hiapk.com/data/upload/apkres/2017/4_11/15/com.baidu.searchbox_034250.apk";
-
-    private ProgressBar mProgressBar;
-
-
-    private String BaseUrl = "http://s.health.shiyugame.com";
-
-    private String account;
-    private String password;
-
     private String game_account;
 
-    private int page = 1;
-
-    public boolean cancle;
 
     private View FooterView;
 
@@ -238,7 +222,7 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
                             if(entity1 != null){
 
                                 //若游戏被删除，需清除游戏记录防止数据出错
-                                if (isAppByPackageID(entity.getPackname())) {
+                                if (PackageUtil.isAppByPackageID(mContext,entity.getPackname())) {
 
 
                                     System.out.print(entity.getV()+"");
@@ -277,7 +261,8 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
 
                                         entity.setDownGame(false);
                                         entity.setGameId(entity.getId());
-                                        startAppByPackageID(entity.getPackname(),entity.getId());
+                                        PackageUtil.startAppByPackageID(mContext,
+                                                entity.getPackname(),entity.getId(),mDownloadMgr);
 
                                     }
 
@@ -323,12 +308,13 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
                             }else {
 
 
-                                if(isAppByPackageID(entity.getPackname())){
+                                if(PackageUtil.isAppByPackageID(mContext,entity.getPackname())){
 
                                     entity.setAccount(game_account);
                                     entity.setGameId(entity.getId());
                                     entity.setDownGame(false);
-                                    startAppByPackageID(entity.getPackname(),entity.getId());
+                                    PackageUtil.startAppByPackageID(mContext,
+                                            entity.getPackname(),entity.getId(),mDownloadMgr);
                                     entity.save();
                                 }else {
 
@@ -429,9 +415,6 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
         builder1.append("厅大戏游");
 
 
-        account = getIntent().getStringExtra("account");
-        password = getIntent().getStringExtra("password");
-
         game_account= UserCenter.getInstance().getGame_account();
 
         gameLayout.getBackground().setAlpha(30);
@@ -527,57 +510,6 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
         }
     }
 
-    /**
-     *  检查应用是否存在，若存在便打开
-     */
-
-    private boolean startAppByPackageID(String packageId,Integer gameid) {
-
-        PackageManager packageManager = getPackageManager();
-        PackageInfo packageInfo;
-        try {
-            // 应用包名
-            packageInfo = packageManager.getPackageInfo( packageId, 0);
-        } catch (PackageManager.NameNotFoundException e) {
-            Toast.makeText(GamesActivity.this, "没有找到应用", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-
-        Intent resolveIntent = new Intent(Intent.ACTION_MAIN, null);
-        resolveIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-        resolveIntent.setPackage(packageInfo.packageName);
-        List<ResolveInfo> apps = packageManager.queryIntentActivities(resolveIntent, 0);
-        ResolveInfo ri = apps.iterator().next();
-        UserCenter.getInstance().save_gameId(gameid);
-        if (ri != null && mDownloadMgr != null) {
-            mDownloadMgr.pauseAllTask();//暂停所有下载任务
-            String className = ri.activityInfo.name;
-            Intent intent = new Intent(Intent.ACTION_MAIN);
-            intent.addCategory(Intent.CATEGORY_LAUNCHER);
-            ComponentName cn = new ComponentName(packageInfo.packageName, className);
-            intent.setComponent(cn);
-            startActivity(intent);
-        }
-        return true;
-    }
-
-
-    /**
-     * 检查应用是否存在
-     * @param packageName
-     */
-    public boolean isAppByPackageID(String packageName) {
-
-        if (packageName == null || "".equals(packageName))
-            return false;
-        try {
-            ApplicationInfo info = getPackageManager().getApplicationInfo(
-                    packageName, PackageManager.GET_UNINSTALLED_PACKAGES);
-            return true;
-        } catch (PackageManager.NameNotFoundException e) {
-            return false;
-        }
-    }
 
 
 
@@ -585,8 +517,6 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
 
 
     private boolean DownGame = false;
-
-
 
     private void downApk(String name,String filepath,String iconUrl,GamesEntity entity,int positoin){
 
@@ -599,7 +529,7 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
             String path = Environment.getExternalStorageDirectory()
                     + "/DownLoad/apk/"+apk_path[apk_path.length-1];
 
-            if(!entity.isDownGame() && !DownGame) {
+            if(!entity.isDownGame() ) {
 
                 if (PackageUtil.isAppByLocal(filepath)) {
                     if(mDownloadMgr !=  null){
@@ -616,12 +546,12 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
                     if(NetworkUtils.isConnected()) {
 
 
-                        DownGame = true;
+
                         mConnectTag = true;
                         progressList.add(positoin);
-                        netConnectionReceiver = new NetConnectionReceiver(mDownloadMgr);
-                        RegisterReceiver(netConnectionReceiver);
-                        unregisterReceiver(itemNetConnectionReceiver);
+                        //netConnectionReceiver = new NetConnectionReceiver(mDownloadMgr);
+                        //RegisterReceiver(netConnectionReceiver);
+                        //unregisterReceiver(itemNetConnectionReceiver);
 
                         //显示activity时加入监听
                         mDownloadTaskListener = new DownloadTaskListener() {
@@ -657,7 +587,7 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
                                             gamesEntity.setDownGame(true);
                                             gamesEntity.setInstallGame(false);
                                             gamesEntity.setLocal(false);
-                                            adapter.notifyItemChanged(positoin);
+                                            adapter.notifyItemChanged(positoin,gamesEntity);
 
                                         }
                                     }
@@ -672,7 +602,7 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
                             @Override
                             public void onFinish(String taskId, File file) {
                                 mDownloadTask = mDownloadMgr.getDownloadTask(taskId);
-                                DownGame = false;
+
                                 mDownloadMgr.removeListener(mDownloadTaskListener);
                                 if (progressList.size() != 0) {
                                     progressList.clear();
@@ -683,8 +613,8 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
                                     @Override
                                     public void run() {
 
-                                        UnregisterReceiver(netConnectionReceiver);
-                                        registerReceiver(itemNetConnectionReceiver, mFilter);
+                                       // UnregisterReceiver(netConnectionReceiver);
+                                       // registerReceiver(itemNetConnectionReceiver, mFilter);
 
                                         GamesEntity gamesEntity = adapter.getItem(positoin);
                                         gamesEntity.setDownGame(false);
@@ -722,10 +652,6 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
                     }
 
                 }
-
-            }else{
-
-                Toast.makeText(mContext, saveDownName+"  正在下载", Toast.LENGTH_SHORT).show();
 
             }
 

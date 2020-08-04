@@ -1,6 +1,8 @@
 package com.unis.gameplatfrom.adapter;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -29,40 +31,30 @@ public class GamesAdapter extends BaseEmptyViewAdapter<GamesEntity> {
     }
 
 
-//    @Override
-//    public void onBindViewHolder(@NonNull BaseViewHolder holder, int position, @NonNull List<Object> payloads) {
-//
-//
-//        Log.e("onBindViewHolder","下载进度列表"+payloads.size());
-//        if(payloads.isEmpty()){
-//            super.onBindViewHolder(holder, position, payloads);
-//            return;
-//        }
-//
-//        int number = (int) payloads.get(0);
-//        Log.e("onBindViewHolder","下载进度："+number);
-////
-////            if(position == number){
-////
-////
-////
-////        }
-//
-////        GamesEntity gamesEntity = list.get(position);
-////
-//
-//
-////        ProgressBar progressBar = holder.itemView.findViewById(R.id.item_progress);
-////        progressBar.setProgress(number);
-//
-//        //TextView
-//
-//
-//
-//
-//
-//
-//    }
+    @Override
+    public void onBindViewHolder(@NonNull BaseViewHolder holder, int position, @NonNull List<Object> payloads) {
+
+
+        Log.e("onBindViewHolder","下载进度列表"+payloads.size());
+        if(payloads.isEmpty()){
+            super.onBindViewHolder(holder, position, payloads);
+            return;
+        }
+
+
+        Log.e("onBindViewHolder","下载进度："+number);
+
+        ProgressBar progressBar = holder.itemView.findViewById(R.id.item_progress);
+        progressBar.setProgress(number);
+
+        //TextView
+
+
+
+
+
+
+    }
 
     @Override
     protected void convert(BaseViewHolder holder, GamesEntity entity) {

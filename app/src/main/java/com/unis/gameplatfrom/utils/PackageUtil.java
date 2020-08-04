@@ -22,6 +22,9 @@ import static com.unis.gameplatfrom.utils.udateapk.DownloadAPk.APK_UPGRADE;
 public class PackageUtil {
 
 
+
+
+
     /**
      *  检查应用是否存在，若存在便打开
      */

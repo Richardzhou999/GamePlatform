@@ -45,7 +45,6 @@ public class LoginActivity extends AppCompatActivity{
 
         transaction.show(userIDFragment).hide(passWordFragment).commit();
 
-
         //每次登陆前先清缓存
         UserCenter.getInstance().deleteDownFile();
 
