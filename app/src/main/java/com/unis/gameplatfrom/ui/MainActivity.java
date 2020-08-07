@@ -737,7 +737,7 @@ public class MainActivity extends BaseActivity<GamePresenter> implements GameCon
                 if (!DownGame) {
                     nowTime = false;
                     if (LinPermission.checkPermission(MainActivity.this, new int[]{7, 8})) {
-                        Intent intent = new Intent(MainActivity.this, GamesListActivity.class);
+                        Intent intent = new Intent(MainActivity.this, GamesActivity.class);
                         startActivity(intent);
                     }
 

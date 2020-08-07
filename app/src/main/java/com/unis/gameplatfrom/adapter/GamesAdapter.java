@@ -35,17 +35,17 @@ public class GamesAdapter extends BaseEmptyViewAdapter<GamesEntity> {
     public void onBindViewHolder(@NonNull BaseViewHolder holder, int position, @NonNull List<Object> payloads) {
 
 
-        Log.e("onBindViewHolder","下载进度列表"+payloads.size());
+//        Log.e("onBindViewHolder","下载进度列表"+payloads.size());
         if(payloads.isEmpty()){
             super.onBindViewHolder(holder, position, payloads);
             return;
         }
-
-
-        Log.e("onBindViewHolder","下载进度："+number);
-
-        ProgressBar progressBar = holder.itemView.findViewById(R.id.item_progress);
-        progressBar.setProgress(number);
+//
+//
+//        Log.e("onBindViewHolder","下载进度："+number);
+//
+//        ProgressBar progressBar = holder.itemView.findViewById(R.id.item_progress);
+//        progressBar.setProgress(number);
 
         //TextView
 

@@ -137,15 +137,16 @@ dependencies {
     implementation 'com.alibaba:fastjson:1.2.9'
 
 
-    implementation 'org.litepal.android:java:3.0.0'
+    //implementation 'org.litepal.android:java:3.0.0'
 //sqlite本地的数据存储 https://github.com/LitePalFramework/LitePal
-
+    implementation 'org.litepal.guolindev:core:3.1.1'
 
     implementation 'com.github.xuexiangjys:XUpdate:1.1.4'
 
 
     implementation 'com.arialyy.aria:core:3.8.10'
     annotationProcessor 'com.arialyy.aria:compiler:3.8.10'
+    implementation 'org.jetbrains:annotations:15.0'
 
 
 }

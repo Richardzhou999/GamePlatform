@@ -24,4 +24,6 @@ public class Constant {
      */
     public static String DEBUG = "1.7.03-20200728-beta";
 
+    public static final boolean IS_PRINT_LOG = true;//是否打印log,true为打印,false为不打印
+
 }

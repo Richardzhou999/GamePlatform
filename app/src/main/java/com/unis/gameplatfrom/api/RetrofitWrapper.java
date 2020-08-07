@@ -1,7 +1,7 @@
 package com.unis.gameplatfrom.api;
 
 import com.blankj.utilcode.util.AppUtils;
-import com.facebook.stetho.okhttp3.StethoInterceptor;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -72,7 +72,6 @@ public class RetrofitWrapper {
                 .retryOnConnectionFailure(true) //超时重连
                 .addInterceptor(requestIntercepter)
                 .addInterceptor(logging)
-                .addNetworkInterceptor(new StethoInterceptor())
                 .cache(cache)
                 .build();
 

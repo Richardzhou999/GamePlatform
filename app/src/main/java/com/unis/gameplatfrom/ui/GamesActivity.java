@@ -174,7 +174,7 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
         adapter.addFooterView(FooterView);
         mMetroViewBorderImpl.attachTo(gamesRecycler);
         gamesRecycler.setAdapter(adapter);
-        LitePal.getDatabase(); //创建数据表
+
 
         myOkHttp = new MyOkHttp();
         mDownloadMgr = (DownloadMgr) new DownloadMgr.Builder()
@@ -201,6 +201,7 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
             @Override
             public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
 
+                LitePal.getDatabase(); //创建数据表
                 GamesEntity entity = (GamesEntity) adapter.getItem(position);
 
                 if (entity.getV() != 0) {
@@ -259,6 +260,7 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
 
                                     }else {
 
+
                                         entity.setDownGame(false);
                                         entity.setGameId(entity.getId());
                                         PackageUtil.startAppByPackageID(mContext,
@@ -271,7 +273,6 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
                                 }else {
 
                                         entity1.setV(entity.getV());
-                                        entity1.setId(entity.getId());
                                         entity.setGameId(entity.getId());
                                         entity1.setName(entity.getName());
                                         entity1.setP(entity.getP());
@@ -304,27 +305,14 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
                                     entity.setAccount(game_account);
                                     entity.setGameId(entity.getId());
                                     //entity.setDownGame(true);
-                                    downApk(entity.getName(),entity.getP(),entity.getIcon(),entity,position);
                                     entity.save();
+                                    boolean bool =  entity.isSaved();
+                                    Log.e("保存",""+bool);
+                                    downApk(entity.getName(),entity.getP(),entity.getIcon(),entity,position);
+
 
                                 }
 
-
-
-//                                    DialogHelper.showAlertDialog(mContext,"确定要下载吗", "确定", "取消", new DialogInterface.OnClickListener() {
-//                                        @Override
-//                                        public void onClick(DialogInterface dialogInterface, int i) {
-//                                            dialogInterface.dismiss();
-//                                            entity.save();
-//                                            downApk(entity.getP(),entity.getIcon());
-//
-//                                        }
-//                                    }, new DialogInterface.OnClickListener() {
-//                                        @Override
-//                                        public void onClick(DialogInterface dialogInterface, int i) {
-//                                            dialogInterface.dismiss();
-//                                        }
-//                                    });
                             }
 
 
@@ -568,7 +556,7 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
                                             gamesEntity.setDownGame(true);
                                             gamesEntity.setInstallGame(false);
                                             gamesEntity.setLocal(false);
-                                            adapter.notifyItemChanged(positoin,gamesEntity);
+                                            adapter.notifyItemChanged(positoin);
 
                                         }
                                     }
@@ -583,7 +571,7 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
                             @Override
                             public void onFinish(String taskId, File file) {
                                 mDownloadTask = mDownloadMgr.getDownloadTask(taskId);
-
+                                DownGame = false;
                                 mDownloadMgr.removeListener(mDownloadTaskListener);
                                 if (progressList.size() != 0) {
                                     progressList.clear();
@@ -695,34 +683,35 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
 
                 for (GamesEntity entity : result.getData()) {
 
-
-                    GamesEntity entity1 = LitePal.where("id=" + entity.getId()).findFirst(GamesEntity.class);
+                    entity.setGameId(entity.getId());
+                    List<GamesEntity> entity1 = LitePal.where("id=" + entity.getGameId()).find(GamesEntity.class);
+                    Log.e("xxx",""+entity1.size());
                     if (entity1 != null) {
                         // entity.setV(entity.getV()+1);
 
                         if (PackageUtil.isAppByPackageID(mContext, entity.getPackname())) {
 
 
-                            if (entity.getV() > entity1.getV()) {
-
-                                entity.setNewGame(true);
-                                entity.setInstallGame(true);
-                                entity.setLocal(true);
-                                getGames.add(entity);
-
-                            } else {
-
-                                entity.setLocal(true);
-                                entity.setInstallGame(true);
-                                getGames.add(entity);
-
-                            }
+//                            if (entity.getV() > entity1.getV()) {
+//
+//                                entity.setNewGame(true);
+//                                entity.setInstallGame(true);
+//                                entity.setLocal(true);
+//                                getGames.add(entity);
+//
+//                            } else {
+//
+//                                entity.setLocal(true);
+//                                entity.setInstallGame(true);
+//                                getGames.add(entity);
+//
+//                            }
 
 
                         } else {
 
-                            entity1.save();
-                            entity1.delete();
+//                            entity1.save();
+//                            entity1.delete();
 
                             if (PackageUtil.isAppByLocal(entity.getP())) {
 
