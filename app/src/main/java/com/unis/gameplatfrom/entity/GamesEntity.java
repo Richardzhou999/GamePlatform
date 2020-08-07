@@ -18,10 +18,7 @@ public class GamesEntity extends LitePalSupport {
      private boolean isDownGame;//是否开始下载
      private boolean isLocal;//判断游戏是否存在本地
      private boolean isNewGame;//测试是否有新版本
-     /**
-     * 单位转换后的速度
-     */
-     private String convertSpeed;
+
 
      private int progress;
 

@@ -95,8 +95,7 @@ dependencies {
     implementation 'com.squareup.retrofit2:retrofit:2.3.0'
     implementation 'com.squareup.retrofit2:adapter-rxjava2:2.3.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
-    implementation 'com.facebook.stetho:stetho:1.3.1'
-    implementation 'com.facebook.stetho:stetho-okhttp3:1.3.1'
+
     implementation 'cn.bingoogolapple:bga-banner:2.1.7'
 
     implementation 'com.scwang.smartrefresh:SmartRefreshLayout:1.0.3'
@@ -144,6 +143,9 @@ dependencies {
 
     implementation 'com.github.xuexiangjys:XUpdate:1.1.4'
 
+
+    implementation 'com.arialyy.aria:core:3.8.10'
+    annotationProcessor 'com.arialyy.aria:compiler:3.8.10'
 
 
 }

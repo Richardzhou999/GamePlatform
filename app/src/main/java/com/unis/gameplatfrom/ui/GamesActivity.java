@@ -283,25 +283,6 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
                                                 entity,position);
 
 
-
-//                                    DialogHelper.showAlertDialog(mContext,"确定要下载吗", "确定", "取消", new DialogInterface.OnClickListener() {
-//                                        @Override
-//                                        public void onClick(DialogInterface dialogInterface, int i) {
-//                                            dialogInterface.dismiss();
-//
-//                                            entity.setV(entity.getV());
-//                                            entity.save();
-//                                            downApk(entity.getP(),entity.getIcon());
-//
-//                                        }
-//                                    }, new DialogInterface.OnClickListener() {
-//                                        @Override
-//                                        public void onClick(DialogInterface dialogInterface, int i) {
-//                                            dialogInterface.dismiss();
-//                                        }
-//                                    });
-
-
                                 }
 
 
@@ -529,7 +510,7 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
             String path = Environment.getExternalStorageDirectory()
                     + "/DownLoad/apk/"+apk_path[apk_path.length-1];
 
-            if(!entity.isDownGame() ) {
+            if(!entity.isDownGame() && !DownGame) {
 
                 if (PackageUtil.isAppByLocal(filepath)) {
                     if(mDownloadMgr !=  null){
@@ -546,7 +527,7 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
                     if(NetworkUtils.isConnected()) {
 
 
-
+                        DownGame = true;
                         mConnectTag = true;
                         progressList.add(positoin);
                         //netConnectionReceiver = new NetConnectionReceiver(mDownloadMgr);

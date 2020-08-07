@@ -1,14 +1,21 @@
 package com.unis.gameplatfrom.entity;
 
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import com.arialyy.aria.core.common.AbsNormalEntity;
+import com.arialyy.aria.core.download.DownloadEntity;
+
 import org.litepal.crud.LitePalSupport;
 
 
-public class GamesListEntity extends LitePalSupport{
+public class GamesListEntity extends DownloadEntity implements Parcelable {
 
      private int id;
      private int v;
      private String p;
+    private int gameId;
      private String icon;
      private String packname;
      private String name;
@@ -21,8 +28,22 @@ public class GamesListEntity extends LitePalSupport{
      private int progress;
 
 
-    public int getId() {
+
+
+
+
+    public int getGameId() {
         return id;
+    }
+
+    @Override
+    public String getKey() {
+        return null;
+    }
+
+    @Override
+    public int getTaskType() {
+        return 0;
     }
 
     public void setId(int id) {
@@ -116,4 +137,62 @@ public class GamesListEntity extends LitePalSupport{
     public void setNewGame(boolean newGame) {
         isNewGame = newGame;
     }
+
+    @Override
+    public String getFilePath() {
+        return null;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    protected GamesListEntity(Parcel in) {
+        super(in);
+        id = in.readInt();
+        v = in.readInt();
+        p = in.readString();
+        gameId = in.readInt();
+        icon = in.readString();
+        packname = in.readString();
+        name = in.readString();
+        account = in.readString();
+        isInstallGame = in.readByte() != 0;
+        isDownGame = in.readByte() != 0;
+        isLocal = in.readByte() != 0;
+        isNewGame = in.readByte() != 0;
+        progress = in.readInt();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
+        dest.writeInt(id);
+        dest.writeInt(v);
+        dest.writeString(p);
+        dest.writeInt(gameId);
+        dest.writeString(icon);
+        dest.writeString(packname);
+        dest.writeString(name);
+        dest.writeString(account);
+        dest.writeByte((byte) (isInstallGame ? 1 : 0));
+        dest.writeByte((byte) (isDownGame ? 1 : 0));
+        dest.writeByte((byte) (isLocal ? 1 : 0));
+        dest.writeByte((byte) (isNewGame ? 1 : 0));
+        dest.writeInt(progress);
+    }
+
+    public static final Creator<GamesListEntity> CREATOR = new Creator<GamesListEntity>() {
+        @Override
+        public GamesListEntity createFromParcel(Parcel in) {
+            return new GamesListEntity(in);
+        }
+
+        @Override
+        public GamesListEntity[] newArray(int size) {
+            return new GamesListEntity[size];
+        }
+    };
+
 }

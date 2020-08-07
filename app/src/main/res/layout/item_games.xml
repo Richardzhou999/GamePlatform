@@ -172,7 +172,7 @@
         android:layout_marginRight="30dp"
         android:background="@drawable/down_color"
         android:layout_toLeftOf="@id/item_game_cancel"
-        android:visibility="gone"/>
+       />
 
     <TextView
         android:id="@+id/item_game_cancel"
@@ -188,7 +188,7 @@
         android:layout_centerVertical="true"
         android:layout_marginRight="30dp"
         android:background="@drawable/down_color"
-        android:visibility="gone"/>
+        />
 
 
     <ImageView
