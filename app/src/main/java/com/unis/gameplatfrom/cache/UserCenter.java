@@ -344,24 +344,30 @@ public class UserCenter {
     public void deleteGameFile(String pageName){
 
         String filePath = null;
+        String filePath2 = null;
         boolean hasSDCard =Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
 
         if (hasSDCard) {
 
             filePath = Environment.getExternalStorageDirectory() + "/UNIS_GameData/"+pageName;
-
+            filePath2 = Environment.getExternalStorageDirectory() + "/GameData/"+pageName;
 
         } else {
 
             filePath = Environment.getDownloadCacheDirectory() + "/UNIS_GameData/"+pageName;
-
+            filePath2 = Environment.getExternalStorageDirectory() + "/GameData/"+pageName;
         }
 
 
         File uidFiles = new File(filePath);
+        File uidFiles2 = new File(filePath2);
         if(uidFiles.exists()) {
             deleteDir(uidFiles);
         }
+        if(uidFiles2.exists()) {
+            deleteDir(uidFiles2);
+        }
+
     }
 
     public void deleteDownFile(){

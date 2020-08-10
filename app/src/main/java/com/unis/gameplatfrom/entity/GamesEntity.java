@@ -8,6 +8,7 @@ public class GamesEntity extends LitePalSupport {
 
      private int id;
      private int v;
+     private int newVersion;//记录上一个版本
      private int gameId;
      private String p;
      private String icon;
@@ -26,6 +27,14 @@ public class GamesEntity extends LitePalSupport {
 
     public int getId() {
         return id;
+    }
+
+    public int getNewVersion() {
+        return newVersion;
+    }
+
+    public void setNewVersion(int newVersion) {
+        this.newVersion = newVersion;
     }
 
     public int getGameId(){

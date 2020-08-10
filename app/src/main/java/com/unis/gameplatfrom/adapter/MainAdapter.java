@@ -121,8 +121,8 @@ public class MainAdapter extends BaseEmptyViewAdapter<GamesEntity>  {
         holder.setText(R.id.game_number,String.valueOf(holder.getAdapterPosition()+1));
 
 
-        if(entity.isNewGame()){
-            holder.setText(R.id.item_games_version, "版本："+(entity.getV()-1));
+        if(entity.isNewGame() && entity.getNewVersion() != 0 ){
+            holder.setText(R.id.item_games_version, "版本："+(entity.getNewVersion()));
             newVersion.setVisibility(View.VISIBLE);
             holder.setText(R.id.item_games_new_version, "发现新版本："+entity.getV());
 

@@ -254,7 +254,14 @@ public class MainActivity extends BaseActivity<GamePresenter> implements GameCon
                          * 情况2：记录不在，游戏不在
                          * 情况3：两者都在
                          */
-                        GamesEntity entity1 = LitePal.where("id=" + entity.getId()).findFirst(GamesEntity.class);
+                        int gameid = entity.getGameId();
+                        GamesEntity entity1;
+                        if(gameid != 0){
+                            entity1 = LitePal.where("gameId=" + entity.getGameId()).findFirst(GamesEntity.class);
+                        }else {
+                            entity1 = LitePal.where("gameId=" + entity.getId()).findFirst(GamesEntity.class);
+                        }
+
                         if (entity1 != null) {
 
                             //若游戏被删除，需清除游戏记录防止数据出错
@@ -267,34 +274,15 @@ public class MainActivity extends BaseActivity<GamePresenter> implements GameCon
 
                                 if (number > entity1.getV()) {
 
-                                    //String content = String.format("发现新版本:V%s\n%s", entity., result.getData().getUpdateContent());
-
-
-//                                        DialogHelper.showAlertDialog(mContext, "发现新版本", "立即更新", "暂不更新", new DialogInterface.OnClickListener() {
-//                                            @Override
-//                                            public void onClick(DialogInterface dialogInterface, int i) {
-//                                                dialogInterface.dismiss();
-//                                                entity1.setV(entity.getV());
-//                                                entity1.save();
-//                                                downApk(entity.getP(),entity.getIcon());
-//
-//                                            }
-//                                        }, new DialogInterface.OnClickListener() {
-//                                            @Override
-//                                            public void onClick(DialogInterface dialogInterface, int i) {
-//                                                dialogInterface.dismiss();
-//                                                startAppByPackageID(entity.getPackname());
-//                                            }
-//                                        });
-
-
                                     entity1.setV(entity.getV());
                                     entity.setGameId(entity.getId());
                                     UserCenter.getInstance().deleteGameFile(entity.getPackname());
                                     downApk(entity.getName(), entity.getP(), entity.getIcon(),
                                             entity, position);
-                                    entity1.save();
-
+                                    boolean bool = entity1.save();
+                                    Log.e("xxxx","更新保存"+bool);
+                                    GamesEntity entity2 = LitePal.where("gameId=" + entity.getGameId()).findFirst(GamesEntity.class);
+                                    Log.e("xxxx",""+entity2);
                                 } else {
 
                                     PackageUtil.startAppByPackageID(mContext, entity.getPackname(),
@@ -306,7 +294,7 @@ public class MainActivity extends BaseActivity<GamePresenter> implements GameCon
                             } else {
 
                                 entity1.setV(entity.getV());
-                                entity1.setId(entity.getId());
+                                entity1.setGameId(entity.getId());
                                 entity1.setName(entity.getName());
                                 entity1.setP(entity.getP());
                                 entity1.setPackname(entity.getPackname());
@@ -315,23 +303,6 @@ public class MainActivity extends BaseActivity<GamePresenter> implements GameCon
                                 downApk(entity.getName(), entity.getP(), entity.getIcon(),
                                         entity, position);
 
-
-//                                    DialogHelper.showAlertDialog(mContext,"确定要下载吗", "确定", "取消", new DialogInterface.OnClickListener() {
-//                                        @Override
-//                                        public void onClick(DialogInterface dialogInterface, int i) {
-//                                            dialogInterface.dismiss();
-//
-//                                            entity.setV(entity.getV());
-//                                            entity.save();
-//                                            downApk(entity.getP(),entity.getIcon());
-//
-//                                        }
-//                                    }, new DialogInterface.OnClickListener() {
-//                                        @Override
-//                                        public void onClick(DialogInterface dialogInterface, int i) {
-//                                            dialogInterface.dismiss();
-//                                        }
-//                                    });
 
                             }
 
@@ -867,6 +838,7 @@ public class MainActivity extends BaseActivity<GamePresenter> implements GameCon
         mPushLayout.setFocusable(true);
         mLoginOut.setFocusable(true);
         mMovieLayout.setFocusable(true);
+        GamesEntity entity1= null;
 
         if (result.getErr() == 0 && result.getData().size() != 0) {
 
@@ -874,13 +846,18 @@ public class MainActivity extends BaseActivity<GamePresenter> implements GameCon
 
                 if (result.getData().size() < 3) {
 
-
                     for (int i = 0; i < result.getData().size(); i++) {
 
 
                         GamesEntity entity = result.getData().get(i);
+                        int gameid = entity.getGameId();
 
-                        GamesEntity entity1 = LitePal.where("id=" + entity.getId()).findFirst(GamesEntity.class);
+                        if(gameid != 0){
+                             entity1 = LitePal.where("gameId=" + entity.getGameId()).findFirst(GamesEntity.class);
+                        }else {
+                             entity1 = LitePal.where("gameId=" + entity.getId()).findFirst(GamesEntity.class);
+                        }
+
                         if (entity1 != null) {
                             // entity.setV(entity.getV()+1);
 
@@ -892,6 +869,7 @@ public class MainActivity extends BaseActivity<GamePresenter> implements GameCon
                                     entity.setNewGame(true);
                                     entity.setInstallGame(true);
                                     entity.setLocal(true);
+                                    entity.setNewVersion(entity1.getV());
                                     gamesEntities.add(entity);
 
                                 } else {
@@ -970,7 +948,14 @@ public class MainActivity extends BaseActivity<GamePresenter> implements GameCon
 
                         GamesEntity entity = result.getData().get(i);
 
-                        GamesEntity entity1 = LitePal.where("id=" + entity.getId()).findFirst(GamesEntity.class);
+                        int gameid = entity.getGameId();
+
+                        if(gameid != 0){
+                            entity1 = LitePal.where("gameId=" + entity.getGameId()).findFirst(GamesEntity.class);
+                        }else {
+                            entity1 = LitePal.where("gameId=" + entity.getId()).findFirst(GamesEntity.class);
+                        }
+
                         if (entity1 != null) {
                             // entity.setV(entity.getV()+1);
 

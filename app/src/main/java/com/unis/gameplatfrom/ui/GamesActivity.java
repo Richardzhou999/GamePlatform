@@ -219,7 +219,8 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
                              * 情况2：记录不在，游戏不在
                              * 情况3：两者都在
                              */
-                            GamesEntity entity1 = LitePal.where("id="+entity.getId()).findFirst(GamesEntity.class);
+                            entity.setGameId(entity.getId());
+                            GamesEntity entity1 = LitePal.where("gameId=" + entity.getGameId()).findFirst(GamesEntity.class);
                             if(entity1 != null){
 
                                 //若游戏被删除，需清除游戏记录防止数据出错
@@ -305,11 +306,8 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
                                     entity.setAccount(game_account);
                                     entity.setGameId(entity.getId());
                                     //entity.setDownGame(true);
-                                    entity.save();
-                                    boolean bool =  entity.isSaved();
-                                    Log.e("保存",""+bool);
                                     downApk(entity.getName(),entity.getP(),entity.getIcon(),entity,position);
-
+                                    entity.save();
 
                                 }
 
@@ -684,28 +682,30 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
                 for (GamesEntity entity : result.getData()) {
 
                     entity.setGameId(entity.getId());
-                    List<GamesEntity> entity1 = LitePal.where("id=" + entity.getGameId()).find(GamesEntity.class);
-                    Log.e("xxx",""+entity1.size());
+                    GamesEntity entity1 = LitePal.where("gameId=" + entity.getGameId()).findFirst(GamesEntity.class);
+
                     if (entity1 != null) {
                         // entity.setV(entity.getV()+1);
 
                         if (PackageUtil.isAppByPackageID(mContext, entity.getPackname())) {
 
 
-//                            if (entity.getV() > entity1.getV()) {
-//
-//                                entity.setNewGame(true);
-//                                entity.setInstallGame(true);
-//                                entity.setLocal(true);
-//                                getGames.add(entity);
-//
-//                            } else {
-//
-//                                entity.setLocal(true);
-//                                entity.setInstallGame(true);
-//                                getGames.add(entity);
-//
-//                            }
+                            if (entity.getV() > entity1.getV()) {
+
+                                entity.setNewGame(true);
+                                entity.setInstallGame(true);
+                                entity.setLocal(true);
+                                entity.setNewVersion(entity1.getV());
+                                getGames.add(entity);
+
+                            } else {
+
+                                entity.setNewGame(false);
+                                entity.setLocal(true);
+                                entity.setInstallGame(true);
+                                getGames.add(entity);
+
+                            }
 
 
                         } else {
