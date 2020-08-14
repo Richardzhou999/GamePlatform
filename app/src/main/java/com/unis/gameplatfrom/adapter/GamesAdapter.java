@@ -120,8 +120,10 @@ public class GamesAdapter extends BaseEmptyViewAdapter<GamesEntity> {
             down.setVisibility(View.INVISIBLE);
 
         }else if(!entity.isInstallGame() && entity.isLocal()){
+
             down.setVisibility(View.VISIBLE);
             install.setVisibility(View.INVISIBLE);
+
         }else {
             down.setVisibility(View.INVISIBLE);
             install.setVisibility(View.INVISIBLE);

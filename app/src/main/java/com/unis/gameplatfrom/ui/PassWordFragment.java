@@ -145,6 +145,7 @@ public class PassWordFragment extends BaseFragment<LoginPresenter> implements Lo
                     saveaccount = true;
                 }else {
                     saveaccount = false;
+                    UserCenter.getInstance().delectUserid();
                 }
             }
         });

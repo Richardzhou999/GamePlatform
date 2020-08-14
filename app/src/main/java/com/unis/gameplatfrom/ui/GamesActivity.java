@@ -1,15 +1,10 @@
 package com.unis.gameplatfrom.ui;
 
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
@@ -23,15 +18,12 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.blankj.utilcode.util.NetworkUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.chad.library.adapter.base.BaseQuickAdapter;
-
-import com.trello.rxlifecycle2.android.ActivityEvent;
 
 
 import org.litepal.LitePal;
@@ -44,9 +36,6 @@ import java.util.List;
 import com.unis.gameplatfrom.R;
 import com.unis.gameplatfrom.adapter.GamesAdapter;
 import com.unis.gameplatfrom.adapter.GamesRightAdapter;
-import com.unis.gameplatfrom.api.HUDLoadDataSubscriber;
-import com.unis.gameplatfrom.api.PublicApiInterface;
-import com.unis.gameplatfrom.api.RetrofitWrapper;
 import com.unis.gameplatfrom.api.result.BaseCustomListResult;
 import com.unis.gameplatfrom.base.BaseActivity;
 import com.unis.gameplatfrom.cache.InnerReceiver;
@@ -56,6 +45,7 @@ import com.unis.gameplatfrom.cache.UserCenter;
 import com.unis.gameplatfrom.constant.GameConstant;
 import com.unis.gameplatfrom.entity.GamesEntity;
 import com.unis.gameplatfrom.presenter.GamePresenter;
+import com.unis.gameplatfrom.ui.view.GameLinearLayoutManager;
 import com.unis.gameplatfrom.ui.widget.MetroViewBorderImpl;
 import com.unis.gameplatfrom.utils.DialogHelper;
 import com.unis.gameplatfrom.utils.DownloadMgr;
@@ -63,7 +53,6 @@ import com.unis.gameplatfrom.utils.PackageUtil;
 import com.unis.gameplatfrom.utils.download_mgr.DownloadTask;
 import com.unis.gameplatfrom.utils.download_mgr.DownloadTaskListener;
 import com.unis.gameplatfrom.utils.download_mgr.MyOkHttp;
-import com.unis.gameplatfrom.utils.udateapk.DownLoadApkService;
 import com.unis.gameplatfrom.utils.udateapk.DownloadAPk;
 import com.unis.gameplatfrom.utils.udateapk.LinNotify;
 import com.unis.gameplatfrom.utils.udateapk.LinPermission;
@@ -71,8 +60,6 @@ import com.unis.gameplatfrom.utils.udateapk.LinPermission;
 
 import butterknife.BindView;
 import butterknife.OnClick;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
 
 
 /**
@@ -107,9 +94,9 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
     private GamesAdapter adapter;
     private GamesRightAdapter rightAdapter;
 
-    private List<GamesEntity> games;
+    private List<GamesEntity> games = new ArrayList<>();
 
-    private List<GamesEntity> getGames = new ArrayList<>();
+
 
     private String game_account;
 
@@ -336,7 +323,6 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
 
 
 
-
     }
 
     @Override
@@ -370,9 +356,6 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
 
     @Override
     protected void initView(Bundle savedInstanceState) {
-
-
-
 
         //创建通道
         LinNotify.setNotificationChannel(GamesActivity.this);
@@ -449,6 +432,8 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
         unregisterReceiver(innerReceiver);
         unregisterReceiver(itemNetConnectionReceiver);
 
+        UserCenter.getInstance().delete_uuid();
+
     }
 
     //防止下载游戏中退出
@@ -468,9 +453,7 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
 
     private void loadData() {
 
-        if (getGames.size() != 0) {
-            getGames.clear();
-        }
+
 
         if (NetworkUtils.isConnected()) {
             gamePresenter.getGameList(UserCenter.getInstance().getToken());
@@ -516,9 +499,9 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
                         DownGame = true;
                         mConnectTag = true;
                         progressList.add(positoin);
-                        //netConnectionReceiver = new NetConnectionReceiver(mDownloadMgr);
-                        //RegisterReceiver(netConnectionReceiver);
-                        //unregisterReceiver(itemNetConnectionReceiver);
+                        netConnectionReceiver = new NetConnectionReceiver(mDownloadMgr);
+                        RegisterReceiver(netConnectionReceiver);
+                        unregisterReceiver(itemNetConnectionReceiver);
 
                         //显示activity时加入监听
                         mDownloadTaskListener = new DownloadTaskListener() {
@@ -527,13 +510,6 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
                                 mDownloadTask = mDownloadMgr.getDownloadTask(taskId);
 
                                 saveDownName = entity.getName();
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        //netConnectionReceiver[0] = new NetConnectionReceiver(mDownloadMgr);
-                                        //RegisterReceiver(netConnectionReceiver[0]);
-                                    }
-                                });
 
                             }
 
@@ -580,13 +556,14 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
                                     @Override
                                     public void run() {
 
-                                       // UnregisterReceiver(netConnectionReceiver);
-                                       // registerReceiver(itemNetConnectionReceiver, mFilter);
+                                        UnregisterReceiver(netConnectionReceiver);
+                                        registerReceiver(itemNetConnectionReceiver, mFilter);
 
                                         GamesEntity gamesEntity = adapter.getItem(positoin);
                                         gamesEntity.setDownGame(false);
                                         gamesEntity.setInstallGame(true);
                                         gamesEntity.setLocal(true);
+                                        refresh = true;
                                         adapter.notifyItemChanged(positoin);
                                         UserCenter.getInstance().save_gameId(entity.getGameId());
                                         Intent installAppIntent = DownloadAPk.getInstallAppIntent(mContext, path);
@@ -671,8 +648,13 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
     @Override
     public void onSuccess(BaseCustomListResult<GamesEntity> result) {
 
+        if (games.size() != 0) {
+            games.clear();
+        }
+
         mGameBack.setFocusable(true);
         mGameBack.setFocusableInTouchMode(true);
+
 
         if (result.getErr() == 0) {
 
@@ -696,14 +678,14 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
                                 entity.setInstallGame(true);
                                 entity.setLocal(true);
                                 entity.setNewVersion(entity1.getV());
-                                getGames.add(entity);
+                                games.add(entity);
 
                             } else {
 
                                 entity.setNewGame(false);
                                 entity.setLocal(true);
                                 entity.setInstallGame(true);
-                                getGames.add(entity);
+                                games.add(entity);
 
                             }
 
@@ -718,14 +700,14 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
                                 entity.setNewGame(false);
                                 entity.setInstallGame(false);
                                 entity.setLocal(true);
-                                getGames.add(entity);
+                                games.add(entity);
 
                             } else {
 
                                 entity.setNewGame(false);
                                 entity.setInstallGame(false);
                                 entity.setLocal(false);
-                                getGames.add(entity);
+                                games.add(entity);
 
                             }
                         }
@@ -739,7 +721,7 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
                             entity.setLocal(true);
                             entity.setNewGame(false);
                             entity.setInstallGame(true);
-                            getGames.add(entity);
+                            games.add(entity);
 
                         } else {
 
@@ -749,29 +731,28 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
                                 entity.setNewGame(false);
                                 entity.setInstallGame(false);
                                 entity.setLocal(true);
-                                getGames.add(entity);
+                                games.add(entity);
 
                             } else {
 
                                 entity.setNewGame(false);
                                 entity.setInstallGame(false);
                                 entity.setLocal(false);
-                                getGames.add(entity);
+                                games.add(entity);
 
                             }
-
-
                         }
 
                     }
-
-
                 }
 
                 if (!refresh) {
 
                     refresh = true;
-                    adapter.setNewData(getGames);
+                    adapter.setNewData(games);
+                    //getGames.clear();
+                    //adapter.notifyItemRangeRemoved(0,size);
+                    //adapter.notifyItemRangeChanged(0,getGames.size());
                 } else {
 
                     if (mDownloadMgr != null) {
@@ -782,15 +763,6 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
 
                 FooterView.setVisibility(View.GONE);
 
-
-            } else {
-
-//                            adapter.setNewData(result.getData());
-//                            rightAdapter.setNewData(result.getData());
-//                            mRefreshLayout.finishRefresh();
-
-                //finish();
-//                        adapter.addData(result.getData());
 
             }
 

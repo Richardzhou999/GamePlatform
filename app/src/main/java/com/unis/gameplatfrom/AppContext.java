@@ -29,7 +29,9 @@ public class AppContext extends BaseApplication {
           //sqlite组件的初始化
           LitePal.initialize(this);
 
-
+        //崩溃日志
+        MyCrashHandler handler = new MyCrashHandler();
+        Thread.setDefaultUncaughtExceptionHandler(handler);
 
          initUpdata();
 

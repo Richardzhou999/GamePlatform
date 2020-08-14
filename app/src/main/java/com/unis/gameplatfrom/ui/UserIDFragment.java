@@ -192,8 +192,10 @@ public class UserIDFragment extends BaseFragment<LoginPresenter> implements Logi
 
                 if(isChecked){
                     saveaccount = true;
+
                 }else {
                     saveaccount = false;
+                    UserCenter.getInstance().delectUserid();
                 }
             }
         });

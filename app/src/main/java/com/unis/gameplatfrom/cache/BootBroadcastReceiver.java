@@ -3,6 +3,7 @@ package com.unis.gameplatfrom.cache;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.icu.lang.UCharacter;
 
 import com.unis.gameplatfrom.adapter.MainAdapter;
 import com.unis.gameplatfrom.ui.GamesActivity;
@@ -20,6 +21,9 @@ public class BootBroadcastReceiver extends BroadcastReceiver {
 
             //防止下载断电出现无法下载
             UserCenter.getInstance().deleteDownFile();
+
+            //断电删除uuid
+            UserCenter.getInstance().delete_uuid();
 
             // 注意H5+SDK的Main Activity为PandoraEntry（见AndroidMainfest.xml）
             Intent bootMainIntent = new Intent(context, LoginActivity.class);

@@ -544,9 +544,7 @@ public class MainActivity extends BaseActivity<GamePresenter> implements GameCon
     private void loadData() {
 
 
-        if (gamesEntities.size() != 0) {
-            gamesEntities.clear();
-        }
+
 
         game_account = UserCenter.getInstance().getGame_account();
 
@@ -840,6 +838,10 @@ public class MainActivity extends BaseActivity<GamePresenter> implements GameCon
         mMovieLayout.setFocusable(true);
         GamesEntity entity1= null;
 
+        if (gamesEntities.size() != 0) {
+            gamesEntities.clear();
+        }
+
         if (result.getErr() == 0 && result.getData().size() != 0) {
 
             if (LinPermission.checkPermission(MainActivity.this, new int[]{7, 8})) {
@@ -967,6 +969,7 @@ public class MainActivity extends BaseActivity<GamePresenter> implements GameCon
                                     entity.setNewGame(true);
                                     entity.setInstallGame(true);
                                     entity.setLocal(true);
+                                    entity.setNewVersion(entity1.getV());
                                     gamesEntities.add(entity);
 
                                 } else {
