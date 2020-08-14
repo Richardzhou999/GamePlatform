@@ -1,6 +1,105 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#008577</color>
-    <color name="colorPrimaryDark">#00574B</color>
-    <color name="colorAccent">#D81B60</color>
+    <color name="colorPrimary">#FFFFFF</color>
+    <color name="colorPrimaryDark">#FFFFFF</color>
+    <color name="colorAccent">#FF4081</color>
+
+    <color name="divide_line">#E4E4E4</color>
+    <color name="yellow_line">#ede309</color>
+    <color name="window_background">#FFFFFF</color>
+    <color name="window_background2">#f1f2f3</color>
+    <color name="window_background3">#f5f6f7</color>
+    <color name="border">#f1f2f3</color>
+    <color name="game_toolbar">#1A1A1A</color>
+    <color name="white">#FFFFFF</color>
+    <color name="transparent">#00000000</color>
+    <color name="game_item">#474747</color>
+    <color name="game_number">#21D1F5</color>
+    <color name="out_login">#2E2E2E</color>
+    <color name="out_login_txt">#999999</color>
+
+    <color name="tv1">#505050</color>
+    <color name="tv2">#787878</color>
+    <color name="tv3">#969696</color>
+    <color name="tv4">#3a9a5d</color>
+    <color name="tv5">#b4cb25</color>
+    <color name="tv6">#f76859</color>
+    <color name="tv7">#B5B5B5</color>
+    <color name="tv8">#706E6E</color>
+    <color name="tv9">#9B9B9B</color>
+
+    <color name="font_black_1">#333333</color>
+    <color name="font_gray_1">#666666</color>
+    <color name="font_gray_2">#999999</color>
+    <color name="font_red">#f66758</color>
+
+    <color name="btn_red_nor">#f76859</color>
+    <color name="text_blue">#3CA6FE</color>
+    <color name="btn_red_select">#f17c70</color>
+    <color name="btn_red_disable">#dcdcdc</color>
+
+    <color name="machine_border">#969696</color>
+
+    <color name="use_ticket_border_nor">#f1f2f3</color>
+    <color name="use_ticket_border_checked">#f76859</color>
+
+    <color name="member_level_1">#94CD68</color>
+    <color name="member_level_2">#58B5E1</color>
+    <color name="member_level_3">#F9C853</color>
+    <color name="member_level_4">#ED6269</color>
+    <color name="member_level_5">#C165A7</color>
+
+    <color name="redeemyuanbg1">#ccf15d6e</color>
+    <color name="redeemyuan1">#f15d6e</color>
+    <color name="redeemyuanbg2">#cc687bf0</color>
+    <color name="redeemyuan2">#687bf0</color>
+    <color name="redeemyuanbg3">#ccff9059</color>
+    <color name="redeemyuan3">#ff9059</color>
+    <color name="redeemyuanbg4">#cc52ce86</color>
+    <color name="redeemyuan4">#52ce86</color>
+
+
+
+
+    <color name="countDownBackground">#77000000</color>
+    <color name="colorOrign">#ffbe72</color>
+    <color name="thinOrign">#fddfb4</color>
+    <color name="store_tag_bg">#bde9fb</color>
+    <color name="thin_pink">#ffd2d0</color>
+    <color name="text_pink">#FF686B</color>
+    <color name="text_white">#FFFFFF</color>
+    <color name="text_title_1">#4D4D4D</color>
+    <color name="text_title_2">#707070</color>
+    <color name="text_title_3">#969696</color>
+
+
+
+    <color name="tab_text_normal">#505050</color>
+    <color name="tab_text_checked">#2AA3FE</color>
+
+    <color name="black_overlay">#66000000</color>
+
+    <color name="black">#000000</color>
+
+    <color name="statusBar">#3ca6fe</color>
+    <color name="titleBar">#3ca6fe</color>
+    <color name="titleBarTitleText">#FFFFFF</color>
+
+
+    <color name="button_bg_normal">#3ca6fe</color>
+    <color name="button_bg_down">#7cc6ff</color>
+    <color name="button_bg_disable">#DEDEDE</color>
+    <color name="text_brown">#a43f08</color>
+
+    <color name="cb_bg_normal">#969696</color>
+    <color name="cb_bg_checked">#3ca6fe</color>
+    <color name="cb_text_normal">#969696</color>
+    <color name="cb_text_checked">#3ca6fe</color>
+
+    <color name="button_blue_hollow_nor">#3ca6fe</color>
+    <color name="button_blue_hollow_down">#7cc6ff</color>
+    <color name="button_blue_hollow_enable">#DEDEDE</color>
+
+    <color name="multiple_image_select_primaryDark">#3ca6fe</color>
+
 </resources>
