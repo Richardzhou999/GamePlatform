@@ -1,5 +1,7 @@
 package com.unis.kotlin.api
 
+import com.unis.kotlin.api.result.BaseCustomListResult
+import com.unis.kotlin.entity.GamesEntity
 import com.unis.kotlin.entity.LoginEntity
 import io.reactivex.Observable
 import retrofit2.http.Field
@@ -16,6 +18,14 @@ interface PublicApiInterface {
     fun passwordLogin(@Field("acc") account: String, @Field("pwd") password: String,
                       @Field("netaddress") netaddress:String,@Field("type") type:Int,
                       @Field("key") key:String):Observable<LoginEntity>
+
+    /**
+     * 获取游戏列表
+     */
+    @FormUrlEncoded
+    @POST("/gamelist")
+    fun getGameList(@Field("uuid") uuid: String): Observable<BaseCustomListResult<GamesEntity>>
+
 
 }
 

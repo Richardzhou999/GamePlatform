@@ -568,7 +568,6 @@ public class GamesActivity extends BaseActivity<GamePresenter> implements GameCo
                                         UserCenter.getInstance().save_gameId(entity.getGameId());
                                         Intent installAppIntent = DownloadAPk.getInstallAppIntent(mContext, path);
                                         startActivity(installAppIntent);
-
                                     }
                                 });
                             }

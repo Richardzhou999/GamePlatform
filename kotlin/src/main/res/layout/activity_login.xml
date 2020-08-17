@@ -14,7 +14,7 @@
 
         <fragment
             android:id="@+id/fragment_password_login"
-            android:name="com.unis.kotlin.ui.PasswordFragment"
+            android:name="com.unis.kotlin.ui.PassWordFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             tools:layout="@layout/fragment_password_login" />

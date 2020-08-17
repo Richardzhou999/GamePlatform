@@ -1,10 +1,143 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.UserIDFragment">
+    tools:context=".ui.LoginActivity"
+    android:orientation="vertical"
+    android:background="@drawable/bg_login">
+
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"/>
 
 
 
-</FrameLayout>
+
+
+
+
+    <EditText
+        android:id="@+id/txt_account"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/white"
+        android:theme="@style/MyEditText"
+        android:text="200016"
+        android:hint="请输入用户ID"
+        android:paddingLeft="20dp"
+
+        android:textColorHint="@color/out_login_txt"
+        android:background="@drawable/edit_select"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:layout_gravity="center"
+        />
+
+
+
+    <EditText
+        android:id="@+id/txt_password"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/white"
+        android:theme="@style/MyEditText"
+        android:textColorHint="@color/out_login_txt"
+        android:background="@drawable/edit_select"
+        android:paddingLeft="20dp"
+        android:text="123"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:hint="请输入密码"
+        android:layout_gravity="center"
+        />
+
+
+
+
+
+    <LinearLayout
+        android:id="@+id/click_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginRight="150dp"
+        android:layout_marginTop="@dimen/dp_10"
+        android:layout_marginBottom="@dimen/dp_10"
+        android:padding="3dp"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        >
+
+
+        <CheckBox
+            android:id="@+id/save_account"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/CustomCheckboxTheme"
+            />
+
+        <TextView
+            android:id="@+id/save_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="记住ID"
+            android:paddingRight="3dp"
+            android:paddingLeft="3dp"
+            android:textColor="@color/white" />
+
+    </LinearLayout>
+
+
+    <Button
+        android:id="@+id/btn_login_userId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_gravity="center_horizontal"
+        android:background="@drawable/login_select"
+        android:text="登录"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:textColor="@color/white"
+        android:textSize="16sp" />
+
+
+
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center">
+
+
+
+        <TextView
+            android:id="@+id/login_password"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="账号登陆"
+            android:textColor="@color/white"
+            android:padding="@dimen/dp_10"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:layout_marginRight="@dimen/dp_10"/>
+
+
+
+
+    </LinearLayout>
+
+
+
+
+
+
+
+
+</LinearLayout>

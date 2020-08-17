@@ -4,7 +4,7 @@ import com.unis.kotlin.model.BaseModel
 import com.unis.kotlin.ui.view.BaseView
 import java.lang.ref.WeakReference
 
-abstract class BaesPresenter<M : BaseModel,V : BaseView>{
+abstract class BasePresenter<M : BaseModel,V : BaseView>{
 
     private var mvpView : WeakReference<V>? = null
 

@@ -1,6 +1,5 @@
 package com.unis.kotlin.constant
 
-import com.unis.kotlin.api.BaseResult
 import com.unis.kotlin.entity.LoginEntity
 import com.unis.kotlin.model.BaseModel
 import com.unis.kotlin.ui.view.BaseView

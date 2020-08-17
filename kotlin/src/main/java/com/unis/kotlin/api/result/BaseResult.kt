@@ -1,4 +1,4 @@
-package com.unis.kotlin.api
+package com.unis.kotlin.api.result
 
 open class BaseResult {
 

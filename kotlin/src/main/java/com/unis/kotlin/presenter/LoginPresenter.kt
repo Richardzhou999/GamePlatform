@@ -10,7 +10,7 @@ import com.unis.kotlin.model.LoginModel
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 
-class LoginPresenter : BaesPresenter<LoginConstant.Model, LoginConstant.View>,LoginConstant.Presenter{
+class LoginPresenter : BasePresenter<LoginConstant.Model, LoginConstant.View>,LoginConstant.Presenter{
 
     private var context: Context? = null;
 

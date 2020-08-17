@@ -36,7 +36,9 @@ class RetrofitWrapper {
     private var retrofit: Retrofit? = null
     private var httpClient: OkHttpClient? = null
 
-    fun RetrofitWrapper() {
+
+
+    constructor(){
         val executor = Executors.newCachedThreadPool()
 
         val gson = GsonBuilder().create()
