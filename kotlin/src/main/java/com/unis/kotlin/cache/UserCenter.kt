@@ -95,8 +95,8 @@ class UserCenter {
         SPUtils.getInstance(SP_NAME).remove(SP_USERID)
     }
 
-    fun getGame_account(): String {
-        return game_account!!
+    fun getGame_account(): String? {
+        return game_account
     }
 
     fun setGameAccount(account: String) {

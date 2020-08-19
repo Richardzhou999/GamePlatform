@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- 倒影控件属性 -->
+    <declare-styleable name="reflectItemView">
+        <attr name="isReflect" format="boolean" />
+    </declare-styleable>
+
+
+    <declare-styleable name="SmoothHorizontalScrollView">
+        <attr name="fadingEdge" format="integer" />
+
+    </declare-styleable>
+
+    <declare-styleable name="MetroItemRound">
+        <attr name="bottomRightRadius" format="dimension" />
+        <attr name="bottomLeftRadius" format="dimension" />
+        <attr name="radius"  format="dimension" />
+        <attr name="topRightRadius" format="dimension" />
+        <attr name="topLeftRadius" format="dimension" />
+
+    </declare-styleable>
+
+</resources>

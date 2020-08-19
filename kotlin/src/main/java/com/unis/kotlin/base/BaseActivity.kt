@@ -14,7 +14,7 @@ import com.unis.kotlin.utils.StatusBarUtil
 
 abstract class BaseActivity<P : BasePresenter<*,*>> : AppCompatActivity(),BaseView{
 
-    private var mContext: Activity? = null
+    protected var mContext: Activity? = null
 
 
 
@@ -40,7 +40,7 @@ abstract class BaseActivity<P : BasePresenter<*,*>> : AppCompatActivity(),BaseVi
         }
 
         initPresenter()
-        initView(savedInstanceState!!)
+        initView(intent.extras)
         initData()
 
 
@@ -59,7 +59,7 @@ abstract class BaseActivity<P : BasePresenter<*,*>> : AppCompatActivity(),BaseVi
      */
     protected abstract fun initPresenter()
 
-    protected abstract fun initView(savedInstanceState: Bundle)
+    protected abstract fun initView(savedInstanceState: Bundle?)
 
     /**
      * 状态栏颜色
